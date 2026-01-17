@@ -1,0 +1,44 @@
+import axios from 'axios';
+
+const API_URL = '/api';
+
+const api = axios.create({
+    baseURL: API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+// Add token to requests
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+// Auth API
+export const authAPI = {
+    register: (data) => api.post('/auth/register', data),
+    login: (data) => api.post('/auth/login', data),
+    logout: () => api.post('/auth/logout'),
+};
+
+// User API
+export const userAPI = {
+    getProfile: () => api.get('/user/profile'),
+    updateProfile: (data) => api.put('/user/profile', data),
+    changePassword: (data) => api.put('/user/change-password', data),
+    deleteAccount: () => api.delete('/user/delete'),
+};
+
+// Admin API
+export const adminAPI = {
+    getAllUsers: () => api.get('/admin/users'),
+    getUserById: (id) => api.get(`/admin/users/${id}`),
+    toggleAdmin: (id, isAdmin) => api.put(`/admin/users/${id}/role`, { isAdmin }),
+    deleteUser: (id) => api.delete(`/admin/users/${id}`),
+};
+
+export default api;

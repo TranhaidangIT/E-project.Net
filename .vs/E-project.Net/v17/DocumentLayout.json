@@ -1,7 +1,16 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\.NET\\E-project.Net\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D8980181-0322-86A8-5C4B-78A2D9D38C94}|e-project.net.client\\e-project.net.client.esproj|d:\\.net\\e-project.net\\e-project.net.client\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D8980181-0322-86A8-5C4B-78A2D9D38C94}|e-project.net.client\\e-project.net.client.esproj|solutionrelative:e-project.net.client\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{41ECEFE3-AB52-4265-81A3-2331BA4C8760}|E-project.Net.Server\\E-project.Net.Server.csproj|d:\\.net\\e-project.net\\e-project.net.server\\api-test.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{41ECEFE3-AB52-4265-81A3-2331BA4C8760}|E-project.Net.Server\\E-project.Net.Server.csproj|solutionrelative:e-project.net.server\\api-test.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,8 +18,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "index.html",
+              "DocumentMoniker": "D:\\.NET\\E-project.Net\\e-project.net.client\\index.html",
+              "RelativeDocumentMoniker": "e-project.net.client\\index.html",
+              "ToolTip": "D:\\.NET\\E-project.Net\\e-project.net.client\\index.html",
+              "RelativeToolTip": "e-project.net.client\\index.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-01-17T16:08:03.749Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
@@ -18,6 +40,19 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "api-test.http",
+              "DocumentMoniker": "D:\\.NET\\E-project.Net\\E-project.Net.Server\\api-test.http",
+              "RelativeDocumentMoniker": "E-project.Net.Server\\api-test.http",
+              "ToolTip": "D:\\.NET\\E-project.Net\\E-project.Net.Server\\api-test.http",
+              "RelativeToolTip": "E-project.Net.Server\\api-test.http",
+              "ViewState": "AgIAABEAAAAAAAAAAAAAwDMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2026-01-17T16:07:24.757Z",
+              "EditorCaption": ""
             }
           ]
         }
