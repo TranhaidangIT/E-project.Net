@@ -1,0 +1,76 @@
+### ========================================
+### MUSIC WEB API - TEST ENDPOINTS
+### ========================================
+
+@baseUrl = http://localhost:5228/api
+@token = {{login.response.body.token}}
+
+### ========================================
+### 1. ĐĂNG KÝ TÀI KHOẢN MỚI
+### ========================================
+# @name register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "123456",
+    "confirmPassword": "123456",
+    "fullName": "Test User"
+}
+
+### ========================================
+### 2. ĐĂNG NHẬP
+### ========================================
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "123456"
+}
+
+### ========================================
+### 3. XEM PROFILE (Cần đăng nhập trước)
+### ========================================
+GET {{baseUrl}}/user/profile
+Authorization: Bearer {{token}}
+
+### ========================================
+### 4. CẬP NHẬT PROFILE
+### ========================================
+PUT {{baseUrl}}/user/profile
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "fullName": "Updated Name",
+    "avatarURL": "https://example.com/avatar.jpg"
+}
+
+### ========================================
+### 5. ĐỔI MẬT KHẨU
+### ========================================
+PUT {{baseUrl}}/user/change-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "currentPassword": "123456",
+    "newPassword": "newpass123",
+    "confirmNewPassword": "newpass123"
+}
+
+### ========================================
+### 6. ĐĂNG XUẤT
+### ========================================
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+
+### ========================================
+### 7. XÓA TÀI KHOẢN
+### ========================================
+DELETE {{baseUrl}}/user/delete
+Authorization: Bearer {{token}}
