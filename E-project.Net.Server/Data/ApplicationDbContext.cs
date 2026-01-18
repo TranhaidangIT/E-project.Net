@@ -12,6 +12,7 @@ namespace E_project.Net.Server.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+        public DbSet<Song> Songs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -79,6 +80,29 @@ namespace E_project.Net.Server.Data
                     .WithMany()
                     .HasForeignKey(e => e.UserID)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure Song entity
+            modelBuilder.Entity<Song>(entity =>
+            {
+                entity.ToTable("Songs");
+                entity.HasKey(e => e.SongID);
+                
+                entity.Property(e => e.SongName)
+                    .IsRequired()
+                    .HasMaxLength(255);
+                
+                entity.Property(e => e.ArtistName)
+                    .IsRequired()
+                    .HasMaxLength(255);
+                
+                entity.Property(e => e.PlayCount)
+                    .HasDefaultValue(0);
+                
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.HasIndex(e => e.ArtistName).HasDatabaseName("IX_Songs_ArtistName");
             });
         }
     }

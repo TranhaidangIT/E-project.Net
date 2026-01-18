@@ -15,16 +15,27 @@ function HomePage() {
                         <>
                             <p>Xin chào, <strong>{user.fullName || user.username}</strong>! 👋</p>
                             <div className="button-group">
-                                <Link to="/profile" className="btn-primary">
+                                <Link to="/music" className="btn-primary">
+                                    🎵 Khám Phá Nhạc
+                                </Link>
+                                <Link to="/profile" className="btn-secondary">
                                     👤 Xem Profile
                                 </Link>
+                                {user.isAdmin && (
+                                    <Link to="/admin" className="btn-secondary">
+                                        ⚙️ Quản Trị
+                                    </Link>
+                                )}
                             </div>
                         </>
                     ) : (
                         <>
-                            <p>Đăng nhập để trải nghiệm âm nhạc tuyệt vời!</p>
+                            <p>Khám phá và thưởng thức âm nhạc tuyệt vời!</p>
                             <div className="button-group">
-                                <Link to="/login" className="btn-primary">
+                                <Link to="/music" className="btn-primary">
+                                    🎵 Khám Phá Nhạc
+                                </Link>
+                                <Link to="/login" className="btn-secondary">
                                     🔐 Đăng Nhập
                                 </Link>
                                 <Link to="/register" className="btn-secondary">

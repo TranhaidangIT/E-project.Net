@@ -86,6 +86,7 @@ function AdminDashboard() {
                     <p>Xin chào, <strong>{user?.fullName || user?.username}</strong> 👑</p>
                 </div>
                 <div className="header-right">
+                    <Link to="/admin/songs" className="btn-secondary btn-sm">🎵 Quản lý Bài hát</Link>
                     <Link to="/profile" className="btn-secondary btn-sm">👤 Profile</Link>
                     <button onClick={handleLogout} className="btn-danger btn-sm">🚪 Đăng xuất</button>
                 </div>

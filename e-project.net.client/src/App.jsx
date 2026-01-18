@@ -6,6 +6,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
+import SongManagement from './pages/SongManagement';
+import MusicPage from './pages/MusicPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import './App.css';
@@ -51,6 +53,7 @@ function AppRoutes() {
     return (
         <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/music" element={<MusicPage />} />
             <Route path="/login" element={
                 <PublicRoute><LoginPage /></PublicRoute>
             } />
@@ -68,6 +71,9 @@ function AppRoutes() {
             } />
             <Route path="/admin" element={
                 <AdminRoute><AdminDashboard /></AdminRoute>
+            } />
+            <Route path="/admin/songs" element={
+                <AdminRoute><SongManagement /></AdminRoute>
             } />
         </Routes>
     );

@@ -44,4 +44,14 @@ export const adminAPI = {
     deleteUser: (id) => api.delete(`/admin/users/${id}`),
 };
 
+// Song API
+export const songAPI = {
+    getAllSongs: () => api.get('/song'),
+    getSongById: (id) => api.get(`/song/${id}`),
+    createSong: (data) => api.post('/song', data),
+    updateSong: (id, data) => api.put(`/song/${id}`, data),
+    deleteSong: (id) => api.delete(`/song/${id}`),
+    searchSongs: (query) => api.get(`/song/search?query=${encodeURIComponent(query)}`),
+};
+
 export default api;
