@@ -6,6 +6,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import './App.css';
 
 // Protected Route Component
@@ -54,6 +56,12 @@ function AppRoutes() {
             } />
             <Route path="/register" element={
                 <PublicRoute><RegisterPage /></PublicRoute>
+            } />
+            <Route path="/forgot-password" element={
+                <PublicRoute><ForgotPasswordPage /></PublicRoute>
+            } />
+            <Route path="/reset-password" element={
+                <PublicRoute><ResetPasswordPage /></PublicRoute>
             } />
             <Route path="/profile" element={
                 <ProtectedRoute><ProfilePage /></ProtectedRoute>

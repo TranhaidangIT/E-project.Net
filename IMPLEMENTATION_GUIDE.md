@@ -89,7 +89,9 @@ VALUES (
 
 ---
 
-## 🗄️ Cấu Trúc Database - Bảng Users
+## 🗄️ Cấu Trúc Database
+
+### Bảng Users
 
 ```sql
 CREATE TABLE Users (
@@ -115,6 +117,29 @@ CREATE TABLE Users (
 | IsAdmin      | BIT           | Quyền admin (0/1)             |
 | CreatedAt    | DATETIME      | Ngày tạo tài khoản         |
 
+### Bảng PasswordResetTokens
+
+```sql
+CREATE TABLE PasswordResetTokens (
+    TokenID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT NOT NULL,
+    Token NVARCHAR(255) NOT NULL UNIQUE,
+    ExpiresAt DATETIME NOT NULL,
+    IsUsed BIT DEFAULT 0,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+);
+```
+
+| Field     | Type          | Mô tả                              |
+| --------- | ------------- | ------------------------------------ |
+| TokenID   | INT           | ID tự động tăng                  |
+| UserID    | INT           | ID người dùng (FK)                |
+| Token     | NVARCHAR(255) | Mã khôi phục 6 ký tự (unique)   |
+| ExpiresAt | DATETIME      | Thời gian hết hạn (15 phút)     |
+| IsUsed    | BIT           | Đã sử dụng chưa (0/1)           |
+| CreatedAt | DATETIME      | Ngày tạo token                     |
+
 ---
 
 ## 📂 CẤU TRÚC DỰ ÁN CHI TIẾT
@@ -129,13 +154,17 @@ E-project.Net.Server/
 │   └── AdminController.cs     # Quản lý users (Admin only)
 ├── Models/
 │   ├── User.cs                # Entity model cho bảng Users
+│   ├── PasswordResetToken.cs  # Entity model cho bảng PasswordResetTokens
 │   └── DTOs/
 │       ├── LoginDTO.cs        # Dữ liệu đăng nhập
 │       ├── RegisterDTO.cs     # Dữ liệu đăng ký
 │       ├── UserDTO.cs         # Response user (không có password)
 │       ├── AuthResponseDTO.cs # Response đăng nhập/đăng ký
 │       ├── UpdateProfileDTO.cs # Cập nhật thông tin
-│       └── ChangePasswordDTO.cs # Đổi mật khẩu
+│       ├── ChangePasswordDTO.cs # Đổi mật khẩu
+│       ├── ForgotPasswordDTO.cs # Quên mật khẩu - nhập email
+│       ├── ResetPasswordDTO.cs  # Đặt lại mật khẩu
+│       └── ValidateResetTokenDTO.cs # Validate token
 ├── Data/
 │   └── ApplicationDbContext.cs # EF Core DbContext
 ├── Services/
@@ -157,6 +186,8 @@ e-project.net.client/src/
 │   ├── HomePage.jsx           # Trang chủ
 │   ├── LoginPage.jsx          # Trang đăng nhập
 │   ├── RegisterPage.jsx       # Trang đăng ký
+│   ├── ForgotPasswordPage.jsx # Trang quên mật khẩu
+│   ├── ResetPasswordPage.jsx  # Trang đặt lại mật khẩu
 │   ├── ProfilePage.jsx        # Trang thông tin cá nhân
 │   └── AdminDashboard.jsx     # Trang quản trị (Admin)
 ├── App.jsx                    # Routes & Protected Routes
@@ -335,6 +366,9 @@ Nhận ChangePasswordDTO → Verify current password → Hash new password
 | POST | `/api/auth/register` | Đăng ký tài khoản | ❌ |
 | POST | `/api/auth/login` | Đăng nhập | ❌ |
 | POST | `/api/auth/logout` | Đăng xuất | ✅ |
+| POST | `/api/auth/forgot-password` | Yêu cầu khôi phục mật khẩu | ❌ |
+| POST | `/api/auth/validate-reset-token` | Kiểm tra token hợp lệ | ❌ |
+| POST | `/api/auth/reset-password` | Đặt lại mật khẩu mới | ❌ |
 
 **Luồng Register:**
 ```
@@ -743,6 +777,48 @@ VALUES ('superadmin', 'admin@musicweb.com', '$2a$11$[hash]', 'Super Administrato
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
+### Flow 6: Quên Mật Khẩu (Forgot Password)
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  BƯỚC 1: Yêu cầu khôi phục                                          │
+│  1. User truy cập /login → Click "Quên mật khẩu?"                │
+│  2. Navigate → /forgot-password                                      │
+│  3. Nhập email → Submit                                              │
+│  4. POST /api/auth/forgot-password → AuthController                  │
+│  5. AuthService.ForgotPasswordAsync()                                │
+│     - Tìm user theo email                                           │
+│     - Tạo token 6 ký tự ngẫu nhiên                                 │
+│     - Lưu token vào PasswordResetTokens (expire 15 phút)            │
+│  6. Return token + success message                                   │
+│  7. Frontend hiển thị token và tự động chuyển hướng                │
+│     → /reset-password?token=XXXXXX                                   │
+│                                                                      │
+│  BƯỚC 2: Validate token (Optional)                                  │
+│  1. ResetPasswordPage mount → validate token                         │
+│  2. POST /api/auth/validate-reset-token                              │
+│  3. AuthService.ValidateResetTokenAsync()                            │
+│     - Check token tồn tại                                           │
+│     - Check IsUsed = false                                           │
+│     - Check ExpiresAt > Now                                          │
+│  4. Token valid → Hiển thị form                                     │
+│     Token invalid → Show error + redirect                            │
+│                                                                      │
+│  BƯỚC 3: Đặt lại mật khẩu                                          │
+│  1. User nhập newPassword + confirmPassword → Submit                 │
+│  2. POST /api/auth/reset-password                                    │
+│  3. AuthService.ResetPasswordAsync()                                 │
+│     - Validate token (như bước 2)                                   │
+│     - BCrypt.HashPassword(newPassword)                               │
+│     - Update user.PasswordHash                                       │
+│     - Set token.IsUsed = true                                        │
+│     - SaveChangesAsync()                                             │
+│  4. Return success message                                           │
+│  5. Frontend navigate → /login                                       │
+│  6. User đăng nhập với mật khẩu mới                                │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 ## 🔐 PHẦN 1: ACCOUNT - USER - LOGIN - LOGOUT (CHI TIẾT CODE)
@@ -894,6 +970,9 @@ e-project.net.client/src/
 | POST   | `/api/auth/register`        | Đăng ký tài khoản | ❌            |
 | POST   | `/api/auth/login`           | Đăng nhập           | ❌            |
 | POST   | `/api/auth/logout`          | Đăng xuất           | ✅            |
+| POST   | `/api/auth/forgot-password` | Quên mật khẩu - lấy token | ❌    |
+| POST   | `/api/auth/validate-reset-token` | Kiểm tra token hợp lệ | ❌  |
+| POST   | `/api/auth/reset-password`  | Đặt lại mật khẩu   | ❌            |
 | GET    | `/api/user/profile`         | Lấy thông tin user   | ✅            |
 | PUT    | `/api/user/profile`         | Cập nhật thông tin  | ✅            |
 | PUT    | `/api/user/change-password` | Đổi mật khẩu       | ✅            |
@@ -901,6 +980,63 @@ e-project.net.client/src/
 | GET    | `/api/admin/users`          | Danh sách users      | ✅ Admin      |
 | PUT    | `/api/admin/users/{id}/role`| Thay đổi quyền     | ✅ Admin      |
 | DELETE | `/api/admin/users/{id}`     | Xóa user             | ✅ Admin      |
+
+---
+
+#### 📁 `pages/ForgotPasswordPage.jsx`
+**Mục đích:** Trang yêu cầu khôi phục mật khẩu
+
+**Chức năng:**
+- Form nhập email đã đăng ký
+- Validate email format
+- Gọi authAPI.forgotPassword()
+- Hiển thị token 6 ký tự
+- Tự động chuyển sang ResetPasswordPage sau 2 giây
+- Link quay lại Login
+
+**Luồng xử lý:**
+```
+User nhập email → Submit
+    ↓
+authAPI.forgotPassword({ email })
+    ↓
+API /api/auth/forgot-password
+    ↓
+Success → Hiển thị token → Navigate to "/reset-password?token=XXX"
+    ↓
+Error → Show error message
+```
+
+---
+
+#### 📁 `pages/ResetPasswordPage.jsx`
+**Mục đích:** Trang đặt lại mật khẩu mới
+
+**Chức năng:**
+- Lấy token từ URL query parameter
+- Auto-validate token khi mount
+- Form nhập password mới + confirm password
+- Validate password match
+- Gọi authAPI.resetPassword()
+- Redirect đến Login sau khi thành công
+
+**Luồng xử lý:**
+```
+Component mount → Get token from URL
+    ↓
+authAPI.validateResetToken({ token })
+    ↓
+Token valid → Show form
+Token invalid → Show error + link to forgot-password
+    ↓
+User nhập password → Submit
+    ↓
+authAPI.resetPassword({ token, newPassword, confirmPassword })
+    ↓
+Success → Alert → Navigate to "/login"
+    ↓
+Error → Show error message
+```
 
 ---
 
@@ -975,4 +1111,39 @@ server: {
 
 ---
 
-*Tài liệu cập nhật: 17/01/2026*
+*Tài liệu cập nhật: 18/01/2026*
+
+---
+
+## 🆕 CẬP NHẬT MỚI NHẤT
+
+### ✅ Tính năng Quên Mật Khẩu (Forgot Password) - 18/01/2026
+
+Đã triển khai đầy đủ tính năng khôi phục mật khẩu:
+
+**Backend Changes:**
+- ✅ Thêm bảng `PasswordResetTokens` vào database
+- ✅ Model `PasswordResetToken.cs` 
+- ✅ DTOs: `ForgotPasswordDTO`, `ResetPasswordDTO`, `ValidateResetTokenDTO`
+- ✅ AuthService: 3 methods mới (ForgotPassword, ValidateToken, ResetPassword)
+- ✅ AuthController: 3 endpoints mới
+
+**Frontend Changes:**
+- ✅ `ForgotPasswordPage.jsx` - Trang nhập email lấy mã khôi phục
+- ✅ `ResetPasswordPage.jsx` - Trang đặt lại mật khẩu mới
+- ✅ Cập nhật `api.js` với 3 API methods mới
+- ✅ Thêm routes `/forgot-password` và `/reset-password`
+- ✅ Thêm link "Quên mật khẩu?" vào LoginPage
+- ✅ CSS styles cho các trang mới
+
+**Quy trình:**
+1. User click "Quên mật khẩu?" → Nhập email → Nhận token 6 ký tự
+2. Tự động chuyển sang trang Reset Password
+3. Nhập mật khẩu mới → Hoàn tất → Đăng nhập lại
+
+**Bảo mật:**
+- Token có hiệu lực 15 phút
+- Token chỉ sử dụng được 1 lần
+- Mật khẩu mới được hash bằng BCrypt
+
+---

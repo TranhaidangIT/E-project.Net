@@ -181,6 +181,63 @@ body {
     text-decoration: underline;
 }
 
+/* Auth Links Container */
+.auth-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.forgot-password-link {
+    color: #ffa502;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.forgot-password-link:hover {
+    color: #ff6348;
+    text-decoration: underline;
+}
+
+/* Auth Description */
+.auth-description {
+    text-align: center;
+    color: #a0a0a0;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+/* Token Display */
+.token-display {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    font-size: 1rem;
+}
+
+.token-display strong {
+    color: #ffd700;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+}
+
+.token-note {
+    font-size: 0.85rem;
+    color: #7bed9f;
+    margin-top: 10px;
+}
+
+/* Disabled Input */
+.disabled-input {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
 /* Profile */
 .profile-card {
     max-width: 500px;

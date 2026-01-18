@@ -72,6 +72,12 @@ function LoginPage() {
                     </button>
                 </form>
                 
+                <div className="auth-links">
+                    <Link to="/forgot-password" className="forgot-password-link">
+                        Quên mật khẩu?
+                    </Link>
+                </div>
+                
                 <p className="auth-link">
                     Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
                 </p>
