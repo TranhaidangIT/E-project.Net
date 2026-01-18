@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using E_project.Net.Server.Data;
 using E_project.Net.Server.Models;
 using E_project.Net.Server.Models.DTOs;
+using System.Linq;
 
 namespace E_project.Net.Server.Services
 {
@@ -204,6 +205,148 @@ namespace E_project.Net.Server.Services
                 IsAdmin = user.IsAdmin,
                 CreatedAt = user.CreatedAt
             };
+        }
+
+        // Forgot Password Methods
+        public async Task<AuthResponseDTO> ForgotPasswordAsync(ForgotPasswordDTO forgotPasswordDTO)
+        {
+            // Kiểm tra email có tồn tại không
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == forgotPasswordDTO.Email);
+
+            if (user == null)
+            {
+                return new AuthResponseDTO
+                {
+                    Success = false,
+                    Message = "Email not found"
+                };
+            }
+
+            // Tạo token reset password (6 ký tự ngẫu nhiên)
+            var resetToken = GenerateResetToken();
+
+            // Lưu token vào database (có hiệu lực trong 15 phút)
+            var passwordResetToken = new PasswordResetToken
+            {
+                UserID = user.UserID,
+                Token = resetToken,
+                ExpiresAt = DateTime.Now.AddMinutes(15),
+                IsUsed = false,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.PasswordResetTokens.Add(passwordResetToken);
+            await _context.SaveChangesAsync();
+
+            return new AuthResponseDTO
+            {
+                Success = true,
+                Message = "Password reset token has been created",
+                Token = resetToken, // Trả về token để chuyển sang trang reset
+                User = MapToUserDTO(user)
+            };
+        }
+
+        public async Task<AuthResponseDTO> ValidateResetTokenAsync(string token)
+        {
+            var resetToken = await _context.PasswordResetTokens
+                .Include(rt => rt.User)
+                .FirstOrDefaultAsync(rt => rt.Token == token);
+
+            if (resetToken == null)
+            {
+                return new AuthResponseDTO
+                {
+                    Success = false,
+                    Message = "Invalid token"
+                };
+            }
+
+            if (resetToken.IsUsed)
+            {
+                return new AuthResponseDTO
+                {
+                    Success = false,
+                    Message = "Token has already been used"
+                };
+            }
+
+            if (resetToken.ExpiresAt < DateTime.Now)
+            {
+                return new AuthResponseDTO
+                {
+                    Success = false,
+                    Message = "Token has expired"
+                };
+            }
+
+            return new AuthResponseDTO
+            {
+                Success = true,
+                Message = "Token is valid",
+                User = MapToUserDTO(resetToken.User)
+            };
+        }
+
+        public async Task<AuthResponseDTO> ResetPasswordAsync(ResetPasswordDTO resetPasswordDTO)
+        {
+            // Validate token
+            var resetToken = await _context.PasswordResetTokens
+                .Include(rt => rt.User)
+                .FirstOrDefaultAsync(rt => rt.Token == resetPasswordDTO.Token);
+
+            if (resetToken == null)
+            {
+                return new AuthResponseDTO
+                {
+                    Success = false,
+                    Message = "Invalid token"
+                };
+            }
+
+            if (resetToken.IsUsed)
+            {
+                return new AuthResponseDTO
+                {
+                    Success = false,
+                    Message = "Token has already been used"
+                };
+            }
+
+            if (resetToken.ExpiresAt < DateTime.Now)
+            {
+                return new AuthResponseDTO
+                {
+                    Success = false,
+                    Message = "Token has expired"
+                };
+            }
+
+            // Cập nhật mật khẩu mới
+            var user = resetToken.User;
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(resetPasswordDTO.NewPassword);
+
+            // Đánh dấu token đã được sử dụng
+            resetToken.IsUsed = true;
+
+            await _context.SaveChangesAsync();
+
+            return new AuthResponseDTO
+            {
+                Success = true,
+                Message = "Password has been reset successfully",
+                User = MapToUserDTO(user)
+            };
+        }
+
+        private string GenerateResetToken()
+        {
+            // Tạo token 6 ký tự ngẫu nhiên (chữ và số)
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 6)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

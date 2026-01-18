@@ -12,5 +12,10 @@ namespace E_project.Net.Server.Services
         Task<AuthResponseDTO> ChangePasswordAsync(int userId, ChangePasswordDTO changePasswordDTO);
         Task<bool> DeleteUserAsync(int userId);
         string GenerateJwtToken(User user);
+        
+        // Forgot Password methods
+        Task<AuthResponseDTO> ForgotPasswordAsync(ForgotPasswordDTO forgotPasswordDTO);
+        Task<AuthResponseDTO> ValidateResetTokenAsync(string token);
+        Task<AuthResponseDTO> ResetPasswordAsync(ResetPasswordDTO resetPasswordDTO);
     }
 }

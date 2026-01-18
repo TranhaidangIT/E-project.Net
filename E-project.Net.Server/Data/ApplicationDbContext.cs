@@ -11,6 +11,7 @@ namespace E_project.Net.Server.Data
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -49,6 +50,35 @@ namespace E_project.Net.Server.Data
                 // Unique constraints
                 entity.HasIndex(e => e.Username).IsUnique();
                 entity.HasIndex(e => e.Email).IsUnique();
+            });
+
+            // Configure PasswordResetToken entity
+            modelBuilder.Entity<PasswordResetToken>(entity =>
+            {
+                entity.ToTable("PasswordResetTokens");
+                entity.HasKey(e => e.TokenID);
+                
+                entity.Property(e => e.Token)
+                    .IsRequired()
+                    .HasMaxLength(255);
+                
+                entity.Property(e => e.IsUsed)
+                    .HasDefaultValue(false);
+                
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.HasIndex(e => e.Token)
+                    .IsUnique()
+                    .HasDatabaseName("IX_PasswordResetTokens_Token");
+                
+                entity.HasIndex(e => e.UserID)
+                    .HasDatabaseName("IX_PasswordResetTokens_UserID");
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserID)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
