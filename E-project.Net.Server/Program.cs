@@ -44,6 +44,7 @@ builder.Services.AddAuthentication(options =>
 
 // Register Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>

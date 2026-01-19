@@ -39,7 +39,7 @@ function ForgotPasswordPage() {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h2>🔐 Quên Mật Khẩu</h2>
+                <h2>Quên Mật Khẩu</h2>
                 <p className="auth-description">
                     Nhập email đã đăng ký để nhận mã khôi phục mật khẩu
                 </p>
@@ -47,7 +47,7 @@ function ForgotPasswordPage() {
                 {error && <div className="error-message">{error}</div>}
                 {success && (
                     <div className="success-message">
-                        <p>✅ Mã khôi phục đã được tạo!</p>
+                        <p>Mã khôi phục đã được tạo!</p>
                         <p className="token-display">Mã của bạn: <strong>{resetToken}</strong></p>
                         <p className="token-note">Đang chuyển hướng...</p>
                     </div>

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { songAPI, playlistAPI, likedSongAPI } from '../services/api';
+import { likedSongAPI, playlistAPI } from '../services/api';
 import MusicPlayer from '../components/MusicPlayer';
 import Layout from '../components/Layout';
 import './MusicPage.css';
 
-function MusicPage() {
+function LikedSongsPage() {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -16,44 +16,26 @@ function MusicPage() {
     const [showPlaylistModal, setShowPlaylistModal] = useState(false);
     const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState(null);
     const [playlistMessage, setPlaylistMessage] = useState('');
-    const [likedSongIds, setLikedSongIds] = useState([]);
-    const [searchParams] = useSearchParams();
     
     const { user } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        const query = searchParams.get('q');
-        if (query) {
-            searchSongs(query);
-        } else {
-            fetchSongs();
+        if (!user) {
+            navigate('/login');
+            return;
         }
-        if (user) {
-            fetchPlaylists();
-            fetchLikedSongIds();
-        }
-    }, [user, searchParams]);
+        fetchLikedSongs();
+        fetchPlaylists();
+    }, [user, navigate]);
 
-    const fetchSongs = async () => {
+    const fetchLikedSongs = async () => {
         try {
             setLoading(true);
-            const response = await songAPI.getAllSongs();
+            const response = await likedSongAPI.getLikedSongs();
             setSongs(response.data);
         } catch {
-            setError('Không thể tải danh sách bài hát');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const searchSongs = async (query) => {
-        try {
-            setLoading(true);
-            const response = await songAPI.searchSongs(query);
-            setSongs(response.data);
-        } catch {
-            setError('Lỗi tìm kiếm');
+            setError('Không thể tải danh sách bài hát yêu thích');
         } finally {
             setLoading(false);
         }
@@ -68,41 +50,18 @@ function MusicPage() {
         }
     };
 
-    const fetchLikedSongIds = async () => {
-        try {
-            const response = await likedSongAPI.getLikedSongIds();
-            setLikedSongIds(response.data);
-        } catch (err) {
-            console.error('Failed to fetch liked songs:', err);
-        }
-    };
-
-    const handleLikeToggle = async (songId, e) => {
+    const handleUnlike = async (songId, e) => {
         e.stopPropagation();
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-
         try {
-            if (likedSongIds.includes(songId)) {
-                await likedSongAPI.unlikeSong(songId);
-                setLikedSongIds(likedSongIds.filter(id => id !== songId));
-            } else {
-                await likedSongAPI.likeSong(songId);
-                setLikedSongIds([...likedSongIds, songId]);
-            }
+            await likedSongAPI.unlikeSong(songId);
+            setSongs(songs.filter(s => s.songID !== songId));
         } catch (err) {
-            console.error('Failed to toggle like:', err);
+            console.error('Failed to unlike song:', err);
         }
     };
 
     const openPlaylistModal = (song, e) => {
         e.stopPropagation();
-        if (!user) {
-            navigate('/login');
-            return;
-        }
         setSelectedSongForPlaylist(song);
         setShowPlaylistModal(true);
         setPlaylistMessage('');
@@ -142,64 +101,71 @@ function MusicPage() {
         }
     };
 
-    const formatDuration = (seconds) => {
-        if (!seconds) return 'N/A';
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
-
-    if (loading) return <Layout><div className="loading">⏳ Đang tải...</div></Layout>;
+    if (loading) return <Layout><div className="loading">Đang tải...</div></Layout>;
     if (error) return <Layout><div className="error">{error}</div></Layout>;
 
     return (
         <Layout>
-            <div className="music-page">
+            <div className="music-page liked-songs-page">
                 {/* Page Header */}
-                <div className="music-header">
-                    <h1>Duyệt Âm Nhạc</h1>
-                    <p>Khám phá và thưởng thức các bài hát yêu thích</p>
-                    {searchParams.get('q') && (
-                        <p className="search-result-info">
-                            Kết quả tìm kiếm cho: "{searchParams.get('q')}" ({songs.length} bài hát)
-                        </p>
-                    )}
+                <div className="music-header liked-header">
+                    <div className="liked-header-icon">
+                        <svg viewBox="0 0 24 24" width="64" height="64" fill="#1DB954">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </div>
+                    <div className="liked-header-text">
+                        <span className="liked-label">Playlist</span>
+                        <h1>Bài Hát Đã Thích</h1>
+                        <p>{songs.length} bài hát yêu thích của bạn</p>
+                    </div>
                 </div>
 
                 {/* Songs Grid */}
-                <div className="songs-grid">
-                    {songs.map((song, index) => (
-                        <div 
-                            key={song.songID} 
-                            className="song-card"
-                        >
-                            <div className="song-card-image">
-                                <div className="song-image-placeholder">
-                                    <img src="/logo.svg" alt="" className="song-logo-icon" />
-                                </div>
-                                <div 
-                                    className="play-button-overlay"
-                                    onClick={() => playSong(song, index)}
-                                >
-                                    <div className="play-button">
-                                        ▶
+                {songs.length === 0 ? (
+                    <div className="empty-state">
+                        <svg viewBox="0 0 24 24" width="64" height="64" fill="#b3b3b3">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                        <h3>Chưa có bài hát yêu thích</h3>
+                        <p>Hãy thích các bài hát để thêm vào danh sách này</p>
+                        <button className="btn-primary" onClick={() => navigate('/music')}>
+                            Khám phá nhạc
+                        </button>
+                    </div>
+                ) : (
+                    <div className="songs-grid">
+                        {songs.map((song, index) => (
+                            <div 
+                                key={song.songID} 
+                                className="song-card"
+                            >
+                                <div className="song-card-image">
+                                    <div className="song-image-placeholder">
+                                        <img src="/logo.svg" alt="" className="song-logo-icon" />
+                                    </div>
+                                    <div 
+                                        className="play-button-overlay"
+                                        onClick={() => playSong(song, index)}
+                                    >
+                                        <div className="play-button">
+                                            ▶
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="song-card-info">
-                                <h3>{song.songName}</h3>
-                                <p>{song.artistName}</p>
-                                <div className="song-card-actions">
-                                    <button 
-                                        className={`btn-like ${likedSongIds.includes(song.songID) ? 'liked' : ''}`}
-                                        onClick={(e) => handleLikeToggle(song.songID, e)}
-                                        title={likedSongIds.includes(song.songID) ? 'Bỏ thích' : 'Thích'}
-                                    >
-                                        <svg viewBox="0 0 24 24" width="20" height="20" fill={likedSongIds.includes(song.songID) ? '#e74c3c' : 'currentColor'}>
-                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                        </svg>
-                                    </button>
-                                    {user && (
+                                <div className="song-card-info">
+                                    <h3>{song.songName}</h3>
+                                    <p>{song.artistName}</p>
+                                    <div className="song-card-actions">
+                                        <button 
+                                            className="btn-like liked"
+                                            onClick={(e) => handleUnlike(song.songID, e)}
+                                            title="Bỏ thích"
+                                        >
+                                            <svg viewBox="0 0 24 24" width="20" height="20" fill="#e74c3c">
+                                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                            </svg>
+                                        </button>
                                         <button 
                                             className="btn-add-playlist-mini"
                                             onClick={(e) => openPlaylistModal(song, e)}
@@ -207,12 +173,12 @@ function MusicPage() {
                                         >
                                             +
                                         </button>
-                                    )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Music Player */}
                 {currentSong && (
@@ -230,7 +196,7 @@ function MusicPage() {
                         <div className="playlist-modal" onClick={(e) => e.stopPropagation()}>
                             <h3>Thêm vào Playlist</h3>
                             {playlistMessage && (
-                                <div className={playlistMessage.includes('thành công') ? 'success-message' : 'error-message'}>
+                                <div className={playlistMessage.includes('Đã thêm') ? 'success-message' : 'error-message'}>
                                     {playlistMessage}
                                 </div>
                             )}
@@ -257,5 +223,4 @@ function MusicPage() {
     );
 }
 
-export default MusicPage;
-    
+export default LikedSongsPage;

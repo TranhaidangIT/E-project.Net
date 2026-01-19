@@ -112,62 +112,17 @@
 .hero-illustration {
     flex: 0 0 45%;
     position: relative;
-    min-height: 500px;
+    min-height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.music-circle {
-    position: absolute;
-    font-size: 5rem;
-    opacity: 0.6;
-    animation: musicFloat 6s ease-in-out infinite;
-    transition: opacity 0.3s ease;
-}
-
-.music-circle:hover {
-    opacity: 1;
-    transform: scale(1.1) !important;
-}
-
-.circle-1 {
-    top: 8%;
-    left: 25%;
-    animation-delay: 0s;
-}
-
-.circle-2 {
-    top: 55%;
-    left: 8%;
-    animation-delay: 1s;
-}
-
-.circle-3 {
-    top: 15%;
-    right: 12%;
-    animation-delay: 2s;
-}
-
-.circle-4 {
-    bottom: 12%;
-    right: 28%;
-    animation-delay: 3s;
-}
-
-@keyframes musicFloat {
-    0%, 100% {
-        transform: translateY(0) rotate(0deg) scale(1);
-    }
-    25% {
-        transform: translateY(-30px) rotate(5deg) scale(1.05);
-    }
-    50% {
-        transform: translateY(-15px) rotate(-5deg) scale(0.95);
-    }
-    75% {
-        transform: translateY(-25px) rotate(3deg) scale(1.02);
-    }
+.hero-logo-icon {
+    width: 280px;
+    height: 280px;
+    filter: invert(1);
+    opacity: 0.15;
 }
 
 /* Welcome Section */
@@ -237,16 +192,22 @@
 }
 
 .action-icon {
-    font-size: 4.5rem;
+    font-size: 2.5rem;
     display: block;
     margin-bottom: 20px;
-    filter: drop-shadow(0 4px 15px rgba(233, 69, 96, 0.3));
+    color: #1DB954;
     transition: all 0.3s ease;
 }
 
+img.action-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 20px;
+    filter: invert(1);
+}
+
 .quick-action-card:hover .action-icon {
-    transform: scale(1.15) rotate(5deg);
-    filter: drop-shadow(0 8px 25px rgba(233, 69, 96, 0.6));
+    transform: scale(1.1);
 }
 
 .quick-action-card h3 {
@@ -293,16 +254,6 @@
 }
 
 .feature-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 40px 30px;
-    text-align: center;
-    transition: all 0.3s ease;
-}
-
-.feature-card {
     background: #181818;
     border: 1px solid #282828;
     border-radius: 8px;
@@ -316,8 +267,15 @@
 }
 
 .feature-icon {
-    font-size: 3rem;
+    font-size: 2.5rem;
     margin-bottom: 20px;
+    color: #1DB954;
+}
+
+img.feature-icon {
+    width: 48px;
+    height: 48px;
+    filter: invert(1);
 }
 
 .feature-card h3 {

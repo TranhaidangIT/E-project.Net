@@ -85,13 +85,13 @@ function AdminDashboard() {
         <div className="admin-container">
             <div className="admin-header">
                 <div className="header-left">
-                    <h1>🎵 Admin Dashboard</h1>
-                    <p>Xin chào, <strong>{user?.fullName || user?.username}</strong> 👑</p>
+                    <h1>Admin Dashboard</h1>
+                    <p>Xin chào, <strong>{user?.fullName || user?.username}</strong></p>
                 </div>
                 <div className="header-right">
-                    <Link to="/admin/songs" className="btn-secondary btn-sm">🎵 Quản lý Bài hát</Link>
-                    <Link to="/profile" className="btn-secondary btn-sm">👤 Profile</Link>
-                    <button onClick={handleLogout} className="btn-danger btn-sm">🚪 Đăng xuất</button>
+                    <Link to="/admin/songs" className="btn-secondary btn-sm">Quản lý Bài hát</Link>
+                    <Link to="/profile" className="btn-secondary btn-sm">Profile</Link>
+                    <button onClick={handleLogout} className="btn-danger btn-sm">Đăng xuất</button>
                 </div>
             </div>
 
@@ -100,21 +100,21 @@ function AdminDashboard() {
 
             <div className="stats-container">
                 <div className="stat-card">
-                    <div className="stat-icon">👥</div>
+                    <div className="stat-icon">○</div>
                     <div className="stat-info">
                         <h3>{stats.totalUsers}</h3>
                         <p>Tổng Users</p>
                     </div>
                 </div>
                 <div className="stat-card">
-                    <div className="stat-icon">👑</div>
+                    <div className="stat-icon">★</div>
                     <div className="stat-info">
                         <h3>{stats.totalAdmins}</h3>
                         <p>Admins</p>
                     </div>
                 </div>
                 <div className="stat-card">
-                    <div className="stat-icon">👤</div>
+                    <div className="stat-icon">●</div>
                     <div className="stat-info">
                         <h3>{stats.totalUsers - stats.totalAdmins}</h3>
                         <p>Regular Users</p>
@@ -123,7 +123,7 @@ function AdminDashboard() {
             </div>
 
             <div className="admin-card">
-                <h2>📋 Quản Lý Users</h2>
+                <h2>Quản Lý Users</h2>
                 <table className="user-table">
                     <thead>
                         <tr>
@@ -153,7 +153,7 @@ function AdminDashboard() {
                                 <td>{u.fullName || '-'}</td>
                                 <td>
                                     <span className={`badge ${u.isAdmin ? 'admin' : 'user'}`}>
-                                        {u.isAdmin ? '👑 Admin' : '👤 User'}
+                                        {u.isAdmin ? 'Admin' : 'User'}
                                     </span>
                                 </td>
                                 <td>{new Date(u.createdAt).toLocaleDateString('vi-VN')}</td>
@@ -165,7 +165,7 @@ function AdminDashboard() {
                                             disabled={u.userID === user.userID}
                                             title={u.isAdmin ? 'Hủy quyền Admin' : 'Cấp quyền Admin'}
                                         >
-                                            {u.isAdmin ? '⬇️' : '⬆️'}
+                                            {u.isAdmin ? '↓' : '↑'}
                                         </button>
                                         <button 
                                             onClick={() => handleDeleteUser(u.userID, u.username)}
@@ -173,7 +173,7 @@ function AdminDashboard() {
                                             disabled={u.userID === user.userID}
                                             title="Xóa user"
                                         >
-                                            🗑️
+                                            ×
                                         </button>
                                     </div>
                                 </td>

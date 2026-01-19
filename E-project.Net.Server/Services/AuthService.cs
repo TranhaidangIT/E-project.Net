@@ -120,6 +120,9 @@ namespace E_project.Net.Server.Services
             if (updateDTO.AvatarURL != null)
                 user.AvatarURL = updateDTO.AvatarURL;
 
+            if (updateDTO.CoverURL != null)
+                user.CoverURL = updateDTO.CoverURL;
+
             await _context.SaveChangesAsync();
             return MapToUserDTO(user);
         }
@@ -202,6 +205,7 @@ namespace E_project.Net.Server.Services
                 Email = user.Email,
                 FullName = user.FullName,
                 AvatarURL = user.AvatarURL,
+                CoverURL = user.CoverURL,
                 IsAdmin = user.IsAdmin,
                 CreatedAt = user.CreatedAt
             };

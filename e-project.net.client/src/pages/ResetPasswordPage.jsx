@@ -69,7 +69,7 @@ function ResetPasswordPage() {
             });
             
             if (response.data.success) {
-                alert('✅ Đặt lại mật khẩu thành công! Vui lòng đăng nhập.');
+                alert('Đặt lại mật khẩu thành công! Vui lòng đăng nhập.');
                 navigate('/login');
             } else {
                 setError(response.data.message);
@@ -109,7 +109,7 @@ function ResetPasswordPage() {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h2>🔑 Đặt Lại Mật Khẩu</h2>
+                <h2>Đặt Lại Mật Khẩu</h2>
                 <p className="auth-description">
                     Nhập mật khẩu mới của bạn
                 </p>

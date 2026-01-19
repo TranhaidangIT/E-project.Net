@@ -7,6 +7,7 @@ namespace E_project.Net.Server.Models.DTOs
         public string Email { get; set; } = string.Empty;
         public string? FullName { get; set; }
         public string? AvatarURL { get; set; }
+        public string? CoverURL { get; set; }
         public bool IsAdmin { get; set; }
         public DateTime CreatedAt { get; set; }
     }

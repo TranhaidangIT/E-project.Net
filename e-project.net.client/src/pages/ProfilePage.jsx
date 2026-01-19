@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
-import { userAPI } from '../services/api';
+import { userAPI, playlistAPI } from '../services/api';
 import Layout from '../components/Layout';
 import './ProfilePage.css';
 
@@ -10,12 +10,30 @@ function ProfilePage() {
     const navigate = useNavigate();
     const [editing, setEditing] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [uploadingCover, setUploadingCover] = useState(false);
     const [formData, setFormData] = useState({
         fullName: user?.fullName || '',
         avatarURL: user?.avatarURL || '',
+        coverURL: user?.coverURL || '',
     });
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const [playlistCount, setPlaylistCount] = useState(0);
+
+    useEffect(() => {
+        if (user) {
+            fetchPlaylistCount();
+        }
+    }, [user]);
+
+    const fetchPlaylistCount = async () => {
+        try {
+            const response = await playlistAPI.getMyPlaylists();
+            setPlaylistCount(response.data.length);
+        } catch (err) {
+            console.error('Failed to fetch playlist count:', err);
+        }
+    };
 
     const handleLogout = () => {
         logout();
@@ -26,18 +44,51 @@ function ProfilePage() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleAvatarUpload = async (e) => {
+    const handleCoverUpload = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Validate file type
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
         if (!allowedTypes.includes(file.type)) {
             setError('Chỉ chấp nhận file ảnh (JPEG, PNG, GIF)');
             return;
         }
 
-        // Validate file size (5MB)
+        if (file.size > 10 * 1024 * 1024) {
+            setError('Kích thước file phải nhỏ hơn 10MB');
+            return;
+        }
+
+        setUploadingCover(true);
+        setError('');
+        setMessage('');
+
+        try {
+            const formDataUpload = new FormData();
+            formDataUpload.append('file', file);
+
+            const response = await userAPI.uploadCover(formDataUpload);
+            const coverUrl = response.data.coverUrl;
+            
+            setFormData(prev => ({ ...prev, coverURL: coverUrl }));
+            setMessage('Upload ảnh bìa thành công! Nhấn "Lưu" để cập nhật.');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Upload ảnh bìa thất bại');
+        } finally {
+            setUploadingCover(false);
+        }
+    };
+
+    const handleAvatarUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            setError('Chỉ chấp nhận file ảnh (JPEG, PNG, GIF)');
+            return;
+        }
+
         if (file.size > 5 * 1024 * 1024) {
             setError('Kích thước file phải nhỏ hơn 5MB');
             return;
@@ -54,18 +105,9 @@ function ProfilePage() {
             const response = await userAPI.uploadAvatar(formDataUpload);
             const avatarUrl = response.data.avatarUrl;
             
-            console.log('Avatar uploaded:', avatarUrl);
-            
-            // Update formData with server URL
-            setFormData(prev => {
-                const newData = { ...prev, avatarURL: avatarUrl };
-                console.log('FormData updated:', newData);
-                return newData;
-            });
-            
-            setMessage('Upload ảnh thành công! Nhấn "Lưu" để cập nhật profile.');
+            setFormData(prev => ({ ...prev, avatarURL: avatarUrl }));
+            setMessage('Upload ảnh đại diện thành công! Nhấn "Lưu" để cập nhật.');
         } catch (err) {
-            console.error('Upload error:', err);
             setError(err.response?.data?.message || 'Upload ảnh thất bại');
         } finally {
             setUploadingAvatar(false);
@@ -100,123 +142,187 @@ function ProfilePage() {
     return (
         <Layout>
             <div className="profile-page">
-                {/* Page Header */}
-                <div className="profile-header">
-                    <h1>Thông Tin Tài Khoản</h1>
-                    <p>Quản lý thông tin cá nhân của bạn</p>
-                </div>
+                {/* Messages */}
+                {message && <div className="success-message">{message}</div>}
+                {error && <div className="error-message">{error}</div>}
 
-                <div className="profile-content">
-                    {message && <div className="success-message">{message}</div>}
-                    {error && <div className="error-message">{error}</div>}
-                    
-                    <div className="profile-avatar">
-                        {(() => {
-                            const avatarUrl = formData.avatarURL || user.avatarURL;
-                            
-                            if (avatarUrl) {
-                                // Use relative URL - Vite proxy will handle it
-                                const fullUrl = avatarUrl.startsWith('http') ? avatarUrl : avatarUrl;
-                                return (
-                                    <img 
-                                        src={fullUrl}
-                                        alt="Avatar" 
-                                        onError={(e) => {
-                                            // Hide broken image and show placeholder
-                                            e.target.style.display = 'none';
-                                            e.target.nextSibling.style.display = 'flex';
-                                        }}
-                                    />
-                                );
-                            }
-                            return null;
-                        })()}
-                        <div 
-                            className="avatar-placeholder"
-                            style={{ display: (formData.avatarURL || user.avatarURL) ? 'none' : 'flex' }}
-                        >
-                            {user.username.charAt(0).toUpperCase()}
+                {!editing ? (
+                    // View Mode - Card Layout with Cover
+                    <div className="profile-wrapper">
+                        {/* Cover Image */}
+                        <div className="profile-cover">
+                            {user.coverURL ? (
+                                <img src={user.coverURL} alt="Cover" />
+                            ) : (
+                                <div className="cover-placeholder">
+                                    <span>Ảnh bìa</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Profile Card overlapping cover */}
+                        <div className="profile-card">
+                            <div className="profile-card-left">
+                                <div className="profile-avatar-large">
+                                    {(() => {
+                                        const avatarUrl = user.avatarURL;
+                                        if (avatarUrl) {
+                                            return (
+                                                <img 
+                                                    src={avatarUrl} 
+                                                    alt="Avatar" 
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.nextSibling.style.display = 'flex';
+                                                    }}
+                                                />
+                                            );
+                                        }
+                                        return null;
+                                    })()}
+                                    <div 
+                                        className="avatar-placeholder-large"
+                                        style={{ display: user.avatarURL ? 'none' : 'flex' }}
+                                    >
+                                        {user.username.charAt(0).toUpperCase()}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="profile-card-right">
+                                <h2 className="profile-name">{user.fullName || user.username}</h2>
+                                <div className="profile-stats">
+                                    <div className="stat-item">
+                                        <span className="stat-label">Playlist:</span>
+                                        <span className="stat-value">{playlistCount}</span>
+                                    </div>
+                                    <div className="stat-item">
+                                        <span className="stat-label">Yêu thích:</span>
+                                        <span className="stat-value">0</span>
+                                    </div>
+                                    <div className="stat-item">
+                                        <span className="stat-label">Ngày tham gia:</span>
+                                        <span className="stat-value">{new Date(user.createdAt).toLocaleDateString('vi-VN')}</span>
+                                    </div>
+                                </div>
+
+                            <div className="profile-actions">
+                                {user.isAdmin && (
+                                    <Link to="/admin" className="btn-primary">
+                                        Quản Trị
+                                    </Link>
+                                )}
+                                <button onClick={() => {
+                                    setFormData({
+                                        fullName: user.fullName || '',
+                                        avatarURL: user.avatarURL || '',
+                                        coverURL: user.coverURL || '',
+                                    });
+                                    setEditing(true);
+                                }} className="btn-secondary">
+                                    Chỉnh sửa Profile
+                                </button>
+                                <Link to="/change-password" className="btn-warning">
+                                    Đổi Mật Khẩu
+                                </Link>
+                                <button onClick={handleLogout} className="btn-danger">
+                                    Đăng xuất
+                                </button>
+                            </div>
                         </div>
                     </div>
-
-                    {!editing ? (
-                    <div className="profile-info">
-                        <div className="info-item">
-                            <label>Username:</label>
-                            <span>{user.username}</span>
-                        </div>
-                        <div className="info-item">
-                            <label>Email:</label>
-                            <span>{user.email}</span>
-                        </div>
-                        <div className="info-item">
-                            <label>Họ tên:</label>
-                            <span>{user.fullName || 'Chưa cập nhật'}</span>
-                        </div>
-                        <div className="info-item">
-                            <label>Ngày tạo:</label>
-                            <span>{new Date(user.createdAt).toLocaleDateString('vi-VN')}</span>
-                        </div>
-                        
-                        <div className="button-group">
-                            {user.isAdmin && (
-                                <Link to="/admin" className="btn-primary">
-                                    Quản Trị
-                                </Link>
-                            )}
-                            <button onClick={() => {
-                                setFormData({
-                                    fullName: user.fullName || '',
-                                    avatarURL: user.avatarURL || '',
-                                });
-                                setEditing(true);
-                            }} className="btn-secondary">
-                                Chỉnh sửa
-                            </button>
-                            <Link to="/change-password" className="btn-warning">
-                                Đổi Mật Khẩu
-                            </Link>
-                            <button onClick={handleLogout} className="btn-danger">
-                                Đăng xuất
-                            </button>
-                        </div>
                     </div>
                 ) : (
-                    <form onSubmit={handleUpdate}>
-                        <div className="form-group">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleAvatarUpload}
-                                disabled={uploadingAvatar}
-                                id="avatar-upload"
-                                style={{ display: 'none' }}
-                            />
-                            <label htmlFor="avatar-upload" className="btn-upload" style={{ marginBottom: '20px', display: 'inline-block' }}>
-                                {uploadingAvatar ? 'Đang upload...' : 'Chọn ảnh Avatar'}
-                            </label>
+                    // Edit Mode with Cover
+                    <div className="profile-edit-wrapper">
+                        {/* Cover Image Edit */}
+                        <div className="profile-cover-edit">
+                            {formData.coverURL || user.coverURL ? (
+                                <img src={formData.coverURL || user.coverURL} alt="Cover" />
+                            ) : (
+                                <div className="cover-placeholder">
+                                    <span>Ảnh bìa (1200x300px)</span>
+                                </div>
+                            )}
+                            <div className="cover-upload-overlay">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleCoverUpload}
+                                    disabled={uploadingCover}
+                                    id="cover-upload"
+                                    style={{ display: 'none' }}
+                                />
+                                <label htmlFor="cover-upload" className="btn-upload-cover">
+                                    {uploadingCover ? 'Đang upload...' : 'Đổi ảnh bìa'}
+                                </label>
+                            </div>
                         </div>
-                        <div className="form-group">
-                            <label>Họ và tên</label>
-                            <input
-                                type="text"
-                                name="fullName"
-                                value={formData.fullName}
-                                onChange={handleChange}
-                                placeholder="Nhập họ tên"
-                            />
+
+                        <div className="profile-edit-card">
+                            <div className="profile-avatar-edit">
+                                {(() => {
+                                    const avatarUrl = formData.avatarURL || user.avatarURL;
+                                    if (avatarUrl) {
+                                        return (
+                                            <img 
+                                                src={avatarUrl} 
+                                                alt="Avatar" 
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                    e.target.nextSibling.style.display = 'flex';
+                                                }}
+                                            />
+                                        );
+                                    }
+                                    return null;
+                                })()}
+                                <div 
+                                    className="avatar-placeholder-edit"
+                                    style={{ display: (formData.avatarURL || user.avatarURL) ? 'none' : 'flex' }}
+                                >
+                                    {user.username.charAt(0).toUpperCase()}
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleUpdate} className="profile-form">
+                                <div className="form-group">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleAvatarUpload}
+                                        disabled={uploadingAvatar}
+                                        id="avatar-upload"
+                                        style={{ display: 'none' }}
+                                    />
+                                    <label htmlFor="avatar-upload" className="btn-upload">
+                                        {uploadingAvatar ? 'Đang upload...' : 'Chọn ảnh Avatar'}
+                                    </label>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Họ và tên</label>
+                                    <input
+                                        type="text"
+                                        name="fullName"
+                                        value={formData.fullName}
+                                        onChange={handleChange}
+                                        placeholder="Nhập họ tên"
+                                    />
+                                </div>
+
+                                <div className="form-actions">
+                                    <button type="submit" className="btn-primary">
+                                        Lưu
+                                    </button>
+                                    <button type="button" onClick={() => setEditing(false)} className="btn-secondary">
+                                        Hủy
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div className="button-group">
-                            <button type="submit" className="btn-primary">
-                                Lưu
-                            </button>
-                            <button type="button" onClick={() => setEditing(false)} className="btn-secondary">
-                                Hủy
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 )}
-                </div>
             </div>
         </Layout>
     );

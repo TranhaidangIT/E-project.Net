@@ -48,7 +48,7 @@ function ChangePasswordPage() {
                 confirmPassword: formData.confirmPassword
             });
             
-            setSuccess('✅ Đổi mật khẩu thành công!');
+            setSuccess('Đổi mật khẩu thành công!');
             setTimeout(() => {
                 navigate('/profile');
             }, 2000);
@@ -63,7 +63,7 @@ function ChangePasswordPage() {
         <Layout>
         <div className="auth-container">
             <div className="auth-card">
-                <h2>🔒 Đổi Mật Khẩu</h2>
+                <h2>Đổi Mật Khẩu</h2>
                 
                 {success && <div className="success-message">{success}</div>}
                 {error && <div className="error-message">{error}</div>}
@@ -107,7 +107,7 @@ function ChangePasswordPage() {
                     </div>
                     
                     <button type="submit" disabled={loading} className="btn-primary">
-                        {loading ? 'Đang xử lý...' : '🔒 Đổi Mật Khẩu'}
+                        {loading ? 'Đang xử lý...' : 'Đổi Mật Khẩu'}
                     </button>
                 </form>
             </div>

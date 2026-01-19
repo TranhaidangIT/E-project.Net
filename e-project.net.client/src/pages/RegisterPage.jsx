@@ -49,7 +49,7 @@ function RegisterPage() {
         <Layout>
         <div className="auth-container">
             <div className="auth-card">
-                <h2>🎵 Music Web - Đăng Ký</h2>
+                <h2><img src="/logo.svg" alt="" className="auth-logo" /> Đăng Ký</h2>
                 
                 {error && <div className="error-message">{error}</div>}
                 

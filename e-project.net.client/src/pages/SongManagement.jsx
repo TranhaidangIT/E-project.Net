@@ -94,10 +94,10 @@ function SongManagement() {
 
             if (editMode && currentSong) {
                 await songAPI.updateSong(currentSong.songID, songData);
-                alert('✅ Cập nhật bài hát thành công!');
+                alert('Cập nhật bài hát thành công!');
             } else {
                 await songAPI.createSong(songData);
-                alert('✅ Thêm bài hát thành công!');
+                alert('Thêm bài hát thành công!');
             }
 
             handleCloseModal();
@@ -112,10 +112,10 @@ function SongManagement() {
 
         try {
             await songAPI.deleteSong(songId);
-            alert('✅ Xóa bài hát thành công!');
+            alert('Xóa bài hát thành công!');
             fetchSongs();
         } catch (err) {
-            alert('❌ Lỗi: ' + (err.response?.data?.message || 'Không thể xóa bài hát'));
+            alert('Lỗi: ' + (err.response?.data?.message || 'Không thể xóa bài hát'));
         }
     };
 
@@ -133,18 +133,18 @@ function SongManagement() {
         <div className="song-management-container">
             {/* Header */}
             <div className="song-management-header">
-                <h1>🎵 Quản Lý Bài Hát</h1>
+                <h1>Quản Lý Bài Hát</h1>
                 <p>Quản lý: {user?.username} (Admin)</p>
                 
                 <div className="header-actions">
                     <button onClick={() => navigate('/admin')} className="btn-secondary">
-                        👥 Quản lý Users
+                        Quản lý Users
                     </button>
                     <button onClick={() => navigate('/profile')} className="btn-secondary">
-                        👤 Profile
+                        Profile
                     </button>
                     <button onClick={logout} className="btn-danger">
-                        🚪 Đăng xuất
+                        Đăng xuất
                     </button>
                 </div>
             </div>
@@ -161,13 +161,13 @@ function SongManagement() {
                         onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                     />
                     <button onClick={handleSearch} className="btn-secondary">
-                        🔍 Tìm
+                        Tìm
                     </button>
                     <button onClick={() => fetchSongs()} className="btn-secondary">
-                        🔄 Tất cả
+                        Tất cả
                     </button>
                     <button onClick={() => handleOpenModal()} className="btn-primary">
-                        ➕ Thêm bài hát
+                        + Thêm bài hát
                     </button>
                 </div>
             </div>
@@ -204,13 +204,13 @@ function SongManagement() {
                                             onClick={() => handleOpenModal(song)}
                                             className="btn-warning btn-sm"
                                         >
-                                            ✏️ Sửa
+                                            Sửa
                                         </button>
                                         <button
                                             onClick={() => handleDelete(song.songID)}
                                             className="btn-danger btn-sm"
                                         >
-                                            🗑️ Xóa
+                                            Xóa
                                         </button>
                                     </div>
                                 </td>
@@ -230,7 +230,7 @@ function SongManagement() {
             {showModal && (
                 <div className="modal-overlay" onClick={handleCloseModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h2>{editMode ? '✏️ Sửa Bài Hát' : '➕ Thêm Bài Hát Mới'}</h2>
+                        <h2>{editMode ? 'Sửa Bài Hát' : 'Thêm Bài Hát Mới'}</h2>
                         
                         {error && <div className="error-message">{error}</div>}
                         
@@ -273,10 +273,10 @@ function SongManagement() {
 
                             <div className="modal-buttons">
                                 <button type="submit" className="btn-primary">
-                                    {editMode ? '💾 Cập Nhật' : '➕ Thêm'}
+                                    {editMode ? 'Cập Nhật' : 'Thêm'}
                                 </button>
                                 <button type="button" onClick={handleCloseModal} className="btn-secondary">
-                                    ❌ Hủy
+                                    Hủy
                                 </button>
                             </div>
                         </form>

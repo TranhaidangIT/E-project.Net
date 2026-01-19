@@ -40,7 +40,7 @@ function LoginPage() {
         <Layout>
         <div className="auth-container">
             <div className="auth-card">
-                <h2>🎵 Music Web - Đăng Nhập</h2>
+                <h2><img src="/logo.svg" alt="" className="auth-logo" /> Đăng Nhập</h2>
                 
                 {error && <div className="error-message">{error}</div>}
                 

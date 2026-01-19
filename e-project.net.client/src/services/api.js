@@ -39,6 +39,11 @@ export const userAPI = {
             'Content-Type': 'multipart/form-data',
         },
     }),
+    uploadCover: (formData) => api.post('/user/upload-cover', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    }),
 };
 
 // Admin API
@@ -57,6 +62,16 @@ export const songAPI = {
     updateSong: (id, data) => api.put(`/song/${id}`, data),
     deleteSong: (id) => api.delete(`/song/${id}`),
     searchSongs: (query) => api.get(`/song/search?query=${encodeURIComponent(query)}`),
+    getSuggestions: (query) => api.get(`/song/suggestions?query=${encodeURIComponent(query)}`),
+};
+
+// Liked Songs API
+export const likedSongAPI = {
+    getLikedSongs: () => api.get('/likedsong'),
+    getLikedSongIds: () => api.get('/likedsong/ids'),
+    likeSong: (songId) => api.post(`/likedsong/${songId}`),
+    unlikeSong: (songId) => api.delete(`/likedsong/${songId}`),
+    checkLiked: (songId) => api.get(`/likedsong/check/${songId}`),
 };
 
 // Playlist API
@@ -70,6 +85,16 @@ export const playlistAPI = {
     addSongToPlaylist: (playlistId, songId) => api.post(`/playlist/${playlistId}/songs`, { songID: songId }),
     removeSongFromPlaylist: (playlistId, songId) => api.delete(`/playlist/${playlistId}/songs/${songId}`),
     reorderPlaylist: (playlistId, songIds) => api.put(`/playlist/${playlistId}/reorder`, songIds),
+};
+
+// Notification API
+export const notificationAPI = {
+    getNotifications: (limit = 20) => api.get(`/notification?limit=${limit}`),
+    getUnreadCount: () => api.get('/notification/unread-count'),
+    markAsRead: (id) => api.put(`/notification/${id}/read`),
+    markAllAsRead: () => api.put('/notification/read-all'),
+    deleteNotification: (id) => api.delete(`/notification/${id}`),
+    clearAll: () => api.delete('/notification/clear-all'),
 };
 
 export default api;

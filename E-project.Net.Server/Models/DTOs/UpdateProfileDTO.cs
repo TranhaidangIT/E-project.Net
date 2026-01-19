@@ -9,5 +9,8 @@ namespace E_project.Net.Server.Models.DTOs
 
         [MaxLength(500, ErrorMessage = "Avatar URL cannot exceed 500 characters")]
         public string? AvatarURL { get; set; }
+
+        [MaxLength(500, ErrorMessage = "Cover URL cannot exceed 500 characters")]
+        public string? CoverURL { get; set; }
     }
 }

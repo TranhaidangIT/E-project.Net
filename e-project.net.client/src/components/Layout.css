@@ -43,7 +43,9 @@
 }
 
 .logo-icon {
-    font-size: 2rem;
+    width: 36px;
+    height: 36px;
+    filter: invert(1);
 }
 
 .logo-text {
@@ -86,16 +88,190 @@
 .header-right {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 16px;
+}
+
+/* Notification Bell */
+.notification-container {
+    position: relative;
+}
+
+.notification-btn {
+    background: transparent;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #b3b3b3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.notification-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
+.notification-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 360px;
+    max-height: 480px;
+    background: #282828;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    margin-top: 8px;
+    z-index: 1001;
+    overflow: hidden;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #333;
+}
+
+.notification-header h3 {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.mark-all-read {
+    background: transparent;
+    border: none;
+    color: #1DB954;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.mark-all-read:hover {
+    background: rgba(29, 185, 84, 0.1);
+}
+
+.notification-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-empty {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.notification-empty svg {
+    opacity: 0.5;
+    margin-bottom: 12px;
+}
+
+.notification-empty p {
+    color: #b3b3b3;
+    margin: 0;
+    font-size: 14px;
+}
+
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+}
+
+.notification-item:hover {
+    background: #333;
+}
+
+.notification-item.unread {
+    background: rgba(29, 185, 84, 0.05);
+}
+
+.notification-item.unread:hover {
+    background: rgba(29, 185, 84, 0.1);
+}
+
+.notification-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #181818;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.notification-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-message {
+    color: #fff;
+    font-size: 14px;
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+}
+
+.notification-time {
+    color: #b3b3b3;
+    font-size: 12px;
+}
+
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    background: #1DB954;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
 }
 
 /* Header Center - Search Bar */
 .header-center {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     max-width: 500px;
     width: 100%;
     margin: 0 auto;
+    position: relative;
 }
 
 .header-search {
@@ -108,6 +284,7 @@
     max-width: 400px;
     border: 1px solid transparent;
     transition: border-color 0.2s, background 0.2s;
+    position: relative;
 }
 
 .header-search:focus-within {
@@ -132,7 +309,7 @@
 .header-search .search-btn {
     background: transparent;
     border: none;
-    padding: 10px 16px;
+    padding: 10px 12px 10px 16px;
     cursor: pointer;
     color: #a7a7a7;
     display: flex;
@@ -143,6 +320,100 @@
 
 .header-search .search-btn:hover {
     color: #fff;
+}
+
+.header-search .clear-btn {
+    background: transparent;
+    border: none;
+    padding: 10px 16px 10px 0;
+    cursor: pointer;
+    color: #a7a7a7;
+    font-size: 18px;
+    line-height: 1;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.header-search .clear-btn:hover {
+    color: #fff;
+}
+
+/* Search Suggestions Dropdown */
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #212121;
+    border-radius: 8px;
+    margin-top: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #333;
+}
+
+.suggestion-loading {
+    padding: 16px;
+    text-align: center;
+    color: #b3b3b3;
+    font-size: 14px;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.suggestion-item:hover {
+    background: #333;
+}
+
+.suggestion-item:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.suggestion-item:last-child {
+    border-radius: 0 0 8px 8px;
+}
+
+.suggestion-icon {
+    color: #b3b3b3;
+    flex-shrink: 0;
+}
+
+.suggestion-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.suggestion-main {
+    color: #fff;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.suggestion-main strong {
+    color: #1DB954;
+    font-weight: 700;
+}
+
+.suggestion-sub {
+    color: #b3b3b3;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* User Menu */
@@ -300,9 +571,8 @@
    ======================================== */
 
 .main-footer {
-    background: rgba(20, 20, 30, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 2px solid rgba(233, 69, 96, 0.3);
+    background: #121212;
+    border-top: 1px solid #282828;
     color: #b3b3b3;
     margin-top: auto;
 }
@@ -320,6 +590,15 @@
     color: #fff;
     margin-bottom: 15px;
     font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-logo-icon {
+    width: 24px;
+    height: 24px;
+    filter: invert(1);
 }
 
 .footer-section h4 {
@@ -360,7 +639,7 @@
 .footer-bottom {
     text-align: center;
     padding: 20px;
-    border-top: 1px solid rgba(233, 69, 96, 0.2);
+    border-top: 1px solid #282828;
 }
 
 .footer-bottom p {

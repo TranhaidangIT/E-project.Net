@@ -208,5 +208,55 @@ namespace E_project.Net.Server.Controllers
 
             return Ok(songs);
         }
+
+        /// <summary>
+        /// Get search suggestions - autocomplete (Public)
+        /// Returns song suggestions based on partial query matching song name or artist
+        /// </summary>
+        [HttpGet("suggestions")]
+        public async Task<ActionResult<IEnumerable<object>>> GetSuggestions([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query) || query.Length < 1)
+            {
+                return Ok(new List<object>());
+            }
+
+            var queryLower = query.ToLower();
+
+            // Search by song name (partial match - even incomplete words)
+            var songMatches = await _context.Songs
+                .Where(s => s.SongName.ToLower().Contains(queryLower))
+                .OrderByDescending(s => s.PlayCount)
+                .Take(5)
+                .Select(s => new {
+                    type = "song",
+                    id = s.SongID,
+                    text = s.SongName,
+                    subText = s.ArtistName
+                })
+                .ToListAsync();
+
+            // Search by artist name - show their songs
+            var artistMatches = await _context.Songs
+                .Where(s => s.ArtistName.ToLower().Contains(queryLower))
+                .OrderByDescending(s => s.PlayCount)
+                .Take(5)
+                .Select(s => new {
+                    type = "artist",
+                    id = s.SongID,
+                    text = s.SongName,
+                    subText = s.ArtistName
+                })
+                .ToListAsync();
+
+            // Combine and remove duplicates, prioritize song matches
+            var combined = songMatches
+                .Union(artistMatches)
+                .DistinctBy(x => x.id)
+                .Take(10)
+                .ToList();
+
+            return Ok(combined);
+        }
     }
 }

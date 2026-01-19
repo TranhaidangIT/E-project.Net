@@ -205,6 +205,64 @@ namespace E_project.Net.Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Upload cover image (returns URL to use in UpdateProfile)
+        /// </summary>
+        [HttpPost("upload-cover")]
+        public async Task<ActionResult> UploadCover(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "No file uploaded" });
+            }
+
+            // Validate file type
+            var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif" };
+            if (!allowedTypes.Contains(file.ContentType.ToLower()))
+            {
+                return BadRequest(new { message = "Invalid file type. Only JPEG, PNG, and GIF are allowed" });
+            }
+
+            // Validate file size (max 10MB for cover)
+            if (file.Length > 10 * 1024 * 1024)
+            {
+                return BadRequest(new { message = "File size must be less than 10MB" });
+            }
+
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "User not authenticated" });
+            }
+
+            try
+            {
+                // Create uploads directory if it doesn't exist
+                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "covers");
+                Directory.CreateDirectory(uploadsPath);
+
+                // Generate unique filename
+                var fileExtension = Path.GetExtension(file.FileName);
+                var fileName = $"{userId}_{DateTime.Now.Ticks}{fileExtension}";
+                var filePath = Path.Combine(uploadsPath, fileName);
+
+                // Save file
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Return the URL
+                var coverUrl = $"/uploads/covers/{fileName}";
+                
+                return Ok(new { coverUrl });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error uploading file: {ex.Message}" });
+            }
+        }
+
         private int? GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);

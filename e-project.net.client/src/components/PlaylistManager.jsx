@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { playlistAPI, songAPI } from '../services/api';
 import Layout from './Layout';
 import './PlaylistManager.css';
 
 const PlaylistManager = () => {
-    const navigate = useNavigate();
     const [playlists, setPlaylists] = useState([]);
     const [selectedPlaylist, setSelectedPlaylist] = useState(null);
     const [playlistDetail, setPlaylistDetail] = useState(null);
@@ -109,7 +107,8 @@ const PlaylistManager = () => {
             await playlistAPI.addSongToPlaylist(selectedPlaylist, songId);
             setSuccess('Đã thêm bài hát vào playlist!');
             loadPlaylistDetail(selectedPlaylist);
-            setShowAddSongModal(false);
+            // Không đóng modal để user có thể tiếp tục thêm bài hát khác
+            setTimeout(() => setSuccess(''), 2000);
         } catch (err) {
             setError(err.response?.data?.message || 'Không thể thêm bài hát');
             console.error(err);
@@ -167,7 +166,7 @@ const PlaylistManager = () => {
         <div className="playlist-manager">
             {/* Page Header */}
             <div className="playlist-header-centered">
-                <h1>🎵 Playlist Của Tôi</h1>
+                <h1>Playlist Của Tôi</h1>
                 <p>Quản lý bộ sưu tập âm nhạc của bạn</p>
                 <div className="header-actions">
                     <button 
@@ -182,57 +181,157 @@ const PlaylistManager = () => {
             {error && <div className="alert alert-error">{error}</div>}
             {success && <div className="alert alert-success">{success}</div>}
 
-            {/* Playlists Grid */}
-            <div className="playlists-grid">
-                {loading && playlists.length === 0 ? (
-                    <p className="loading-text">Đang tải...</p>
-                ) : playlists.length === 0 ? (
-                    <div className="empty-state">
-                        <p>Chưa có playlist. Tạo playlist đầu tiên của bạn!</p>
-                    </div>
-                ) : (
-                    playlists.map(playlist => (
-                        <div 
-                            key={playlist.playlistID}
-                            className="playlist-card"
-                            onClick={() => loadPlaylistDetail(playlist.playlistID)}
+            {/* Main Content - Grid or Detail View */}
+            {!playlistDetail ? (
+                /* Playlists Grid */
+                <div className="playlists-grid">
+                    {loading && playlists.length === 0 ? (
+                        <p className="loading-text">Đang tải...</p>
+                    ) : playlists.length === 0 ? (
+                        <div className="empty-state">
+                            <p>Chưa có playlist. Tạo playlist đầu tiên của bạn!</p>
+                        </div>
+                    ) : (
+                        playlists.map(playlist => (
+                            <div 
+                                key={playlist.playlistID}
+                                className="playlist-card"
+                                onClick={() => loadPlaylistDetail(playlist.playlistID)}
+                            >
+                                <div className="playlist-card-image">
+                                    <img src="/logo.svg" alt="" className="playlist-icon" />
+                                </div>
+                                <div className="playlist-card-header">
+                                    <h3>{playlist.playlistName}</h3>
+                                </div>
+                                <p className="song-count">{playlist.songCount} bài hát</p>
+                                <span className={`badge ${playlist.isPublic ? 'badge-public' : 'badge-private'}`}>
+                                    {playlist.isPublic ? 'Công khai' : 'Riêng tư'}
+                                </span>
+                                <div className="playlist-card-actions">
+                                    <button 
+                                        className="btn-icon"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleTogglePublic(playlist);
+                                        }}
+                                        title={playlist.isPublic ? 'Đặt Riêng Tư' : 'Đặt Công Khai'}
+                                    >
+                                        {playlist.isPublic ? '○' : '●'}
+                                    </button>
+                                    <button 
+                                        className="btn-icon btn-delete"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeletePlaylist(playlist.playlistID);
+                                        }}
+                                        title="Xóa Playlist"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            ) : (
+                /* Playlist Detail View */
+                <div className="playlist-detail">
+                    {/* Back Button & Header */}
+                    <div className="playlist-detail-header">
+                        <button 
+                            className="btn-back" 
+                            onClick={() => {
+                                setPlaylistDetail(null);
+                                setSelectedPlaylist(null);
+                            }}
                         >
-                            <div className="playlist-card-image">
-                                <div className="playlist-icon">🎵</div>
+                            ← Quay lại
+                        </button>
+                        
+                        <div className="playlist-detail-info">
+                            <div className="playlist-detail-cover">
+                                <img src="/logo.svg" alt="" className="playlist-icon-large" />
                             </div>
-                            <div className="playlist-card-header">
-                                <h3>{playlist.playlistName}</h3>
-                            </div>
-                            <p className="song-count">{playlist.songCount} bài hát</p>
-                            <span className={`badge ${playlist.isPublic ? 'badge-public' : 'badge-private'}`}>
-                                {playlist.isPublic ? 'Công khai' : 'Riêng tư'}
-                            </span>
-                            <div className="playlist-card-actions">
-                                <button 
-                                    className="btn-icon"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleTogglePublic(playlist);
-                                    }}
-                                    title={playlist.isPublic ? 'Đặt Riêng Tư' : 'Đặt Công Khai'}
-                                >
-                                    {playlist.isPublic ? '🔓' : '🔒'}
-                                </button>
-                                <button 
-                                    className="btn-icon btn-delete"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeletePlaylist(playlist.playlistID);
-                                    }}
-                                    title="Xóa Playlist"
-                                >
-                                    🗑️
-                                </button>
+                            <div className="playlist-detail-meta">
+                                <span className={`badge ${playlistDetail.isPublic ? 'badge-public' : 'badge-private'}`}>
+                                    {playlistDetail.isPublic ? 'Công khai' : 'Riêng tư'}
+                                </span>
+                                <h1>{playlistDetail.playlistName}</h1>
+                                {playlistDetail.description && (
+                                    <p className="playlist-description">{playlistDetail.description}</p>
+                                )}
+                                <p className="playlist-stats">
+                                    {playlistDetail.songs.length} bài hát • Tạo bởi {playlistDetail.username}
+                                </p>
+                                <div className="playlist-detail-actions">
+                                    <button 
+                                        className="btn-primary"
+                                        onClick={() => setShowAddSongModal(true)}
+                                    >
+                                        + Thêm bài hát
+                                    </button>
+                                    <button 
+                                        className="btn-secondary"
+                                        onClick={() => handleTogglePublic(playlistDetail)}
+                                    >
+                                        {playlistDetail.isPublic ? 'Đặt riêng tư' : 'Đặt công khai'}
+                                    </button>
+                                    <button 
+                                        className="btn-danger"
+                                        onClick={() => handleDeletePlaylist(playlistDetail.playlistID)}
+                                    >
+                                        Xóa playlist
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    ))
-                )}
-            </div>
+                    </div>
+
+                    {/* Songs List */}
+                    <div className="playlist-songs">
+                        <div className="songs-header">
+                            <span className="col-index">#</span>
+                            <span className="col-title">Tiêu đề</span>
+                            <span className="col-artist">Nghệ sĩ</span>
+                            <span className="col-duration">Thời lượng</span>
+                            <span className="col-action"></span>
+                        </div>
+
+                        {playlistDetail.songs.length === 0 ? (
+                            <div className="empty-songs">
+                                <p>Playlist chưa có bài hát nào</p>
+                                <button 
+                                    className="btn-primary"
+                                    onClick={() => setShowAddSongModal(true)}
+                                >
+                                    + Thêm bài hát đầu tiên
+                                </button>
+                            </div>
+                        ) : (
+                            playlistDetail.songs.map((song, index) => (
+                                <div key={song.playlistSongID} className="song-row">
+                                    <span className="col-index">{index + 1}</span>
+                                    <span className="col-title">{song.songName}</span>
+                                    <span className="col-artist">{song.artistName}</span>
+                                    <span className="col-duration">
+                                        {song.duration ? `${Math.floor(song.duration / 60)}:${(song.duration % 60).toString().padStart(2, '0')}` : '--:--'}
+                                    </span>
+                                    <span className="col-action">
+                                        <button 
+                                            className="btn-remove-song"
+                                            onClick={() => handleRemoveSong(song.songID)}
+                                            title="Xóa khỏi playlist"
+                                        >
+                                            ✕
+                                        </button>
+                                    </span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Create Playlist Modal */}
             {showCreateModal && (

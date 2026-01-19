@@ -13,6 +13,7 @@ CREATE TABLE Users (
     PasswordHash NVARCHAR(255) NOT NULL,
     FullName NVARCHAR(255),
     AvatarURL NVARCHAR(500),
+    CoverURL NVARCHAR(500) NULL,
     IsAdmin BIT DEFAULT 0,
     CreatedAt DATETIME DEFAULT GETDATE()
 );

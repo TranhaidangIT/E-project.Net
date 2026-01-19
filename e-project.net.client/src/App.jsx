@@ -8,6 +8,7 @@ import ProfilePage from './pages/ProfilePage';
 import AdminDashboard from './pages/AdminDashboard';
 import SongManagement from './pages/SongManagement';
 import MusicPage from './pages/MusicPage';
+import LikedSongsPage from './pages/LikedSongsPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
@@ -73,6 +74,9 @@ function AppRoutes() {
             } />
             <Route path="/playlists" element={
                 <ProtectedRoute><PlaylistManager /></ProtectedRoute>
+            } />
+            <Route path="/liked-songs" element={
+                <ProtectedRoute><LikedSongsPage /></ProtectedRoute>
             } />
             <Route path="/change-password" element={
                 <ProtectedRoute><ChangePasswordPage /></ProtectedRoute>

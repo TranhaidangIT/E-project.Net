@@ -15,6 +15,8 @@ namespace E_project.Net.Server.Data
         public DbSet<Song> Songs { get; set; }
         public DbSet<Playlist> Playlists { get; set; }
         public DbSet<PlaylistSong> PlaylistSongs { get; set; }
+        public DbSet<LikedSong> LikedSongs { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -155,6 +157,72 @@ namespace E_project.Net.Server.Data
 
                 entity.HasIndex(e => e.PlaylistID).HasDatabaseName("IX_PlaylistSongs_PlaylistID");
                 entity.HasIndex(e => e.SongID).HasDatabaseName("IX_PlaylistSongs_SongID");
+            });
+
+            // Configure LikedSong entity
+            modelBuilder.Entity<LikedSong>(entity =>
+            {
+                entity.ToTable("LikedSongs");
+                entity.HasKey(e => e.LikedSongID);
+
+                entity.Property(e => e.LikedAt)
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Song)
+                    .WithMany()
+                    .HasForeignKey(e => e.SongID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.UserID).HasDatabaseName("IX_LikedSongs_UserID");
+                entity.HasIndex(e => e.SongID).HasDatabaseName("IX_LikedSongs_SongID");
+                entity.HasIndex(e => new { e.UserID, e.SongID }).IsUnique();
+            });
+
+            // Configure Notification entity
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.ToTable("Notifications");
+                entity.HasKey(e => e.NotificationID);
+
+                entity.Property(e => e.Type)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.Message)
+                    .IsRequired()
+                    .HasMaxLength(1000);
+
+                entity.Property(e => e.Link)
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.IsRead)
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.FromUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.FromUserID)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasIndex(e => e.UserID).HasDatabaseName("IX_Notifications_UserID");
+                entity.HasIndex(e => e.FromUserID).HasDatabaseName("IX_Notifications_FromUserID");
+                entity.HasIndex(e => new { e.UserID, e.IsRead }).HasDatabaseName("IX_Notifications_UserID_IsRead");
             });
         }
     }

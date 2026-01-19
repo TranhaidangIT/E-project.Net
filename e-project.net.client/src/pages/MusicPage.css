@@ -119,12 +119,17 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #3f1f3f 0%, #2a1a2a 100%);
+    background: linear-gradient(135deg, #282828 0%, #181818 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 4rem;
-    color: rgba(255, 255, 255, 0.3);
+}
+
+.song-logo-icon {
+    width: 60%;
+    height: 60%;
+    filter: invert(1);
+    opacity: 0.3;
 }
 
 /* Play Button Overlay */
@@ -195,10 +200,44 @@
     -webkit-box-orient: vertical;
 }
 
-.btn-add-playlist-mini {
+/* Song Card Actions */
+.song-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     position: absolute;
     top: 2px;
     right: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.song-card:hover .song-card-actions {
+    opacity: 1;
+}
+
+.btn-like {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: #b3b3b3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    border-radius: 50%;
+}
+
+.btn-like:hover {
+    transform: scale(1.1);
+}
+
+.btn-like.liked {
+    color: #e74c3c;
+}
+
+.btn-add-playlist-mini {
     background: rgba(24, 24, 24, 0.8);
     border: 1px solid #282828;
     border-radius: 50%;
@@ -212,17 +251,88 @@
     cursor: pointer;
     padding: 0;
     transition: all 0.2s;
-    opacity: 0;
-}
-
-.song-card:hover .btn-add-playlist-mini {
-    opacity: 1;
 }
 
 .btn-add-playlist-mini:hover {
     background: #1DB954;
     color: #000;
     border-color: #1DB954;
+}
+
+/* Liked Songs Page Styles */
+.liked-songs-page .liked-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    text-align: left;
+    padding: 40px 0;
+    background: linear-gradient(180deg, #513496 0%, #121212 100%);
+    margin: -40px -60px 40px -60px;
+    padding: 60px;
+}
+
+.liked-header-icon {
+    flex-shrink: 0;
+}
+
+.liked-header-text {
+    flex: 1;
+}
+
+.liked-label {
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.liked-header-text h1 {
+    font-size: 4rem;
+    margin: 8px 0;
+}
+
+.liked-header-text p {
+    color: #b3b3b3;
+    margin: 0;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.empty-state svg {
+    margin-bottom: 24px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    color: #b3b3b3;
+    margin-bottom: 24px;
+}
+
+.empty-state .btn-primary {
+    padding: 14px 32px;
+    background: #1DB954;
+    color: #000;
+    border: none;
+    border-radius: 500px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.empty-state .btn-primary:hover {
+    background: #1ed760;
+    transform: scale(1.04);
 }
 
 /* Success/Error Messages */
