@@ -1,5 +1,5 @@
 -- Tạo bảng LikedSongs để lưu bài hát yêu thích của người dùng
-USE music_web;
+USE MusicWebDB;
 GO
 
 -- Kiểm tra và tạo bảng nếu chưa tồn tại

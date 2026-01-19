@@ -1,5 +1,5 @@
 -- Tạo bảng Notifications để lưu thông báo người dùng
-USE music_web;
+USE MusicWebDB;
 GO
 
 -- Kiểm tra và tạo bảng nếu chưa tồn tại
