@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using E_project.Net.Server.Data;
 using E_project.Net.Server.Models.DTOs;
 using E_project.Net.Server.Services;
 
@@ -12,17 +14,19 @@ namespace E_project.Net.Server.Controllers
     public class UserController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly ApplicationDbContext _context;
 
-        public UserController(IAuthService authService)
+        public UserController(IAuthService authService, ApplicationDbContext context)
         {
             _authService = authService;
+            _context = context;
         }
 
         /// <summary>
         /// Get current user profile
         /// </summary>
         [HttpGet("profile")]
-        public async Task<ActionResult<UserDTO>> GetProfile()
+        public async Task<ActionResult<UserProfileDTO>> GetProfile()
         {
             var userId = GetCurrentUserId();
             if (userId == null)
@@ -36,7 +40,21 @@ namespace E_project.Net.Server.Controllers
                 return NotFound(new { message = "User not found" });
             }
 
-            return Ok(user);
+            var playlistCount = await _context.Playlists
+                .CountAsync(p => p.UserID == userId.Value);
+
+            var userProfile = new UserProfileDTO
+            {
+                UserID = user.UserID,
+                Username = user.Username,
+                Email = user.Email,
+                FullName = user.FullName,
+                AvatarURL = user.AvatarURL,
+                CreatedAt = user.CreatedAt,
+                PlaylistCount = playlistCount
+            };
+
+            return Ok(userProfile);
         }
 
         /// <summary>
@@ -127,6 +145,64 @@ namespace E_project.Net.Server.Controllers
                 Success = true,
                 Message = "Account deleted successfully"
             });
+        }
+
+        /// <summary>
+        /// Upload avatar (returns URL to use in UpdateProfile)
+        /// </summary>
+        [HttpPost("upload-avatar")]
+        public async Task<ActionResult> UploadAvatar(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "No file uploaded" });
+            }
+
+            // Validate file type
+            var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif" };
+            if (!allowedTypes.Contains(file.ContentType.ToLower()))
+            {
+                return BadRequest(new { message = "Invalid file type. Only JPEG, PNG, and GIF are allowed" });
+            }
+
+            // Validate file size (max 5MB)
+            if (file.Length > 5 * 1024 * 1024)
+            {
+                return BadRequest(new { message = "File size must be less than 5MB" });
+            }
+
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "User not authenticated" });
+            }
+
+            try
+            {
+                // Create uploads directory if it doesn't exist
+                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
+                Directory.CreateDirectory(uploadsPath);
+
+                // Generate unique filename
+                var fileExtension = Path.GetExtension(file.FileName);
+                var fileName = $"{userId}_{DateTime.Now.Ticks}{fileExtension}";
+                var filePath = Path.Combine(uploadsPath, fileName);
+
+                // Save file
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                // Return the URL
+                var avatarUrl = $"/uploads/avatars/{fileName}";
+                
+                return Ok(new { avatarUrl });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error uploading file: {ex.Message}" });
+            }
         }
 
         private int? GetCurrentUserId()

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 import { adminAPI } from '../services/api';
+import Layout from '../components/Layout';
 
 function AdminDashboard() {
     const { user, logout } = useAuth();
@@ -75,10 +76,11 @@ function AdminDashboard() {
     };
 
     if (loading) {
-        return <div className="loading">Đang tải...</div>;
+        return <Layout><div className="loading">Đang tải...</div></Layout>;
     }
 
     return (
+        <Layout>
         <div className="admin-container">
             <div className="admin-header">
                 <div className="header-left">
@@ -180,6 +182,7 @@ function AdminDashboard() {
                 </table>
             </div>
         </div>
+        </Layout>
     );
 }
 

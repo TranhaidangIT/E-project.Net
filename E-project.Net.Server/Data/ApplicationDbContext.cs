@@ -13,6 +13,8 @@ namespace E_project.Net.Server.Data
         public DbSet<User> Users { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
         public DbSet<Song> Songs { get; set; }
+        public DbSet<Playlist> Playlists { get; set; }
+        public DbSet<PlaylistSong> PlaylistSongs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -103,6 +105,56 @@ namespace E_project.Net.Server.Data
                     .HasDefaultValueSql("GETDATE()");
 
                 entity.HasIndex(e => e.ArtistName).HasDatabaseName("IX_Songs_ArtistName");
+            });
+
+            // Configure Playlist entity
+            modelBuilder.Entity<Playlist>(entity =>
+            {
+                entity.ToTable("Playlists");
+                entity.HasKey(e => e.PlaylistID);
+                
+                entity.Property(e => e.PlaylistName)
+                    .IsRequired()
+                    .HasMaxLength(255);
+                
+                entity.Property(e => e.Description)
+                    .HasMaxLength(1000);
+                
+                entity.Property(e => e.IsPublic)
+                    .HasDefaultValue(false);
+                
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.UserID).HasDatabaseName("IX_Playlists_UserID");
+            });
+
+            // Configure PlaylistSong entity
+            modelBuilder.Entity<PlaylistSong>(entity =>
+            {
+                entity.ToTable("PlaylistSongs");
+                entity.HasKey(e => e.PlaylistSongID);
+                
+                entity.Property(e => e.AddedAt)
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(e => e.Playlist)
+                    .WithMany(p => p.PlaylistSongs)
+                    .HasForeignKey(e => e.PlaylistID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Song)
+                    .WithMany()
+                    .HasForeignKey(e => e.SongID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.PlaylistID).HasDatabaseName("IX_PlaylistSongs_PlaylistID");
+                entity.HasIndex(e => e.SongID).HasDatabaseName("IX_PlaylistSongs_SongID");
             });
         }
     }

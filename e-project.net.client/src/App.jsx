@@ -10,6 +10,8 @@ import SongManagement from './pages/SongManagement';
 import MusicPage from './pages/MusicPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
+import PlaylistManager from './components/PlaylistManager';
 import './App.css';
 
 // Protected Route Component
@@ -68,6 +70,12 @@ function AppRoutes() {
             } />
             <Route path="/profile" element={
                 <ProtectedRoute><ProfilePage /></ProtectedRoute>
+            } />
+            <Route path="/playlists" element={
+                <ProtectedRoute><PlaylistManager /></ProtectedRoute>
+            } />
+            <Route path="/change-password" element={
+                <ProtectedRoute><ChangePasswordPage /></ProtectedRoute>
             } />
             <Route path="/admin" element={
                 <AdminRoute><AdminDashboard /></AdminRoute>

@@ -34,6 +34,11 @@ export const userAPI = {
     updateProfile: (data) => api.put('/user/profile', data),
     changePassword: (data) => api.put('/user/change-password', data),
     deleteAccount: () => api.delete('/user/delete'),
+    uploadAvatar: (formData) => api.post('/user/upload-avatar', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    }),
 };
 
 // Admin API
@@ -52,6 +57,19 @@ export const songAPI = {
     updateSong: (id, data) => api.put(`/song/${id}`, data),
     deleteSong: (id) => api.delete(`/song/${id}`),
     searchSongs: (query) => api.get(`/song/search?query=${encodeURIComponent(query)}`),
+};
+
+// Playlist API
+export const playlistAPI = {
+    getMyPlaylists: () => api.get('/playlist/my-playlists'),
+    getPublicPlaylists: () => api.get('/playlist/public'),
+    getPlaylistById: (id) => api.get(`/playlist/${id}`),
+    createPlaylist: (data) => api.post('/playlist', data),
+    updatePlaylist: (id, data) => api.put(`/playlist/${id}`, data),
+    deletePlaylist: (id) => api.delete(`/playlist/${id}`),
+    addSongToPlaylist: (playlistId, songId) => api.post(`/playlist/${playlistId}/songs`, { songID: songId }),
+    removeSongFromPlaylist: (playlistId, songId) => api.delete(`/playlist/${playlistId}/songs/${songId}`),
+    reorderPlaylist: (playlistId, songIds) => api.put(`/playlist/${playlistId}/reorder`, songIds),
 };
 
 export default api;

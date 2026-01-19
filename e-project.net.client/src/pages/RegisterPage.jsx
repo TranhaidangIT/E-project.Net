@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
+import Layout from '../components/Layout';
 
 function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -45,7 +46,9 @@ function RegisterPage() {
     };
 
     return (
+        <Layout>
         <div className="auth-container">
+            <button onClick={() => navigate(-1)} className="btn-back-auth">← Quay Lại</button>
             <div className="auth-card">
                 <h2>🎵 Music Web - Đăng Ký</h2>
                 
@@ -123,6 +126,7 @@ function RegisterPage() {
                 </p>
             </div>
         </div>
+        </Layout>
     );
 }
 

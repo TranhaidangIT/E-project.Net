@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 import { userAPI } from '../services/api';
+import Layout from '../components/Layout';
 
 function ProfilePage() {
     const { user, logout, loadUser } = useAuth();
     const navigate = useNavigate();
     const [editing, setEditing] = useState(false);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [formData, setFormData] = useState({
         fullName: user?.fullName || '',
         avatarURL: user?.avatarURL || '',
@@ -21,6 +23,43 @@ function ProfilePage() {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleAvatarUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            setError('Chỉ chấp nhận file ảnh (JPEG, PNG, GIF)');
+            return;
+        }
+
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            setError('Kích thước file phải nhỏ hơn 5MB');
+            return;
+        }
+
+        setUploadingAvatar(true);
+        setError('');
+        setMessage('');
+
+        try {
+            const formDataUpload = new FormData();
+            formDataUpload.append('file', file);
+
+            const response = await userAPI.uploadAvatar(formDataUpload);
+            const avatarUrl = response.data.avatarUrl;
+            
+            setFormData({ ...formData, avatarURL: avatarUrl });
+            setMessage('Upload ảnh thành công! Nhấn "Lưu" để cập nhật profile.');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Upload ảnh thất bại');
+        } finally {
+            setUploadingAvatar(false);
+        }
     };
 
     const handleUpdate = async (e) => {
@@ -49,7 +88,9 @@ function ProfilePage() {
     }
 
     return (
+        <Layout>
         <div className="auth-container">
+            <button onClick={() => navigate(-1)} className="btn-back-auth">← Quay Lại</button>
             <div className="auth-card profile-card">
                 <h2>🎵 Thông Tin Tài Khoản</h2>
                 
@@ -94,12 +135,15 @@ function ProfilePage() {
                         <div className="button-group">
                             {user.isAdmin && (
                                 <Link to="/admin" className="btn-primary">
-                                    👑 Admin Panel
+                                    👑 Qu\ản Trị
                                 </Link>
                             )}
                             <button onClick={() => setEditing(true)} className="btn-secondary">
                                 ✏️ Chỉnh sửa
                             </button>
+                            <Link to="/change-password" className="btn-warning">
+                                🔒 Đổi Mật Khẩu
+                            </Link>
                             <button onClick={handleLogout} className="btn-danger">
                                 🚪 Đăng xuất
                             </button>
@@ -107,6 +151,30 @@ function ProfilePage() {
                     </div>
                 ) : (
                     <form onSubmit={handleUpdate}>
+                        <div className="form-group">
+                            <label>Avatar</label>
+                            <div className="avatar-upload-section">
+                                {formData.avatarURL && (
+                                    <div className="avatar-preview">
+                                        <img src={formData.avatarURL} alt="Avatar preview" />
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarUpload}
+                                    disabled={uploadingAvatar}
+                                    id="avatar-upload"
+                                    style={{ display: 'none' }}
+                                />
+                                <label htmlFor="avatar-upload" className="btn-upload">
+                                    {uploadingAvatar ? '📤 Đang upload...' : '📷 Chọn ảnh'}
+                                </label>
+                                <small style={{ color: '#b3b3b3', marginTop: '5px', display: 'block' }}>
+                                    Hoặc nhập URL ảnh bên dưới
+                                </small>
+                            </div>
+                        </div>
                         <div className="form-group">
                             <label>Họ và tên</label>
                             <input
@@ -118,7 +186,7 @@ function ProfilePage() {
                             />
                         </div>
                         <div className="form-group">
-                            <label>Avatar URL</label>
+                            <label>Avatar URL (tùy chọn)</label>
                             <input
                                 type="url"
                                 name="avatarURL"
@@ -139,6 +207,7 @@ function ProfilePage() {
                 )}
             </div>
         </div>
+        </Layout>
     );
 }
 

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { songAPI } from '../services/api';
+import { songAPI, playlistAPI } from '../services/api';
 import MusicPlayer from '../components/MusicPlayer';
+import Layout from '../components/Layout';
 
 function MusicPage() {
     const [songs, setSongs] = useState([]);
@@ -11,13 +12,21 @@ function MusicPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [currentSong, setCurrentSong] = useState(null);
     const [currentIndex, setCurrentIndex] = useState(-1);
+    const [playlists, setPlaylists] = useState([]);
+    const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+    const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState(null);
+    const [playlistMessage, setPlaylistMessage] = useState('');
     
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchSongs();
-    }, []);
+        if (user) {
+            fetchPlaylists();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
 
     const fetchSongs = async () => {
         try {
@@ -28,6 +37,39 @@ function MusicPage() {
             setError('Không thể tải danh sách bài hát');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchPlaylists = async () => {
+        try {
+            const response = await playlistAPI.getMyPlaylists();
+            setPlaylists(response.data);
+        } catch (err) {
+            console.error('Failed to fetch playlists:', err);
+        }
+    };
+
+    const openPlaylistModal = (song, e) => {
+        e.stopPropagation();
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        setSelectedSongForPlaylist(song);
+        setShowPlaylistModal(true);
+        setPlaylistMessage('');
+    };
+
+    const addToPlaylist = async (playlistId) => {
+        try {
+            await playlistAPI.addSongToPlaylist(playlistId, selectedSongForPlaylist.songID);
+            setPlaylistMessage('✅ Đã thêm vào playlist!');
+            setTimeout(() => {
+                setShowPlaylistModal(false);
+                setPlaylistMessage('');
+            }, 1500);
+        } catch (err) {
+            setPlaylistMessage(err.response?.data?.message || '❌ Không thể thêm vào playlist');
         }
     };
 
@@ -72,42 +114,19 @@ function MusicPage() {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    if (loading) return <div className="loading">Đang tải...</div>;
+    if (loading) return <Layout><div className="loading">Đang tải...</div></Layout>;
 
     return (
+        <Layout>
         <div className="music-page">
-            {/* Header */}
-            <div className="music-header">
-                <div className="header-left">
-                    <h1>🎵 Music Web</h1>
-                    <p>Thưởng thức âm nhạc miễn phí</p>
-                </div>
-                <div className="header-right">
-                    {user ? (
-                        <>
-                            <span className="welcome-text">👋 {user.username}</span>
-                            {user.isAdmin && (
-                                <button onClick={() => navigate('/admin')} className="btn-secondary btn-sm">
-                                    ⚙️ Admin
-                                </button>
-                            )}
-                            <button onClick={() => navigate('/profile')} className="btn-secondary btn-sm">
-                                👤 Profile
-                            </button>
-                            <button onClick={logout} className="btn-danger btn-sm">
-                                Đăng xuất
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <button onClick={() => navigate('/login')} className="btn-secondary btn-sm">
-                                Đăng nhập
-                            </button>
-                            <button onClick={() => navigate('/register')} className="btn-primary btn-sm">
-                                Đăng ký
-                            </button>
-                        </>
-                    )}
+            {/* Page Header with Back Button */}
+            <div className="page-header">
+                <button onClick={() => navigate(-1)} className="btn-back">
+                    ← Quay Lại
+                </button>
+                <div className="page-title-section">
+                    <h1>🎵 Duyệt Âm Nhạc</h1>
+                    <p>Khám phá và thưởng thức các bài hát yêu thích</p>
                 </div>
             </div>
 
@@ -140,18 +159,26 @@ function MusicPage() {
                         <div 
                             key={song.songID} 
                             className={`song-card ${currentSong?.songID === song.songID ? 'active' : ''}`}
-                            onClick={() => playSong(song, index)}
                         >
-                            <div className="song-card-art">
+                            <div className="song-card-art" onClick={() => playSong(song, index)}>
                                 🎵
                             </div>
-                            <div className="song-card-info">
+                            <div className="song-card-info" onClick={() => playSong(song, index)}>
                                 <h3>{song.songName}</h3>
                                 <p className="artist">{song.artistName}</p>
                                 <div className="song-card-meta">
                                     <span>⏱️ {formatDuration(song.duration)}</span>
                                     <span>👂 {song.playCount}</span>
                                 </div>
+                            </div>
+                            <div className="song-card-actions">
+                                <button 
+                                    className="btn-icon-action"
+                                    onClick={(e) => openPlaylistModal(song, e)}
+                                    title="Thêm vào playlist"
+                                >
+                                    ➕
+                                </button>
                             </div>
                             {currentSong?.songID === song.songID && (
                                 <div className="playing-indicator">
@@ -178,8 +205,60 @@ function MusicPage() {
                 onNext={currentIndex < songs.length - 1 ? playNext : null}
                 onPrevious={currentIndex > 0 ? playPrevious : null}
             />
+
+            {/* Add to Playlist Modal */}
+            {showPlaylistModal && (
+                <div className="modal-overlay" onClick={() => setShowPlaylistModal(false)}>
+                    <div className="modal playlist-select-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Thêm vào Playlist</h3>
+                            <button className="btn-close" onClick={() => setShowPlaylistModal(false)}>×</button>
+                        </div>
+                        <div className="modal-body">
+                            <p className="song-to-add">
+                                <strong>{selectedSongForPlaylist?.songName}</strong> - {selectedSongForPlaylist?.artistName}
+                            </p>
+                            {playlistMessage && (
+                                <div className={`alert ${playlistMessage.includes('✅') ? 'alert-success' : 'alert-error'}`}>
+                                    {playlistMessage}
+                                </div>
+                            )}
+                            {playlists.length === 0 ? (
+                                <div className="empty-playlists">
+                                    <p>Bạn chưa có playlist nào</p>
+                                    <button 
+                                        className="btn-primary"
+                                        onClick={() => navigate('/playlists')}
+                                    >
+                                        Tạo Playlist Đầu Tiên
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="playlists-list">
+                                    {playlists.map(playlist => (
+                                        <div 
+                                            key={playlist.playlistID}
+                                            className="playlist-item-select"
+                                            onClick={() => addToPlaylist(playlist.playlistID)}
+                                        >
+                                            <div className="playlist-icon">📋</div>
+                                            <div className="playlist-info">
+                                                <h4>{playlist.playlistName}</h4>
+                                                <p>{playlist.songCount} bài hát</p>
+                                            </div>
+                                            <div className="playlist-arrow">→</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
+        </Layout>
     );
 }
 
 export default MusicPage;
+    

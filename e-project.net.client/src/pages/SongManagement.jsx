@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { songAPI } from '../services/api';
+import Layout from '../components/Layout';
 
 function SongManagement() {
     const [songs, setSongs] = useState([]);
@@ -30,8 +31,9 @@ function SongManagement() {
             setLoading(true);
             const response = await songAPI.getAllSongs();
             setSongs(response.data);
-        } catch (_err) {
+        } catch (err) {
             setError('Không thể tải danh sách bài hát');
+            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -45,8 +47,9 @@ function SongManagement() {
         try {
             const response = await songAPI.searchSongs(searchQuery);
             setSongs(response.data);
-        } catch (_err) {
+        } catch (err) {
             setError('Lỗi tìm kiếm');
+            console.error(err);
         }
     };
 
@@ -122,9 +125,10 @@ function SongManagement() {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    if (loading) return <div className="loading">Đang tải...</div>;
+    if (loading) return <Layout><div className="loading">Đang tải...</div></Layout>;
 
     return (
+        <Layout>
         <div className="admin-container">
             <div className="admin-header">
                 <div className="header-left">
@@ -279,6 +283,7 @@ function SongManagement() {
                 </div>
             )}
         </div>
+        </Layout>
     );
 }
 

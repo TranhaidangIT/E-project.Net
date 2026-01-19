@@ -8,7 +8,12 @@ using E_project.Net.Server.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
 
 // Configure Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -64,6 +69,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Enable serving static files (for avatar uploads)
+app.UseStaticFiles();
 
 // Use CORS
 app.UseCors("AllowReactApp");
