@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { songAPI } from '../services/api';
@@ -13,10 +13,14 @@ function SongManagement() {
     const [currentSong, setCurrentSong] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     
+    // Drag & Drop state
+    const [dragActive, setDragActive] = useState(false);
+    const fileInputRef = useRef(null);
+    
     const [formData, setFormData] = useState({
         songName: '',
         artistName: '',
-        duration: ''
+        file: null
     });
     
     const { user, logout } = useAuth();
@@ -60,24 +64,60 @@ function SongManagement() {
             setFormData({
                 songName: song.songName,
                 artistName: song.artistName,
-                duration: song.duration || ''
+                file: null
             });
         } else {
             setEditMode(false);
             setCurrentSong(null);
-            setFormData({ songName: '', artistName: '', duration: '' });
+            setFormData({ songName: '', artistName: '', file: null });
         }
         setShowModal(true);
+        setError('');
+        setDragActive(false);
     };
 
     const handleCloseModal = () => {
         setShowModal(false);
-        setFormData({ songName: '', artistName: '', duration: '' });
+        setFormData({ songName: '', artistName: '', file: null });
         setError('');
+        setDragActive(false);
     };
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        if (e.target.name === 'file') {
+            setFormData({ ...formData, file: e.target.files[0] });
+        } else {
+            setFormData({ ...formData, [e.target.name]: e.target.value });
+        }
+    };
+
+    // Drag & Drop Handlers
+    const handleDrag = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === "dragenter" || e.type === "dragover") {
+            setDragActive(true);
+        } else if (e.type === "dragleave") {
+            setDragActive(false);
+        }
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const droppedFile = e.dataTransfer.files[0];
+            if (droppedFile.type.startsWith('audio/')) {
+                 setFormData({ ...formData, file: droppedFile });
+            } else {
+                setError('Chỉ chấp nhận file âm thanh (MP3, WAV...)');
+            }
+        }
+    };
+
+    const handleZoneClick = () => {
+        fileInputRef.current.click();
     };
 
     const handleSubmit = async (e) => {
@@ -85,17 +125,27 @@ function SongManagement() {
         setError('');
 
         try {
-            const songData = {
-                songName: formData.songName,
-                artistName: formData.artistName,
-                duration: formData.duration ? parseInt(formData.duration) : null
-            };
-
             if (editMode && currentSong) {
+                // Update mode (Metadata only for now)
+                const songData = {
+                    songName: formData.songName,
+                    artistName: formData.artistName
+                };
                 await songAPI.updateSong(currentSong.songID, songData);
                 alert('✅ Cập nhật bài hát thành công!');
             } else {
-                await songAPI.createSong(songData);
+                // Create mode (Multipart)
+                if (!formData.file) {
+                    setError('Vui lòng chọn file nhạc (.mp3)');
+                    return;
+                }
+                
+                const data = new FormData();
+                data.append('songName', formData.songName);
+                data.append('artistName', formData.artistName);
+                data.append('file', formData.file);
+                
+                await songAPI.createSong(data);
                 alert('✅ Thêm bài hát thành công!');
             }
 
@@ -258,17 +308,49 @@ function SongManagement() {
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label>Thời Lượng (giây)</label>
-                                <input
-                                    type="number"
-                                    name="duration"
-                                    value={formData.duration}
-                                    onChange={handleChange}
-                                    placeholder="Ví dụ: 240 (4 phút)"
-                                    min="1"
-                                />
-                            </div>
+                            {!editMode && (
+                                <div className="form-group">
+                                    <label>File Nhạc (.mp3) *</label>
+                                    <div 
+                                        className={`drag-drop-zone ${dragActive ? 'active' : ''}`}
+                                        onDragEnter={handleDrag}
+                                        onDragLeave={handleDrag}
+                                        onDragOver={handleDrag}
+                                        onDrop={handleDrop}
+                                        onClick={handleZoneClick}
+                                        style={{
+                                            border: dragActive ? '2px dashed #4facfe' : '2px dashed #666',
+                                            borderRadius: '10px',
+                                            padding: '20px',
+                                            textAlign: 'center',
+                                            cursor: 'pointer',
+                                            backgroundColor: dragActive ? 'rgba(79, 172, 254, 0.1)' : 'transparent',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                    >
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            name="file"
+                                            accept="audio/*"
+                                            onChange={handleChange}
+                                            style={{ display: 'none' }}
+                                        />
+                                        {formData.file ? (
+                                            <div style={{ color: '#4facfe' }}>
+                                                <p>📄 {formData.file.name}</p>
+                                                <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>Click hoặc kéo thả để thay đổi</p>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <p style={{ fontSize: '2rem', marginBottom: '10px' }}>☁️</p>
+                                                <p>Kéo thả file nhạc vào đây</p>
+                                                <p style={{ fontSize: '0.9rem', color: '#999' }}>hoặc click để chọn file</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="button-group">
                                 <button type="submit" className="btn-primary">
