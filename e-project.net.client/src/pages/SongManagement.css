@@ -12,14 +12,14 @@
 }
 
 .song-management-header h1 {
-    font-size: 3.5rem;
-    font-weight: 900;
-    color: #fff;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--text-primary);
     margin: 0 0 8px 0;
 }
 
 .song-management-header p {
-    color: #b3b3b3;
+    color: var(--text-secondary);
     font-size: 1rem;
     margin: 0;
 }
@@ -34,10 +34,10 @@
 }
 
 /* Search Section */
-.search-section {
-    background: #181818;
-    border: 1px solid #282828;
-    border-radius: 4px;
+.song-management-container .search-section {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
     padding: 20px;
     margin-bottom: 24px;
 }
@@ -52,34 +52,35 @@
 .search-input {
     flex: 1;
     padding: 12px 16px;
-    background: #121212;
-    border: 1px solid #727272;
-    border-radius: 4px;
-    color: #fff;
+    background: var(--bg-elevated);
+    border: 1px solid var(--text-subdued);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
     font-size: 14px;
+    transition: border-color var(--transition-normal);
 }
 
 .search-input:focus {
     outline: none;
-    border-color: #fff;
+    border-color: var(--text-primary);
 }
 
 .search-input::placeholder {
-    color: #727272;
+    color: var(--text-subdued);
 }
 
 /* Song Table Section */
 .song-table-section {
-    background: #181818;
-    border: 1px solid #282828;
-    border-radius: 4px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
     padding: 24px;
 }
 
 .song-table-section h2 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     margin: 0 0 24px 0;
 }
 
@@ -90,13 +91,13 @@
 }
 
 .song-table thead {
-    border-bottom: 1px solid #282828;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .song-table th {
     padding: 12px 16px;
     text-align: left;
-    color: #b3b3b3;
+    color: var(--text-secondary);
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
@@ -105,54 +106,79 @@
 
 .song-table td {
     padding: 16px;
-    border-bottom: 1px solid #282828;
-    color: #fff;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
     font-size: 14px;
 }
 
-/* Button Styles */
-.btn-primary {
-    background: #1DB954;
-    color: #000;
+.song-table tbody tr:hover {
+    background: var(--bg-highlight);
+}
+
+/* Button Styles - Using global styles */
+.song-management-container .btn-primary {
+    background: var(--primary);
+    color: var(--bg-base);
     padding: 12px 24px;
-    border-radius: 500px;
+    border-radius: var(--radius-full);
     font-weight: 700;
     font-size: 14px;
     border: none;
     cursor: pointer;
+    transition: all var(--transition-normal);
 }
 
-.btn-secondary {
+.song-management-container .btn-primary:hover {
+    background: var(--primary-hover);
+    transform: scale(1.02);
+}
+
+.song-management-container .btn-secondary {
     background: transparent;
-    border: 1px solid #727272;
-    color: #fff;
+    border: 1px solid var(--text-subdued);
+    color: var(--text-primary);
     padding: 12px 24px;
-    border-radius: 500px;
+    border-radius: var(--radius-full);
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
+    transition: all var(--transition-normal);
 }
 
-.btn-danger {
+.song-management-container .btn-secondary:hover {
+    border-color: var(--text-primary);
+}
+
+.song-management-container .btn-danger {
     background: rgba(255, 71, 87, 0.2);
-    color: #ff4757;
-    border: 1px solid #ff4757;
+    color: var(--error);
+    border: 1px solid var(--error);
     padding: 12px 24px;
-    border-radius: 500px;
+    border-radius: var(--radius-full);
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
+    transition: all var(--transition-normal);
 }
 
-.btn-warning {
+.song-management-container .btn-danger:hover {
+    background: rgba(255, 71, 87, 0.3);
+}
+
+.song-management-container .btn-warning {
     background: rgba(255, 193, 7, 0.2);
     color: #ffc107;
     border: 1px solid #ffc107;
     padding: 12px 24px;
-    border-radius: 500px;
+    border-radius: var(--radius-full);
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.song-management-container .btn-warning:hover {
+    background: rgba(255, 193, 7, 0.3);
 }
 
 .btn-sm {
@@ -166,7 +192,7 @@
 }
 
 /* Modal */
-.modal-overlay {
+.song-management-container .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -177,21 +203,22 @@
     justify-content: center;
     align-items: center;
     z-index: 2000;
+    backdrop-filter: blur(4px);
 }
 
-.modal-content {
-    background: #181818;
-    border: 1px solid #282828;
-    border-radius: 8px;
+.song-management-container .modal-content {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     padding: 32px;
     width: 90%;
     max-width: 500px;
 }
 
-.modal-content h2 {
-    font-size: 1.8rem;
+.song-management-container .modal-content h2 {
+    font-size: 1.5rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     margin: 0 0 24px 0;
 }
 
@@ -201,7 +228,7 @@
 
 .form-group label {
     display: block;
-    color: #fff;
+    color: var(--text-primary);
     font-weight: 600;
     margin-bottom: 8px;
     font-size: 14px;
@@ -210,20 +237,21 @@
 .form-group input {
     width: 100%;
     padding: 12px 16px;
-    background: #121212;
-    border: 1px solid #727272;
-    border-radius: 4px;
-    color: #fff;
+    background: var(--bg-elevated);
+    border: 1px solid var(--text-subdued);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
     font-size: 14px;
+    transition: border-color var(--transition-normal);
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #fff;
+    border-color: var(--text-primary);
 }
 
 .form-group input::placeholder {
-    color: #727272;
+    color: var(--text-subdued);
 }
 
 .modal-buttons {
@@ -237,30 +265,30 @@
 }
 
 /* Messages */
-.success-message {
+.song-management-container .success-message {
     background: rgba(29, 185, 84, 0.2);
-    color: #1DB954;
+    color: var(--primary);
     padding: 12px 16px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     margin-bottom: 20px;
-    border: 1px solid #1DB954;
+    border: 1px solid var(--primary);
     font-size: 14px;
 }
 
-.error-message {
+.song-management-container .error-message {
     background: rgba(255, 71, 87, 0.2);
-    color: #ff4757;
+    color: var(--error);
     padding: 12px 16px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     margin-bottom: 20px;
-    border: 1px solid #ff4757;
+    border: 1px solid var(--error);
     font-size: 14px;
 }
 
 .loading {
     text-align: center;
     padding: 40px;
-    color: #b3b3b3;
+    color: var(--text-secondary);
     font-size: 1.2rem;
 }
 
@@ -271,7 +299,7 @@
     }
 
     .song-management-header h1 {
-        font-size: 2.8rem;
+        font-size: 2.5rem;
     }
 }
 
@@ -281,7 +309,7 @@
     }
 
     .song-management-header h1 {
-        font-size: 2.2rem;
+        font-size: 2rem;
     }
 
     .search-controls {

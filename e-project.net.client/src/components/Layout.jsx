@@ -366,7 +366,7 @@ const Layout = ({ children }) => {
                                                             onClick={() => handleNotificationClick(notification)}
                                                         >
                                                             <div className="notification-icon">
-                                                                {notification.fromAvatarURL ? (
+                                                                {notification.fromAvatarURL && notification.fromAvatarURL.startsWith('/') ? (
                                                                     <img src={notification.fromAvatarURL} alt="" />
                                                                 ) : (
                                                                     getNotificationIcon(notification.type)
@@ -387,11 +387,19 @@ const Layout = ({ children }) => {
 
                                 <div className="user-menu">
                                     <div className="user-avatar" onClick={() => navigate('/profile')}>
-                                        {user.avatarURL ? (
-                                            <img src={user.avatarURL} alt={user.username} />
-                                        ) : (
-                                            <span>{user.username.charAt(0).toUpperCase()}</span>
-                                        )}
+                                        {user.avatarURL && user.avatarURL.startsWith('/') ? (
+                                            <img 
+                                                src={user.avatarURL} 
+                                                alt={user.username}
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                    e.target.nextSibling.style.display = 'flex';
+                                                }}
+                                            />
+                                        ) : null}
+                                        <span style={{ display: user.avatarURL && user.avatarURL.startsWith('/') ? 'none' : 'flex' }}>
+                                            {user.username.charAt(0).toUpperCase()}
+                                        </span>
                                     </div>
                                     <div className="user-dropdown">
                                         <span className="user-name">{user.username}</span>

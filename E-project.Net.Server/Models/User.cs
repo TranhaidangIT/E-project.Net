@@ -10,6 +10,7 @@ namespace E_project.Net.Server.Models
         public string? AvatarURL { get; set; }
         public string? CoverURL { get; set; }
         public bool IsAdmin { get; set; } = false;
+        public bool IsSuperAdmin { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

@@ -16,9 +16,12 @@ function SongManagement() {
     
     const [formData, setFormData] = useState({
         songName: '',
-        artistName: '',
-        duration: ''
+        artistName: ''
     });
+    const [audioFile, setAudioFile] = useState(null);
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
     
     const { user, logout } = useAuth();
     const navigate = useNavigate();
@@ -60,21 +63,72 @@ function SongManagement() {
             setCurrentSong(song);
             setFormData({
                 songName: song.songName,
-                artistName: song.artistName,
-                duration: song.duration || ''
+                artistName: song.artistName
             });
         } else {
             setEditMode(false);
             setCurrentSong(null);
-            setFormData({ songName: '', artistName: '', duration: '' });
+            setFormData({ songName: '', artistName: '' });
         }
+        setAudioFile(null);
+        setImageFile(null);
+        setImagePreview(null);
+        setUploadProgress(0);
         setShowModal(true);
     };
 
     const handleCloseModal = () => {
         setShowModal(false);
-        setFormData({ songName: '', artistName: '', duration: '' });
+        setFormData({ songName: '', artistName: '' });
+        setAudioFile(null);
+        setImageFile(null);
+        setImagePreview(null);
+        setUploadProgress(0);
         setError('');
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'];
+            if (!allowedTypes.includes(file.type)) {
+                setError('Chỉ chấp nhận file MP3, WAV, OGG');
+                return;
+            }
+            // Validate file size (50MB)
+            if (file.size > 50 * 1024 * 1024) {
+                setError('File không được vượt quá 50MB');
+                return;
+            }
+            setAudioFile(file);
+            setError('');
+        }
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                setError('Chỉ chấp nhận file ảnh JPG, PNG, WEBP');
+                return;
+            }
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                setError('File ảnh không được vượt quá 5MB');
+                return;
+            }
+            setImageFile(file);
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+            setError('');
+        }
     };
 
     const handleChange = (e) => {
@@ -86,17 +140,32 @@ function SongManagement() {
         setError('');
 
         try {
-            const songData = {
-                songName: formData.songName,
-                artistName: formData.artistName,
-                duration: formData.duration ? parseInt(formData.duration) : null
-            };
-
             if (editMode && currentSong) {
+                // Update mode - use JSON
+                const songData = {
+                    songName: formData.songName,
+                    artistName: formData.artistName
+                };
                 await songAPI.updateSong(currentSong.songID, songData);
                 alert('Cập nhật bài hát thành công!');
             } else {
-                await songAPI.createSong(songData);
+                // Create mode - use FormData with file
+                if (!audioFile) {
+                    setError('Vui lòng chọn file nhạc MP3');
+                    return;
+                }
+
+                const formDataToSend = new FormData();
+                formDataToSend.append('SongName', formData.songName);
+                formDataToSend.append('ArtistName', formData.artistName);
+                formDataToSend.append('File', audioFile);
+                if (imageFile) {
+                    formDataToSend.append('ImageFile', imageFile);
+                }
+
+                await songAPI.createSongWithFile(formDataToSend, (progress) => {
+                    setUploadProgress(progress);
+                });
                 alert('Thêm bài hát thành công!');
             }
 
@@ -181,6 +250,7 @@ function SongManagement() {
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Ảnh</th>
                             <th>Tên Bài Hát</th>
                             <th>Nghệ Sĩ</th>
                             <th>Thời Lượng</th>
@@ -193,6 +263,28 @@ function SongManagement() {
                         {songs.map((song) => (
                             <tr key={song.songID}>
                                 <td>{song.songID}</td>
+                                <td>
+                                    {song.imageUrl ? (
+                                        <img 
+                                            src={song.imageUrl} 
+                                            alt={song.songName}
+                                            className="song-thumbnail"
+                                            style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+                                        />
+                                    ) : (
+                                        <div className="song-thumbnail-placeholder" style={{ 
+                                            width: '50px', 
+                                            height: '50px', 
+                                            backgroundColor: '#282828', 
+                                            borderRadius: '4px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: '#b3b3b3',
+                                            fontSize: '20px'
+                                        }}>♪</div>
+                                    )}
+                                </td>
                                 <td><strong>{song.songName}</strong></td>
                                 <td>{song.artistName}</td>
                                 <td>{formatDuration(song.duration)}</td>
@@ -259,17 +351,88 @@ function SongManagement() {
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label>Thời Lượng (giây)</label>
-                                <input
-                                    type="number"
-                                    name="duration"
-                                    value={formData.duration}
-                                    onChange={handleChange}
-                                    placeholder="Ví dụ: 240 (4 phút)"
-                                    min="1"
-                                />
-                            </div>
+                            {!editMode && (
+                                <>
+                                <div className="form-group">
+                                    <label>File Nhạc (MP3) *</label>
+                                    <input
+                                        type="file"
+                                        accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg"
+                                        onChange={handleFileChange}
+                                        required={!editMode}
+                                        style={{
+                                            padding: '10px',
+                                            backgroundColor: '#282828',
+                                            border: '1px solid #404040',
+                                            borderRadius: '4px',
+                                            color: '#fff',
+                                            width: '100%'
+                                        }}
+                                    />
+                                    {audioFile && (
+                                        <p style={{ marginTop: '5px', color: '#1db954', fontSize: '14px' }}>
+                                            ✓ Đã chọn: {audioFile.name} ({(audioFile.size / 1024 / 1024).toFixed(2)} MB)
+                                        </p>
+                                    )}
+                                    {uploadProgress > 0 && uploadProgress < 100 && (
+                                        <div style={{ marginTop: '10px' }}>
+                                            <div style={{
+                                                width: '100%',
+                                                height: '8px',
+                                                backgroundColor: '#404040',
+                                                borderRadius: '4px',
+                                                overflow: 'hidden'
+                                            }}>
+                                                <div style={{
+                                                    width: `${uploadProgress}%`,
+                                                    height: '100%',
+                                                    backgroundColor: '#1db954',
+                                                    transition: 'width 0.3s'
+                                                }}></div>
+                                            </div>
+                                            <p style={{ textAlign: 'center', marginTop: '5px', color: '#b3b3b3' }}>
+                                                Đang upload: {uploadProgress}%
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Hình Ảnh Bài Hát (Không bắt buộc)</label>
+                                    <input
+                                        type="file"
+                                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                                        onChange={handleImageChange}
+                                        style={{
+                                            padding: '10px',
+                                            backgroundColor: '#282828',
+                                            border: '1px solid #404040',
+                                            borderRadius: '4px',
+                                            color: '#fff',
+                                            width: '100%'
+                                        }}
+                                    />
+                                    {imagePreview && (
+                                        <div style={{ marginTop: '10px', textAlign: 'center' }}>
+                                            <img 
+                                                src={imagePreview} 
+                                                alt="Preview" 
+                                                style={{ 
+                                                    width: '200px', 
+                                                    height: '200px', 
+                                                    objectFit: 'cover', 
+                                                    borderRadius: '8px',
+                                                    border: '2px solid #1db954'
+                                                }} 
+                                            />
+                                            <p style={{ marginTop: '5px', color: '#1db954', fontSize: '14px' }}>
+                                                ✓ {imageFile.name} ({(imageFile.size / 1024).toFixed(2)} KB)
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                                </>
+                            )}
 
                             <div className="modal-buttons">
                                 <button type="submit" className="btn-primary">

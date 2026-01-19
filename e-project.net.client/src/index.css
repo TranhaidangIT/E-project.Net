@@ -1,73 +1,128 @@
+/* ========================================
+   MUSIC WEB - GLOBAL STYLES
+   Spotify-inspired Design System
+   ======================================== */
+
 :root {
-  --spotify-green: #1DB954;
-  --spotify-green-hover: #1ed760;
-  --spotify-black: #000;
-  --spotify-dark: #121212;
-  --spotify-gray: #181818;
-  --spotify-light-gray: #282828;
-  --spotify-text: #fff;
-  --spotify-text-muted: #b3b3b3;
-  
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-  line-height: 1.6;
-  font-weight: 400;
-
-  color-scheme: dark;
-  color: #fff;
-  background-color: #000;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    /* Primary Colors */
+    --primary: #1DB954;
+    --primary-hover: #1ed760;
+    --primary-dark: #169c46;
+    
+    /* Background Colors */
+    --bg-base: #000000;
+    --bg-elevated: #121212;
+    --bg-surface: #181818;
+    --bg-highlight: #282828;
+    --bg-press: #3e3e3e;
+    
+    /* Text Colors */
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --text-muted: #6a6a6a;
+    
+    /* Accent Colors */
+    --accent-red: #e91429;
+    --accent-orange: #ffa42b;
+    --accent-blue: #509bf5;
+    
+    /* State Colors */
+    --success: #1DB954;
+    --warning: #ffa42b;
+    --error: #e91429;
+    
+    /* Border */
+    --border-color: #282828;
+    --border-light: #404040;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-full: 500px;
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 200ms ease;
+    
+    /* Typography */
+    font-family: 'Circular Std', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color-scheme: dark;
+    color: var(--text-primary);
+    background-color: var(--bg-base);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  outline: none !important;
+/* Reset */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none !important;
 }
 
-*:focus,
-*:focus-visible {
-  outline: none !important;
+*:focus, *:focus-visible {
+    outline: none !important;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background: #000;
+    margin: 0;
+    padding: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    overflow-x: hidden;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-primary);
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-}
-button:focus,
-button:focus-visible {
-  outline: none;
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+
+p { color: var(--text-secondary); }
+
+a {
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+a:hover {
+    color: var(--primary);
 }
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-highlight);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bg-press);
+}
+

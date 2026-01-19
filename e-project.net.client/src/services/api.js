@@ -52,6 +52,7 @@ export const adminAPI = {
     getUserById: (id) => api.get(`/admin/users/${id}`),
     toggleAdmin: (id, isAdmin) => api.put(`/admin/users/${id}/role`, { isAdmin }),
     deleteUser: (id) => api.delete(`/admin/users/${id}`),
+    createAdmin: (data) => api.post('/admin/create-admin', data),
 };
 
 // Song API
@@ -59,10 +60,22 @@ export const songAPI = {
     getAllSongs: () => api.get('/song'),
     getSongById: (id) => api.get(`/song/${id}`),
     createSong: (data) => api.post('/song', data),
+    createSongWithFile: (formData, onProgress) => api.post('/song', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+            if (onProgress && progressEvent.total) {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                onProgress(percentCompleted);
+            }
+        },
+    }),
     updateSong: (id, data) => api.put(`/song/${id}`, data),
     deleteSong: (id) => api.delete(`/song/${id}`),
     searchSongs: (query) => api.get(`/song/search?query=${encodeURIComponent(query)}`),
     getSuggestions: (query) => api.get(`/song/suggestions?query=${encodeURIComponent(query)}`),
+    streamSong: (id) => `/api/song/${id}/stream`,
 };
 
 // Liked Songs API

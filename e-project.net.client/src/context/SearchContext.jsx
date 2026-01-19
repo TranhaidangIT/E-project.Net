@@ -1,8 +1,7 @@
-import { createContext, useContext, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { songAPI } from '../services/api';
-
-const SearchContext = createContext();
+import { SearchContext } from './SearchContextDef';
 
 export const SearchProvider = ({ children }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -49,5 +48,3 @@ export const SearchProvider = ({ children }) => {
         </SearchContext.Provider>
     );
 };
-
-export const useSearch = () => useContext(SearchContext);

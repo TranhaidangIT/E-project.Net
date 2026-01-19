@@ -166,7 +166,8 @@ function ProfilePage() {
                                 <div className="profile-avatar-large">
                                     {(() => {
                                         const avatarUrl = user.avatarURL;
-                                        if (avatarUrl) {
+                                        // Only show image if it's a valid local URL (starts with /)
+                                        if (avatarUrl && avatarUrl.startsWith('/')) {
                                             return (
                                                 <img 
                                                     src={avatarUrl} 
@@ -182,7 +183,7 @@ function ProfilePage() {
                                     })()}
                                     <div 
                                         className="avatar-placeholder-large"
-                                        style={{ display: user.avatarURL ? 'none' : 'flex' }}
+                                        style={{ display: user.avatarURL && user.avatarURL.startsWith('/') ? 'none' : 'flex' }}
                                     >
                                         {user.username.charAt(0).toUpperCase()}
                                     </div>
@@ -263,7 +264,8 @@ function ProfilePage() {
                             <div className="profile-avatar-edit">
                                 {(() => {
                                     const avatarUrl = formData.avatarURL || user.avatarURL;
-                                    if (avatarUrl) {
+                                    // Only show image if it's a valid local URL (starts with /)
+                                    if (avatarUrl && avatarUrl.startsWith('/')) {
                                         return (
                                             <img 
                                                 src={avatarUrl} 
@@ -279,7 +281,7 @@ function ProfilePage() {
                                 })()}
                                 <div 
                                     className="avatar-placeholder-edit"
-                                    style={{ display: (formData.avatarURL || user.avatarURL) ? 'none' : 'flex' }}
+                                    style={{ display: (formData.avatarURL || user.avatarURL)?.startsWith('/') ? 'none' : 'flex' }}
                                 >
                                     {user.username.charAt(0).toUpperCase()}
                                 </div>

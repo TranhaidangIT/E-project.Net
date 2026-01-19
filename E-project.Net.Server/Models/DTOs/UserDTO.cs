@@ -9,6 +9,7 @@ namespace E_project.Net.Server.Models.DTOs
         public string? AvatarURL { get; set; }
         public string? CoverURL { get; set; }
         public bool IsAdmin { get; set; }
+        public bool IsSuperAdmin { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

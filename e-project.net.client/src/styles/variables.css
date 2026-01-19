@@ -1,0 +1,85 @@
+/* ========================================
+   MUSIC WEB - DESIGN SYSTEM VARIABLES
+   Spotify-inspired Dark Theme
+   ======================================== */
+
+:root {
+    /* Primary Colors */
+    --primary: #1DB954;
+    --primary-hover: #1ed760;
+    --primary-dark: #169c46;
+    
+    /* Background Colors */
+    --bg-base: #000000;
+    --bg-elevated: #121212;
+    --bg-surface: #181818;
+    --bg-highlight: #282828;
+    --bg-press: #3e3e3e;
+    
+    /* Text Colors */
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --text-muted: #6a6a6a;
+    --text-subdued: #a7a7a7;
+    
+    /* Accent Colors */
+    --accent-red: #e91429;
+    --accent-orange: #ffa42b;
+    --accent-blue: #509bf5;
+    --accent-purple: #8c67ac;
+    
+    /* State Colors */
+    --success: #1DB954;
+    --warning: #ffa42b;
+    --error: #e91429;
+    --info: #509bf5;
+    
+    /* Border & Divider */
+    --border-color: #282828;
+    --divider: rgba(255, 255, 255, 0.1);
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+    
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 50%;
+    
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    
+    /* Typography */
+    --font-family: 'Circular Std', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    --font-size-xs: 11px;
+    --font-size-sm: 12px;
+    --font-size-base: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 20px;
+    --font-size-xl: 24px;
+    --font-size-2xl: 32px;
+    --font-size-3xl: 48px;
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 200ms ease;
+    --transition-slow: 300ms ease;
+    
+    /* Z-Index */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 400;
+    --z-modal: 500;
+    --z-tooltip: 600;
+}

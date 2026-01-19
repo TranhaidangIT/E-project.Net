@@ -35,6 +35,7 @@ namespace E_project.Net.Server.Controllers
                     FullName = u.FullName,
                     AvatarURL = u.AvatarURL,
                     IsAdmin = u.IsAdmin,
+                    IsSuperAdmin = u.IsSuperAdmin,
                     CreatedAt = u.CreatedAt
                 })
                 .ToListAsync();
@@ -62,12 +63,13 @@ namespace E_project.Net.Server.Controllers
                 FullName = user.FullName,
                 AvatarURL = user.AvatarURL,
                 IsAdmin = user.IsAdmin,
+                IsSuperAdmin = user.IsSuperAdmin,
                 CreatedAt = user.CreatedAt
             });
         }
 
         /// <summary>
-        /// Toggle user admin role (Admin only)
+        /// Toggle user admin role (Admin only - cannot modify SuperAdmin)
         /// </summary>
         [HttpPut("users/{id}/role")]
         public async Task<ActionResult> ToggleAdminRole(int id, [FromBody] ToggleAdminDTO dto)
@@ -84,6 +86,12 @@ namespace E_project.Net.Server.Controllers
                 return NotFound(new { message = "User not found" });
             }
 
+            // Prevent modifying SuperAdmin permissions
+            if (user.IsSuperAdmin)
+            {
+                return BadRequest(new { message = "Cannot modify SuperAdmin permissions" });
+            }
+
             user.IsAdmin = dto.IsAdmin;
             await _context.SaveChangesAsync();
 
@@ -91,7 +99,7 @@ namespace E_project.Net.Server.Controllers
         }
 
         /// <summary>
-        /// Delete user (Admin only)
+        /// Delete user (Admin only - cannot delete SuperAdmin)
         /// </summary>
         [HttpDelete("users/{id}")]
         public async Task<ActionResult> DeleteUser(int id)
@@ -108,10 +116,61 @@ namespace E_project.Net.Server.Controllers
                 return NotFound(new { message = "User not found" });
             }
 
+            // Prevent deleting SuperAdmin
+            if (user.IsSuperAdmin)
+            {
+                return BadRequest(new { message = "Cannot delete SuperAdmin account" });
+            }
+
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = $"User {user.Username} has been deleted" });
+        }
+
+        /// <summary>
+        /// Create new Admin account (SuperAdmin only)
+        /// </summary>
+        [HttpPost("create-admin")]
+        public async Task<ActionResult> CreateAdminAccount([FromBody] CreateAdminDTO dto)
+        {
+            // Check if current user is SuperAdmin
+            var currentUserId = GetCurrentUserId();
+            var currentUser = await _context.Users.FindAsync(currentUserId);
+            
+            if (currentUser == null || !currentUser.IsSuperAdmin)
+            {
+                return Forbid();
+            }
+
+            // Check if username already exists
+            if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
+            {
+                return BadRequest(new { message = "Username already exists" });
+            }
+
+            // Check if email already exists
+            if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+            {
+                return BadRequest(new { message = "Email already exists" });
+            }
+
+            // Create new admin user
+            var newAdmin = new Models.User
+            {
+                Username = dto.Username,
+                Email = dto.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+                FullName = dto.FullName,
+                IsAdmin = true,
+                IsSuperAdmin = false,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Users.Add(newAdmin);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = $"Admin account '{dto.Username}' has been created successfully" });
         }
 
         private int? GetCurrentUserId()
@@ -128,5 +187,13 @@ namespace E_project.Net.Server.Controllers
     public class ToggleAdminDTO
     {
         public bool IsAdmin { get; set; }
+    }
+
+    public class CreateAdminDTO
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string? FullName { get; set; }
     }
 }

@@ -12,6 +12,9 @@ namespace E_project.Net.Server.Models.DTOs
         [MaxLength(255)]
         public string ArtistName { get; set; } = string.Empty;
 
+        [MaxLength(500)]
+        public string? ImageUrl { get; set; }
+
         [Range(1, int.MaxValue, ErrorMessage = "Duration must be greater than 0")]
         public int? Duration { get; set; }
     }

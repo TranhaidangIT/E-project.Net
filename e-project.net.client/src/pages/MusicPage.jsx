@@ -38,9 +38,11 @@ function MusicPage() {
     const fetchSongs = async () => {
         try {
             setLoading(true);
+            setError('');
             const response = await songAPI.getAllSongs();
             setSongs(response.data);
-        } catch {
+        } catch (err) {
+            console.error('Fetch songs error:', err);
             setError('Không thể tải danh sách bài hát');
         } finally {
             setLoading(false);
@@ -50,10 +52,16 @@ function MusicPage() {
     const searchSongs = async (query) => {
         try {
             setLoading(true);
+            setError('');
             const response = await songAPI.searchSongs(query);
             setSongs(response.data);
-        } catch {
-            setError('Lỗi tìm kiếm');
+            if (response.data.length === 0) {
+                setError('');
+            }
+        } catch (err) {
+            console.error('Search error:', err);
+            setError('Lỗi tìm kiếm. Vui lòng thử lại.');
+            setSongs([]);
         } finally {
             setLoading(false);
         }
@@ -79,21 +87,33 @@ function MusicPage() {
 
     const handleLikeToggle = async (songId, e) => {
         e.stopPropagation();
+        e.preventDefault();
         if (!user) {
             navigate('/login');
             return;
         }
 
+        const previousLikedState = [...likedSongIds];
+        
+        // Optimistic update
+        if (likedSongIds.includes(songId)) {
+            setLikedSongIds(prev => prev.filter(id => id !== songId));
+        } else {
+            setLikedSongIds(prev => [...prev, songId]);
+        }
+
         try {
-            if (likedSongIds.includes(songId)) {
+            if (previousLikedState.includes(songId)) {
                 await likedSongAPI.unlikeSong(songId);
-                setLikedSongIds(likedSongIds.filter(id => id !== songId));
             } else {
                 await likedSongAPI.likeSong(songId);
-                setLikedSongIds([...likedSongIds, songId]);
             }
         } catch (err) {
             console.error('Failed to toggle like:', err);
+            // Revert on error
+            setLikedSongIds(previousLikedState);
+            const errorMsg = err.response?.data?.message || err.message || 'Không thể thực hiện';
+            alert(errorMsg + '. Vui lòng thử lại.');
         }
     };
 
@@ -142,13 +162,6 @@ function MusicPage() {
         }
     };
 
-    const formatDuration = (seconds) => {
-        if (!seconds) return 'N/A';
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
-
     if (loading) return <Layout><div className="loading">⏳ Đang tải...</div></Layout>;
     if (error) return <Layout><div className="error">{error}</div></Layout>;
 
@@ -167,12 +180,41 @@ function MusicPage() {
                 </div>
 
                 {/* Songs Grid */}
+                {songs.length === 0 && !loading && !error && (
+                    <div className="empty-state">
+                        <p>Không tìm thấy bài hát nào</p>
+                        {searchParams.get('q') && (
+                            <p className="empty-hint">Thử tìm kiếm với từ khóa khác</p>
+                        )}
+                    </div>
+                )}
                 <div className="songs-grid">
                     {songs.map((song, index) => (
                         <div 
                             key={song.songID} 
                             className="song-card"
                         >
+                            {/* Like Button - positioned on top right of card */}
+                            <div className="song-card-actions">
+                                <button 
+                                    className={`btn-like ${likedSongIds.includes(song.songID) ? 'liked' : ''}`}
+                                    onClick={(e) => handleLikeToggle(song.songID, e)}
+                                    title={likedSongIds.includes(song.songID) ? 'Bỏ thích' : 'Thích'}
+                                >
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill={likedSongIds.includes(song.songID) ? '#e74c3c' : 'currentColor'}>
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                </button>
+                                {user && (
+                                    <button 
+                                        className="btn-add-playlist-mini"
+                                        onClick={(e) => openPlaylistModal(song, e)}
+                                        title="Thêm vào Playlist"
+                                    >
+                                        +
+                                    </button>
+                                )}
+                            </div>
                             <div className="song-card-image">
                                 <div className="song-image-placeholder">
                                     <img src="/logo.svg" alt="" className="song-logo-icon" />
@@ -189,26 +231,6 @@ function MusicPage() {
                             <div className="song-card-info">
                                 <h3>{song.songName}</h3>
                                 <p>{song.artistName}</p>
-                                <div className="song-card-actions">
-                                    <button 
-                                        className={`btn-like ${likedSongIds.includes(song.songID) ? 'liked' : ''}`}
-                                        onClick={(e) => handleLikeToggle(song.songID, e)}
-                                        title={likedSongIds.includes(song.songID) ? 'Bỏ thích' : 'Thích'}
-                                    >
-                                        <svg viewBox="0 0 24 24" width="20" height="20" fill={likedSongIds.includes(song.songID) ? '#e74c3c' : 'currentColor'}>
-                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                        </svg>
-                                    </button>
-                                    {user && (
-                                        <button 
-                                            className="btn-add-playlist-mini"
-                                            onClick={(e) => openPlaylistModal(song, e)}
-                                            title="Thêm vào Playlist"
-                                        >
-                                            +
-                                        </button>
-                                    )}
-                                </div>
                             </div>
                         </div>
                     ))}

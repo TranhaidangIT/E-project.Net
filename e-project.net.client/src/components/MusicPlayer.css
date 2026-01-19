@@ -4,8 +4,8 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: #181818;
-    border-top: 1px solid #282828;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-color);
     padding: 12px 16px;
     z-index: 1000;
     height: 90px;
@@ -31,8 +31,8 @@
 .player-album-art {
     width: 56px;
     height: 56px;
-    background: linear-gradient(135deg, #282828 0%, #181818 100%);
-    border-radius: 4px;
+    background: linear-gradient(135deg, var(--bg-highlight) 0%, var(--bg-surface) 100%);
+    border-radius: var(--radius-sm);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -54,14 +54,14 @@
 .player-details h3 {
     font-size: 14px;
     margin: 0 0 4px 0;
-    color: #fff;
+    color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .player-details p {
-    color: #b3b3b3;
+    color: var(--text-secondary);
     font-size: 12px;
     margin: 0;
     overflow: hidden;
@@ -82,21 +82,21 @@
     border: none;
     padding: 8px;
     cursor: pointer;
-    color: #b3b3b3;
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
 }
 
 .player-action-btn:hover {
-    color: #fff;
+    color: var(--text-primary);
     transform: scale(1.1);
 }
 
 .player-action-btn.liked {
-    color: #e74c3c;
+    color: var(--error);
 }
 
 .playlist-dropdown-container {
@@ -108,8 +108,8 @@
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background: #282828;
-    border-radius: 8px;
+    background: var(--bg-highlight);
+    border-radius: var(--radius-md);
     min-width: 200px;
     max-height: 250px;
     overflow-y: auto;
@@ -120,7 +120,7 @@
 
 .player-playlist-dropdown .dropdown-header {
     padding: 12px 16px;
-    color: #fff;
+    color: var(--text-primary);
     font-weight: 700;
     font-size: 14px;
     border-bottom: 1px solid #333;
@@ -128,7 +128,7 @@
 
 .player-playlist-dropdown .dropdown-message {
     padding: 8px 16px;
-    color: #1DB954;
+    color: var(--primary);
     font-size: 12px;
     text-align: center;
     background: rgba(29, 185, 84, 0.1);
@@ -136,17 +136,17 @@
 
 .player-playlist-dropdown .dropdown-empty {
     padding: 16px;
-    color: #b3b3b3;
+    color: var(--text-secondary);
     font-size: 13px;
     text-align: center;
 }
 
 .player-playlist-dropdown .dropdown-item {
     padding: 12px 16px;
-    color: #fff;
+    color: var(--text-primary);
     font-size: 13px;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background var(--transition-fast);
 }
 
 .player-playlist-dropdown .dropdown-item:hover {
@@ -154,7 +154,7 @@
 }
 
 .player-playlist-dropdown .dropdown-item:last-child {
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
 }
 
 /* Center Section - Controls & Progress */
@@ -177,15 +177,15 @@
 .control-btn {
     background: transparent;
     border: none;
-    color: #b3b3b3;
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
     padding: 0;
     font-size: 16px;
 }
 
 .control-btn:hover:not(:disabled) {
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .control-btn:disabled {
@@ -196,18 +196,19 @@
 .play-btn {
     width: 32px;
     height: 32px;
-    background: #fff;
-    color: #000;
-    border-radius: 50%;
+    background: var(--text-primary);
+    color: var(--bg-base);
+    border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
     padding-left: 2px;
+    transition: transform var(--transition-fast);
 }
 
 .play-btn:hover {
-    background: #f0f0f0;
+    transform: scale(1.06);
 }
 
 /* Progress Bar */
@@ -233,11 +234,11 @@
     appearance: none;
     width: 12px;
     height: 12px;
-    background: #fff;
-    border-radius: 50%;
+    background: var(--text-primary);
+    border-radius: var(--radius-full);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity var(--transition-fast);
 }
 
 .progress-bar:hover::-webkit-slider-thumb {
@@ -247,12 +248,12 @@
 .progress-bar::-moz-range-thumb {
     width: 12px;
     height: 12px;
-    background: #fff;
-    border-radius: 50%;
+    background: var(--text-primary);
+    border-radius: var(--radius-full);
     cursor: pointer;
     border: none;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity var(--transition-fast);
 }
 
 .progress-bar:hover::-moz-range-thumb {
@@ -261,7 +262,7 @@
 
 .time {
     font-size: 11px;
-    color: #b3b3b3;
+    color: var(--text-secondary);
     min-width: 40px;
     text-align: center;
 }
@@ -284,7 +285,7 @@
 
 .player-volume span:first-child {
     font-size: 14px;
-    color: #b3b3b3;
+    color: var(--text-secondary);
 }
 
 .volume-bar {
@@ -303,11 +304,11 @@
     appearance: none;
     width: 12px;
     height: 12px;
-    background: #fff;
-    border-radius: 50%;
+    background: var(--text-primary);
+    border-radius: var(--radius-full);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity var(--transition-fast);
 }
 
 .volume-bar:hover::-webkit-slider-thumb {
@@ -317,12 +318,12 @@
 .volume-bar::-moz-range-thumb {
     width: 12px;
     height: 12px;
-    background: #fff;
-    border-radius: 50%;
+    background: var(--text-primary);
+    border-radius: var(--radius-full);
     cursor: pointer;
     border: none;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity var(--transition-fast);
 }
 
 .volume-bar:hover::-moz-range-thumb {
@@ -331,7 +332,7 @@
 
 .volume-percent {
     font-size: 11px;
-    color: #b3b3b3;
+    color: var(--text-secondary);
     min-width: 32px;
 }
 
@@ -340,7 +341,7 @@
     background: rgba(138, 43, 226, 0.2);
     color: #9d4edd;
     padding: 4px 12px;
-    border-radius: 500px;
+    border-radius: var(--radius-full);
     font-size: 10px;
     font-weight: 600;
     border: 1px solid #9d4edd;

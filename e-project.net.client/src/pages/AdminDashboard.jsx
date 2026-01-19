@@ -9,10 +9,19 @@ function AdminDashboard() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [users, setUsers] = useState([]);
-    const [stats, setStats] = useState({ totalUsers: 0, totalAdmins: 0 });
+    const [stats, setStats] = useState({ totalUsers: 0, totalAdmins: 0, totalSuperAdmins: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
+    
+    // Create Admin Modal
+    const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
+    const [adminFormData, setAdminFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+        fullName: ''
+    });
 
     useEffect(() => {
         if (!user?.isAdmin) {
@@ -28,7 +37,8 @@ function AdminDashboard() {
             setUsers(response.data);
             setStats({
                 totalUsers: response.data.length,
-                totalAdmins: response.data.filter(u => u.isAdmin).length
+                totalAdmins: response.data.filter(u => u.isAdmin).length,
+                totalSuperAdmins: response.data.filter(u => u.isSuperAdmin).length
             });
         } catch {
             setError('Không thể tải danh sách người dùng');
@@ -40,6 +50,13 @@ function AdminDashboard() {
     const handleToggleAdmin = async (userId, currentStatus) => {
         if (userId === user.userID) {
             setError('Không thể thay đổi quyền của chính mình');
+            return;
+        }
+
+        // Check if target user is SuperAdmin
+        const targetUser = users.find(u => u.userID === userId);
+        if (targetUser?.isSuperAdmin) {
+            setError('Không thể thay đổi quyền của SuperAdmin');
             return;
         }
         
@@ -57,6 +74,13 @@ function AdminDashboard() {
             setError('Không thể xóa chính mình');
             return;
         }
+
+        // Check if target user is SuperAdmin
+        const targetUser = users.find(u => u.userID === userId);
+        if (targetUser?.isSuperAdmin) {
+            setError('Không thể xóa tài khoản SuperAdmin');
+            return;
+        }
         
         if (!window.confirm(`Bạn có chắc muốn xóa user "${username}"?`)) {
             return;
@@ -68,6 +92,22 @@ function AdminDashboard() {
             loadUsers();
         } catch (err) {
             setError(err.response?.data?.message || 'Xóa thất bại');
+        }
+    };
+
+    // Create Admin handlers
+    const handleCreateAdminSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            await adminAPI.createAdmin(adminFormData);
+            setMessage('Tạo tài khoản Admin thành công!');
+            setShowCreateAdminModal(false);
+            setAdminFormData({ username: '', email: '', password: '', fullName: '' });
+            loadUsers();
+        } catch (err) {
+            setError(err.response?.data?.message || 'Tạo Admin thất bại');
         }
     };
 
@@ -86,9 +126,19 @@ function AdminDashboard() {
             <div className="admin-header">
                 <div className="header-left">
                     <h1>Admin Dashboard</h1>
-                    <p>Xin chào, <strong>{user?.fullName || user?.username}</strong></p>
+                    <p>Xin chào, <strong>{user?.fullName || user?.username}</strong>
+                        {user?.isSuperAdmin && <span className="superadmin-badge">SuperAdmin</span>}
+                    </p>
                 </div>
                 <div className="header-right">
+                    {user?.isSuperAdmin && (
+                        <button 
+                            onClick={() => setShowCreateAdminModal(true)} 
+                            className="btn-primary btn-sm"
+                        >
+                            + Tạo Admin
+                        </button>
+                    )}
                     <Link to="/admin/songs" className="btn-secondary btn-sm">Quản lý Bài hát</Link>
                     <Link to="/profile" className="btn-secondary btn-sm">Profile</Link>
                     <button onClick={handleLogout} className="btn-danger btn-sm">Đăng xuất</button>
@@ -152,26 +202,28 @@ function AdminDashboard() {
                                 <td>{u.email}</td>
                                 <td>{u.fullName || '-'}</td>
                                 <td>
-                                    <span className={`badge ${u.isAdmin ? 'admin' : 'user'}`}>
-                                        {u.isAdmin ? 'Admin' : 'User'}
+                                    <span className={`badge ${u.isSuperAdmin ? 'superadmin' : u.isAdmin ? 'admin' : 'user'}`}>
+                                        {u.isSuperAdmin ? 'SuperAdmin' : u.isAdmin ? 'Admin' : 'User'}
                                     </span>
                                 </td>
                                 <td>{new Date(u.createdAt).toLocaleDateString('vi-VN')}</td>
                                 <td>
                                     <div className="action-buttons">
-                                        <button 
-                                            onClick={() => handleToggleAdmin(u.userID, u.isAdmin)}
-                                            className={`btn-sm ${u.isAdmin ? 'btn-warning' : 'btn-success'}`}
-                                            disabled={u.userID === user.userID}
-                                            title={u.isAdmin ? 'Hủy quyền Admin' : 'Cấp quyền Admin'}
-                                        >
-                                            {u.isAdmin ? '↓' : '↑'}
-                                        </button>
+                                        {u.isAdmin && (
+                                            <button 
+                                                onClick={() => handleToggleAdmin(u.userID, u.isAdmin)}
+                                                className="btn-sm btn-warning"
+                                                disabled={u.userID === user.userID || u.isSuperAdmin}
+                                                title={u.isSuperAdmin ? 'Không thể thay đổi quyền SuperAdmin' : 'Hủy quyền Admin'}
+                                            >
+                                                ↓
+                                            </button>
+                                        )}
                                         <button 
                                             onClick={() => handleDeleteUser(u.userID, u.username)}
                                             className="btn-danger btn-sm"
-                                            disabled={u.userID === user.userID}
-                                            title="Xóa user"
+                                            disabled={u.userID === user.userID || u.isSuperAdmin}
+                                            title={u.isSuperAdmin ? 'Không thể xóa SuperAdmin' : 'Xóa user'}
                                         >
                                             ×
                                         </button>
@@ -182,6 +234,80 @@ function AdminDashboard() {
                     </tbody>
                 </table>
             </div>
+
+            {/* Create Admin Modal */}
+            {showCreateAdminModal && (
+                <div className="modal-overlay" onClick={() => setShowCreateAdminModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h2>Tạo Tài Khoản Admin</h2>
+                        
+                        {error && <div className="error-message">{error}</div>}
+                        
+                        <form onSubmit={handleCreateAdminSubmit}>
+                            <div className="form-group">
+                                <label>Username *</label>
+                                <input
+                                    type="text"
+                                    value={adminFormData.username}
+                                    onChange={(e) => setAdminFormData({...adminFormData, username: e.target.value})}
+                                    required
+                                    placeholder="Nhập username"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Email *</label>
+                                <input
+                                    type="email"
+                                    value={adminFormData.email}
+                                    onChange={(e) => setAdminFormData({...adminFormData, email: e.target.value})}
+                                    required
+                                    placeholder="Nhập email"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Mật khẩu *</label>
+                                <input
+                                    type="password"
+                                    value={adminFormData.password}
+                                    onChange={(e) => setAdminFormData({...adminFormData, password: e.target.value})}
+                                    required
+                                    placeholder="Nhập mật khẩu"
+                                    minLength="6"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Họ Tên</label>
+                                <input
+                                    type="text"
+                                    value={adminFormData.fullName}
+                                    onChange={(e) => setAdminFormData({...adminFormData, fullName: e.target.value})}
+                                    placeholder="Nhập họ tên (không bắt buộc)"
+                                />
+                            </div>
+
+                            <div className="modal-buttons">
+                                <button type="submit" className="btn-primary">
+                                    Tạo Admin
+                                </button>
+                                <button 
+                                    type="button" 
+                                    onClick={() => {
+                                        setShowCreateAdminModal(false);
+                                        setAdminFormData({ username: '', email: '', password: '', fullName: '' });
+                                        setError('');
+                                    }} 
+                                    className="btn-secondary"
+                                >
+                                    Hủy
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
         </Layout>
     );

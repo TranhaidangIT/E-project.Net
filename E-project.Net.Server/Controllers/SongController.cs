@@ -59,6 +59,7 @@ namespace E_project.Net.Server.Controllers
                 SongID = song.SongID,
                 SongName = song.SongName,
                 ArtistName = song.ArtistName,
+                ImageUrl = song.ImageUrl,
                 Duration = song.Duration,
                 PlayCount = song.PlayCount,
                 CreatedAt = song.CreatedAt
@@ -90,6 +91,7 @@ namespace E_project.Net.Server.Controllers
             {
                 SongName = createSongDTO.SongName,
                 ArtistName = createSongDTO.ArtistName,
+                ImageUrl = createSongDTO.ImageUrl,
                 Duration = createSongDTO.Duration,
                 PlayCount = 0,
                 CreatedAt = DateTime.Now
@@ -103,6 +105,7 @@ namespace E_project.Net.Server.Controllers
                 SongID = song.SongID,
                 SongName = song.SongName,
                 ArtistName = song.ArtistName,
+                ImageUrl = song.ImageUrl,
                 Duration = song.Duration,
                 PlayCount = song.PlayCount,
                 CreatedAt = song.CreatedAt
@@ -138,6 +141,7 @@ namespace E_project.Net.Server.Controllers
 
             song.SongName = updateSongDTO.SongName;
             song.ArtistName = updateSongDTO.ArtistName;
+            song.ImageUrl = updateSongDTO.ImageUrl;
             song.Duration = updateSongDTO.Duration;
 
             await _context.SaveChangesAsync();
@@ -147,6 +151,7 @@ namespace E_project.Net.Server.Controllers
                 SongID = song.SongID,
                 SongName = song.SongName,
                 ArtistName = song.ArtistName,
+                ImageUrl = song.ImageUrl,
                 Duration = song.Duration,
                 PlayCount = song.PlayCount,
                 CreatedAt = song.CreatedAt
@@ -200,6 +205,7 @@ namespace E_project.Net.Server.Controllers
                     SongID = s.SongID,
                     SongName = s.SongName,
                     ArtistName = s.ArtistName,
+                    ImageUrl = s.ImageUrl,
                     Duration = s.Duration,
                     PlayCount = s.PlayCount,
                     CreatedAt = s.CreatedAt

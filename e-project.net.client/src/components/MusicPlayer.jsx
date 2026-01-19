@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { likedSongAPI, playlistAPI } from '../services/api';
@@ -19,44 +19,43 @@ function MusicPlayer({ song, onNext, onPrevious }) {
     const navigate = useNavigate();
     const duration = song?.duration || 180;
 
-    // Define functions first using useCallback
-    const checkIfLiked = useCallback(async (songId) => {
-        try {
-            const response = await likedSongAPI.checkLiked(songId);
-            setIsLiked(response.data);
-        } catch (err) {
-            console.error('Failed to check liked status:', err);
-            setIsLiked(false);
-        }
-    }, []);
-
-    const fetchPlaylists = useCallback(async () => {
-        try {
-            const response = await playlistAPI.getMyPlaylists();
-            setPlaylists(response.data);
-        } catch (err) {
-            console.error('Failed to fetch playlists:', err);
-        }
-    }, []);
-
-    // Reset when song changes
+    // Reset when song changes - this is intentional state reset on dependency change
     const currentSongId = song?.songID;
     useEffect(() => {
+        // Reset player state when song changes (intentional synchronous update)
         setCurrentTime(0);
         setIsPlaying(false);
         setIsLiked(false);
-        // Check if song is liked
+        
+        // Check if song is liked (async operation)
         if (user && currentSongId) {
-            checkIfLiked(currentSongId);
+            const checkLiked = async () => {
+                try {
+                    const response = await likedSongAPI.checkLiked(currentSongId);
+                    setIsLiked(response.data);
+                } catch (err) {
+                    console.error('Failed to check liked status:', err);
+                    setIsLiked(false);
+                }
+            };
+            checkLiked();
         }
-    }, [currentSongId, user, checkIfLiked]);
+    }, [currentSongId, user]);
 
     // Fetch playlists when user is logged in
     useEffect(() => {
         if (user) {
-            fetchPlaylists();
+            const loadPlaylists = async () => {
+                try {
+                    const response = await playlistAPI.getMyPlaylists();
+                    setPlaylists(response.data);
+                } catch (err) {
+                    console.error('Failed to fetch playlists:', err);
+                }
+            };
+            loadPlaylists();
         }
-    }, [user, fetchPlaylists]);
+    }, [user]);
 
     // Close dropdown when clicking outside
     useEffect(() => {

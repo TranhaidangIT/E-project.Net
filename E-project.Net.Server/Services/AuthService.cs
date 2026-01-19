@@ -182,7 +182,8 @@ namespace E_project.Net.Server.Services
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User"),
-                new Claim("IsAdmin", user.IsAdmin.ToString())
+                new Claim("IsAdmin", user.IsAdmin.ToString()),
+                new Claim("IsSuperAdmin", user.IsSuperAdmin.ToString())
             };
 
             var token = new JwtSecurityToken(
@@ -207,6 +208,7 @@ namespace E_project.Net.Server.Services
                 AvatarURL = user.AvatarURL,
                 CoverURL = user.CoverURL,
                 IsAdmin = user.IsAdmin,
+                IsSuperAdmin = user.IsSuperAdmin,
                 CreatedAt = user.CreatedAt
             };
         }
