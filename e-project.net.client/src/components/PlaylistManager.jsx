@@ -165,125 +165,73 @@ const PlaylistManager = () => {
     return (
         <Layout>
         <div className="playlist-manager">
-            <div className="playlist-header">
-                <div className="header-with-back">
-                    <button onClick={() => navigate(-1)} className="btn-back">
-                        ← Quay Lại
+            {/* Page Header */}
+            <div className="playlist-header-centered">
+                <h1>🎵 Playlist Của Tôi</h1>
+                <p>Quản lý bộ sưu tập âm nhạc của bạn</p>
+                <div className="header-actions">
+                    <button 
+                        className="btn-create-playlist" 
+                        onClick={() => setShowCreateModal(true)}
+                    >
+                        + Tạo Playlist Mới
                     </button>
-                    <div>
-                        <h1>Playlist Của Tôi</h1>
-                        <p>Quản lý bộ sưu tập âm nhạc</p>
-                    </div>
                 </div>
-                <button 
-                    className="btn-primary" 
-                    onClick={() => setShowCreateModal(true)}
-                >
-                    + Tạo Playlist Mới
-                </button>
             </div>
 
             {error && <div className="alert alert-error">{error}</div>}
             {success && <div className="alert alert-success">{success}</div>}
 
-            <div className="playlist-container">
-                {/* Playlists List */}
-                <div className="playlists-list">
-                    {loading && playlists.length === 0 ? (
-                        <p>Đang tải...</p>
-                    ) : playlists.length === 0 ? (
-                        <p className="no-data">Chưa có playlist. Tạo playlist đầu tiên của bạn!</p>
-                    ) : (
-                        playlists.map(playlist => (
-                            <div 
-                                key={playlist.playlistID}
-                                className={`playlist-item ${selectedPlaylist === playlist.playlistID ? 'active' : ''}`}
-                                onClick={() => loadPlaylistDetail(playlist.playlistID)}
-                            >
-                                <div className="playlist-info">
-                                    <h3>{playlist.playlistName}</h3>
-                                    <p className="song-count">{playlist.songCount} bài hát</p>
-                                    <span className={`badge ${playlist.isPublic ? 'badge-public' : 'badge-private'}`}>
-                                        {playlist.isPublic ? 'Công khai' : 'Riêng tư'}
-                                    </span>
-                                </div>
-                                <div className="playlist-actions">
-                                    <button 
-                                        className="btn-icon"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleTogglePublic(playlist);
-                                        }}
-                                        title={playlist.isPublic ? 'Đặt Riêng Tư' : 'Đặt Công Khai'}
-                                    >
-                                        {playlist.isPublic ? '🔓' : '🔒'}
-                                    </button>
-                                    <button 
-                                        className="btn-icon btn-delete"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeletePlaylist(playlist.playlistID);
-                                        }}
-                                        title="Xóa Playlist"
-                                    >
-                                        🗑️
-                                    </button>
-                                </div>
+            {/* Playlists Grid */}
+            <div className="playlists-grid">
+                {loading && playlists.length === 0 ? (
+                    <p className="loading-text">Đang tải...</p>
+                ) : playlists.length === 0 ? (
+                    <div className="empty-state">
+                        <p>Chưa có playlist. Tạo playlist đầu tiên của bạn!</p>
+                    </div>
+                ) : (
+                    playlists.map(playlist => (
+                        <div 
+                            key={playlist.playlistID}
+                            className="playlist-card"
+                            onClick={() => loadPlaylistDetail(playlist.playlistID)}
+                        >
+                            <div className="playlist-card-image">
+                                <div className="playlist-icon">🎵</div>
                             </div>
-                        ))
-                    )}
-                </div>
-
-                {/* Playlist Detail */}
-                <div className="playlist-detail">
-                    {!playlistDetail ? (
-                        <div className="no-selection">
-                            <p>Chọn một playlist để xem chi tiết</p>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="detail-header">
-                                <h2>{playlistDetail.playlistName}</h2>
-                                {playlistDetail.description && (
-                                    <p className="description">{playlistDetail.description}</p>
-                                )}
+                            <div className="playlist-card-header">
+                                <h3>{playlist.playlistName}</h3>
+                            </div>
+                            <p className="song-count">{playlist.songCount} bài hát</p>
+                            <span className={`badge ${playlist.isPublic ? 'badge-public' : 'badge-private'}`}>
+                                {playlist.isPublic ? 'Công khai' : 'Riêng tư'}
+                            </span>
+                            <div className="playlist-card-actions">
                                 <button 
-                                    className="btn-primary"
-                                    onClick={() => setShowAddSongModal(true)}
+                                    className="btn-icon"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleTogglePublic(playlist);
+                                    }}
+                                    title={playlist.isPublic ? 'Đặt Riêng Tư' : 'Đặt Công Khai'}
                                 >
-                                    + Thêm Bài Hát
+                                    {playlist.isPublic ? '🔓' : '🔒'}
+                                </button>
+                                <button 
+                                    className="btn-icon btn-delete"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeletePlaylist(playlist.playlistID);
+                                    }}
+                                    title="Xóa Playlist"
+                                >
+                                    🗑️
                                 </button>
                             </div>
-
-                            <div className="songs-list">
-                                {playlistDetail.songs.length === 0 ? (
-                                    <p className="no-data">Chưa có bài hát trong playlist này</p>
-                                ) : (
-                                    playlistDetail.songs.map((song, index) => (
-                                        <div key={song.playlistSongID} className="song-item">
-                                            <span className="song-number">{index + 1}</span>
-                                            <div className="song-info">
-                                                <h4>{song.songName}</h4>
-                                                <p>{song.artistName}</p>
-                                            </div>
-                                            {song.duration && (
-                                                <span className="duration">
-                                                    {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
-                                                </span>
-                                            )}
-                                            <button 
-                                                className="btn-remove"
-                                                onClick={() => handleRemoveSong(song.songID)}
-                                            >
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </>
-                    )}
-                </div>
+                        </div>
+                    ))
+                )}
             </div>
 
             {/* Create Playlist Modal */}

@@ -1,0 +1,346 @@
+/* Admin Dashboard - Spotify Style */
+.admin-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 60px;
+}
+
+/* Header */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #282828;
+}
+
+.header-left h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #fff;
+    margin: 0 0 8px 0;
+}
+
+.header-left p {
+    color: #b3b3b3;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.header-left p strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+.header-right {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Stats Container */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: #181818;
+    border: 1px solid #282828;
+    border-radius: 4px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(29, 185, 84, 0.1);
+    border-radius: 4px;
+}
+
+.stat-info h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 4px 0;
+}
+
+.stat-info p {
+    color: #b3b3b3;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Admin Card */
+.admin-card {
+    background: #181818;
+    border: 1px solid #282828;
+    border-radius: 4px;
+    padding: 24px;
+}
+
+.admin-card h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 24px 0;
+}
+
+/* User Table */
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-table thead {
+    border-bottom: 1px solid #282828;
+}
+
+.user-table th {
+    padding: 12px 16px;
+    text-align: left;
+    color: #b3b3b3;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-table td {
+    padding: 16px;
+    border-bottom: 1px solid #282828;
+    color: #fff;
+    font-size: 14px;
+}
+
+
+.user-table tbody tr.current-user {
+    background: rgba(29, 185, 84, 0.1);
+}
+
+/* User Cell */
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar-small {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #000;
+    flex-shrink: 0;
+}
+
+.you-badge {
+    background: #1DB954;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Badge */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 500px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge.admin {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    color: #000;
+}
+
+.badge.user {
+    background: rgba(29, 185, 84, 0.2);
+    color: #1DB954;
+    border: 1px solid #1DB954;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* Button Styles */
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 500px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #1DB954;
+    color: #000;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid #727272;
+    color: #fff;
+}
+
+.btn-success {
+    background: #1DB954;
+    color: #000;
+}
+
+.btn-warning {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid #ffc107;
+}
+
+.btn-danger {
+    background: rgba(255, 71, 87, 0.2);
+    color: #ff4757;
+    border: 1px solid #ff4757;
+}
+
+.btn-sm:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Messages */
+.success-message {
+    background: rgba(29, 185, 84, 0.2);
+    color: #1DB954;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border: 1px solid #1DB954;
+    font-size: 14px;
+}
+
+.error-message {
+    background: rgba(255, 71, 87, 0.2);
+    color: #ff4757;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border: 1px solid #ff4757;
+    font-size: 14px;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #b3b3b3;
+    font-size: 1.2rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .admin-container {
+        padding: 30px 40px;
+    }
+
+    .header-left h1 {
+        font-size: 2.8rem;
+    }
+
+    .stats-container {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 20px;
+    }
+
+    .admin-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .header-left h1 {
+        font-size: 2.2rem;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+
+    .user-table {
+        font-size: 12px;
+    }
+
+    .user-table th,
+    .user-table td {
+        padding: 12px 8px;
+    }
+
+    .user-cell {
+        gap: 8px;
+    }
+
+    .avatar-small {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-container {
+        padding: 15px;
+    }
+
+    .header-left h1 {
+        font-size: 1.8rem;
+    }
+
+    .admin-card {
+        padding: 16px;
+    }
+
+    .user-table {
+        display: block;
+        overflow-x: auto;
+    }
+}

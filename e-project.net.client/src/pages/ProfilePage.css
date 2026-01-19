@@ -1,0 +1,345 @@
+/* Profile Page Styles - Spotify Design */
+.profile-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 60px;
+}
+
+/* Page Header */
+.profile-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.profile-header h1 {
+    font-size: 3.5rem;
+    color: #fff;
+    margin-bottom: 12px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.profile-header p {
+    color: #b3b3b3;
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+/* Success/Error Messages */
+.success-message {
+    background: rgba(29, 185, 84, 0.2);
+    color: #1ed760;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid #1ed760;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 14px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.error-message {
+    background: rgba(255, 71, 87, 0.2);
+    color: #ff4757;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid #ff4757;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 14px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Profile Content */
+.profile-content {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #181818;
+    border-radius: 8px;
+    padding: 40px;
+}
+
+/* Avatar */
+.profile-avatar {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.profile-avatar img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #1DB954;
+}
+
+.avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1DB954, #1ed760);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+    font-weight: 900;
+    color: #000;
+}
+
+/* Profile Info */
+.profile-info {
+    margin-top: 20px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #282828;
+}
+
+.info-item:last-of-type {
+    border-bottom: none;
+}
+
+.info-item label {
+    color: #b3b3b3;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.info-item span {
+    color: #fff;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Badge */
+.badge {
+    padding: 6px 14px;
+    border-radius: 500px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge.admin {
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+    color: #000;
+}
+
+.badge.user {
+    background: rgba(29, 185, 84, 0.2);
+    color: #1ed760;
+    border: 1px solid #1ed760;
+}
+
+/* Button Group */
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #282828;
+}
+
+.button-group a,
+.button-group button {
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: 500px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+}
+
+.btn-primary {
+    background: #1DB954;
+    color: #000;
+}
+
+.btn-primary:hover {
+    background: #1ed760;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid #727272;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    border-color: #fff;
+}
+
+.btn-warning {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid #ffc107;
+}
+
+.btn-warning:hover {
+    background: rgba(255, 193, 7, 0.3);
+}
+
+.btn-danger {
+    background: rgba(255, 71, 87, 0.2);
+    color: #ff4757;
+    border: 1px solid #ff4757;
+}
+
+.btn-danger:hover {
+    background: rgba(255, 71, 87, 0.3);
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="url"] {
+    width: 100%;
+    padding: 12px 16px;
+    background: #121212;
+    border: 1px solid #727272;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #fff;
+}
+
+.form-group input::placeholder {
+    color: #727272;
+}
+
+/* Avatar Upload */
+.avatar-upload-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #1DB954;
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-upload {
+    background: transparent;
+    border: 1px solid #727272;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 500px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.btn-upload:hover {
+    border-color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .profile-page {
+        padding: 30px 40px;
+    }
+
+    .profile-header h1 {
+        font-size: 2.8rem;
+    }
+
+    .profile-content {
+        padding: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-page {
+        padding: 20px 30px;
+    }
+
+    .profile-header h1 {
+        font-size: 2.2rem;
+    }
+
+    .profile-header p {
+        font-size: 1rem;
+    }
+
+    .profile-content {
+        padding: 24px;
+    }
+
+    .profile-avatar img,
+    .avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-page {
+        padding: 15px 20px;
+    }
+
+    .profile-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .profile-header p {
+        font-size: 0.95rem;
+    }
+
+    .profile-content {
+        padding: 20px;
+    }
+
+    .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .button-group {
+        gap: 10px;
+    }
+}

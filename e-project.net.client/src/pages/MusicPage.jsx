@@ -1,40 +1,57 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { songAPI, playlistAPI } from '../services/api';
 import MusicPlayer from '../components/MusicPlayer';
 import Layout from '../components/Layout';
+import './MusicPage.css';
 
 function MusicPage() {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
     const [currentSong, setCurrentSong] = useState(null);
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [playlists, setPlaylists] = useState([]);
     const [showPlaylistModal, setShowPlaylistModal] = useState(false);
     const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState(null);
     const [playlistMessage, setPlaylistMessage] = useState('');
+    const [searchParams] = useSearchParams();
     
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchSongs();
+        const query = searchParams.get('q');
+        if (query) {
+            searchSongs(query);
+        } else {
+            fetchSongs();
+        }
         if (user) {
             fetchPlaylists();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
+    }, [user, searchParams]);
 
     const fetchSongs = async () => {
         try {
             setLoading(true);
             const response = await songAPI.getAllSongs();
             setSongs(response.data);
-        } catch (_err) {
+        } catch {
             setError('Không thể tải danh sách bài hát');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const searchSongs = async (query) => {
+        try {
+            setLoading(true);
+            const response = await songAPI.searchSongs(query);
+            setSongs(response.data);
+        } catch {
+            setError('Lỗi tìm kiếm');
         } finally {
             setLoading(false);
         }
@@ -63,26 +80,13 @@ function MusicPage() {
     const addToPlaylist = async (playlistId) => {
         try {
             await playlistAPI.addSongToPlaylist(playlistId, selectedSongForPlaylist.songID);
-            setPlaylistMessage('✅ Đã thêm vào playlist!');
+            setPlaylistMessage('Đã thêm vào playlist!');
             setTimeout(() => {
                 setShowPlaylistModal(false);
                 setPlaylistMessage('');
             }, 1500);
         } catch (err) {
-            setPlaylistMessage(err.response?.data?.message || '❌ Không thể thêm vào playlist');
-        }
-    };
-
-    const handleSearch = async () => {
-        if (!searchQuery.trim()) {
-            fetchSongs();
-            return;
-        }
-        try {
-            const response = await songAPI.searchSongs(searchQuery);
-            setSongs(response.data);
-        } catch (_err) {
-            setError('Lỗi tìm kiếm');
+            setPlaylistMessage(err.response?.data?.message || 'Không thể thêm vào playlist');
         }
     };
 
@@ -114,148 +118,99 @@ function MusicPage() {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    if (loading) return <Layout><div className="loading">Đang tải...</div></Layout>;
+    if (loading) return <Layout><div className="loading">⏳ Đang tải...</div></Layout>;
+    if (error) return <Layout><div className="error">{error}</div></Layout>;
 
     return (
         <Layout>
-        <div className="music-page">
-            {/* Page Header with Back Button */}
-            <div className="page-header">
-                <button onClick={() => navigate(-1)} className="btn-back">
-                    ← Quay Lại
-                </button>
-                <div className="page-title-section">
-                    <h1>🎵 Duyệt Âm Nhạc</h1>
+            <div className="music-page">
+                {/* Page Header */}
+                <div className="music-header">
+                    <h1>Duyệt Âm Nhạc</h1>
                     <p>Khám phá và thưởng thức các bài hát yêu thích</p>
+                    {searchParams.get('q') && (
+                        <p className="search-result-info">
+                            Kết quả tìm kiếm cho: "{searchParams.get('q')}" ({songs.length} bài hát)
+                        </p>
+                    )}
                 </div>
-            </div>
 
-            {/* Search Bar */}
-            <div className="search-section">
-                <div className="search-bar">
-                    <input
-                        type="text"
-                        placeholder="🔍 Tìm kiếm bài hát, nghệ sĩ..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    />
-                    <button onClick={handleSearch} className="btn-primary">
-                        Tìm kiếm
-                    </button>
-                    <button onClick={() => { setSearchQuery(''); fetchSongs(); }} className="btn-secondary">
-                        🔄 Tất cả
-                    </button>
-                </div>
-            </div>
-
-            {error && <div className="error-message">{error}</div>}
-
-            {/* Songs Grid */}
-            <div className="songs-container">
-                <h2>Danh Sách Bài Hát ({songs.length})</h2>
+                {/* Songs Grid */}
                 <div className="songs-grid">
                     {songs.map((song, index) => (
                         <div 
                             key={song.songID} 
-                            className={`song-card ${currentSong?.songID === song.songID ? 'active' : ''}`}
+                            className="song-card"
                         >
-                            <div className="song-card-art" onClick={() => playSong(song, index)}>
-                                🎵
-                            </div>
-                            <div className="song-card-info" onClick={() => playSong(song, index)}>
-                                <h3>{song.songName}</h3>
-                                <p className="artist">{song.artistName}</p>
-                                <div className="song-card-meta">
-                                    <span>⏱️ {formatDuration(song.duration)}</span>
-                                    <span>👂 {song.playCount}</span>
+                            <div className="song-card-image">
+                                <div className="song-image-placeholder">
+                                    🎵
                                 </div>
-                            </div>
-                            <div className="song-card-actions">
-                                <button 
-                                    className="btn-icon-action"
-                                    onClick={(e) => openPlaylistModal(song, e)}
-                                    title="Thêm vào playlist"
+                                <div 
+                                    className="play-button-overlay"
+                                    onClick={() => playSong(song, index)}
                                 >
-                                    ➕
-                                </button>
-                            </div>
-                            {currentSong?.songID === song.songID && (
-                                <div className="playing-indicator">
-                                    <span className="wave"></span>
-                                    <span className="wave"></span>
-                                    <span className="wave"></span>
+                                    <div className="play-button">
+                                        ▶
+                                    </div>
                                 </div>
-                            )}
+                            </div>
+                            <div className="song-card-info">
+                                <h3>{song.songName}</h3>
+                                <p>{song.artistName}</p>
+                                {user && (
+                                    <button 
+                                        className="btn-add-playlist-mini"
+                                        onClick={(e) => openPlaylistModal(song, e)}
+                                        title="Thêm vào Playlist"
+                                    >
+                                        ➕
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>
 
-                {songs.length === 0 && (
-                    <div className="empty-state">
-                        <p>Không tìm thấy bài hát nào</p>
-                    </div>
+                {/* Music Player */}
+                {currentSong && (
+                    <MusicPlayer 
+                        song={currentSong}
+                        playlist={songs}
+                        onNext={currentIndex < songs.length - 1 ? playNext : null}
+                        onPrevious={currentIndex > 0 ? playPrevious : null}
+                    />
                 )}
-            </div>
 
-            {/* Music Player */}
-            <MusicPlayer 
-                song={currentSong}
-                playlist={songs}
-                onNext={currentIndex < songs.length - 1 ? playNext : null}
-                onPrevious={currentIndex > 0 ? playPrevious : null}
-            />
-
-            {/* Add to Playlist Modal */}
-            {showPlaylistModal && (
-                <div className="modal-overlay" onClick={() => setShowPlaylistModal(false)}>
-                    <div className="modal playlist-select-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
+                {/* Playlist Modal */}
+                {showPlaylistModal && (
+                    <div className="playlist-modal-overlay" onClick={() => setShowPlaylistModal(false)}>
+                        <div className="playlist-modal" onClick={(e) => e.stopPropagation()}>
                             <h3>Thêm vào Playlist</h3>
-                            <button className="btn-close" onClick={() => setShowPlaylistModal(false)}>×</button>
-                        </div>
-                        <div className="modal-body">
-                            <p className="song-to-add">
-                                <strong>{selectedSongForPlaylist?.songName}</strong> - {selectedSongForPlaylist?.artistName}
-                            </p>
                             {playlistMessage && (
-                                <div className={`alert ${playlistMessage.includes('✅') ? 'alert-success' : 'alert-error'}`}>
+                                <div className={playlistMessage.includes('✅') ? 'success-message' : 'error-message'}>
                                     {playlistMessage}
                                 </div>
                             )}
-                            {playlists.length === 0 ? (
-                                <div className="empty-playlists">
-                                    <p>Bạn chưa có playlist nào</p>
-                                    <button 
-                                        className="btn-primary"
-                                        onClick={() => navigate('/playlists')}
+                            <div className="playlist-list">
+                                {playlists.map(playlist => (
+                                    <div 
+                                        key={playlist.playlistID}
+                                        className="playlist-item-modal"
+                                        onClick={() => addToPlaylist(playlist.playlistID)}
                                     >
-                                        Tạo Playlist Đầu Tiên
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="playlists-list">
-                                    {playlists.map(playlist => (
-                                        <div 
-                                            key={playlist.playlistID}
-                                            className="playlist-item-select"
-                                            onClick={() => addToPlaylist(playlist.playlistID)}
-                                        >
-                                            <div className="playlist-icon">📋</div>
-                                            <div className="playlist-info">
-                                                <h4>{playlist.playlistName}</h4>
-                                                <p>{playlist.songCount} bài hát</p>
-                                            </div>
-                                            <div className="playlist-arrow">→</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                                        <h4>{playlist.playlistName}</h4>
+                                        <p>{playlist.songCount} bài hát</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <button className="modal-close" onClick={() => setShowPlaylistModal(false)}>
+                                Đóng
+                            </button>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+            </div>
         </Layout>
     );
 }

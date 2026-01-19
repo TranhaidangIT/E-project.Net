@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 import { userAPI } from '../services/api';
 import Layout from '../components/Layout';
+import './ProfilePage.css';
 
 function ProfilePage() {
     const { user, logout, loadUser } = useAuth();
@@ -53,9 +54,18 @@ function ProfilePage() {
             const response = await userAPI.uploadAvatar(formDataUpload);
             const avatarUrl = response.data.avatarUrl;
             
-            setFormData({ ...formData, avatarURL: avatarUrl });
+            console.log('Avatar uploaded:', avatarUrl);
+            
+            // Update formData with server URL
+            setFormData(prev => {
+                const newData = { ...prev, avatarURL: avatarUrl };
+                console.log('FormData updated:', newData);
+                return newData;
+            });
+            
             setMessage('Upload ảnh thành công! Nhấn "Lưu" để cập nhật profile.');
         } catch (err) {
+            console.error('Upload error:', err);
             setError(err.response?.data?.message || 'Upload ảnh thất bại');
         } finally {
             setUploadingAvatar(false);
@@ -89,25 +99,47 @@ function ProfilePage() {
 
     return (
         <Layout>
-        <div className="auth-container">
-            <button onClick={() => navigate(-1)} className="btn-back-auth">← Quay Lại</button>
-            <div className="auth-card profile-card">
-                <h2>🎵 Thông Tin Tài Khoản</h2>
-                
-                {message && <div className="success-message">{message}</div>}
-                {error && <div className="error-message">{error}</div>}
-                
-                <div className="profile-avatar">
-                    {user.avatarURL ? (
-                        <img src={user.avatarURL} alt="Avatar" />
-                    ) : (
-                        <div className="avatar-placeholder">
-                            {user.username.charAt(0).toUpperCase()}
-                        </div>
-                    )}
+            <div className="profile-page">
+                {/* Page Header */}
+                <div className="profile-header">
+                    <h1>Thông Tin Tài Khoản</h1>
+                    <p>Quản lý thông tin cá nhân của bạn</p>
                 </div>
 
-                {!editing ? (
+                <div className="profile-content">
+                    {message && <div className="success-message">{message}</div>}
+                    {error && <div className="error-message">{error}</div>}
+                    
+                    <div className="profile-avatar">
+                        {(() => {
+                            const avatarUrl = formData.avatarURL || user.avatarURL;
+                            
+                            if (avatarUrl) {
+                                // Use relative URL - Vite proxy will handle it
+                                const fullUrl = avatarUrl.startsWith('http') ? avatarUrl : avatarUrl;
+                                return (
+                                    <img 
+                                        src={fullUrl}
+                                        alt="Avatar" 
+                                        onError={(e) => {
+                                            // Hide broken image and show placeholder
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'flex';
+                                        }}
+                                    />
+                                );
+                            }
+                            return null;
+                        })()}
+                        <div 
+                            className="avatar-placeholder"
+                            style={{ display: (formData.avatarURL || user.avatarURL) ? 'none' : 'flex' }}
+                        >
+                            {user.username.charAt(0).toUpperCase()}
+                        </div>
+                    </div>
+
+                    {!editing ? (
                     <div className="profile-info">
                         <div className="info-item">
                             <label>Username:</label>
@@ -122,12 +154,6 @@ function ProfilePage() {
                             <span>{user.fullName || 'Chưa cập nhật'}</span>
                         </div>
                         <div className="info-item">
-                            <label>Vai trò:</label>
-                            <span className={user.isAdmin ? 'badge admin' : 'badge user'}>
-                                {user.isAdmin ? '👑 Admin' : '👤 User'}
-                            </span>
-                        </div>
-                        <div className="info-item">
                             <label>Ngày tạo:</label>
                             <span>{new Date(user.createdAt).toLocaleDateString('vi-VN')}</span>
                         </div>
@@ -135,45 +161,40 @@ function ProfilePage() {
                         <div className="button-group">
                             {user.isAdmin && (
                                 <Link to="/admin" className="btn-primary">
-                                    👑 Qu\ản Trị
+                                    Quản Trị
                                 </Link>
                             )}
-                            <button onClick={() => setEditing(true)} className="btn-secondary">
-                                ✏️ Chỉnh sửa
+                            <button onClick={() => {
+                                setFormData({
+                                    fullName: user.fullName || '',
+                                    avatarURL: user.avatarURL || '',
+                                });
+                                setEditing(true);
+                            }} className="btn-secondary">
+                                Chỉnh sửa
                             </button>
                             <Link to="/change-password" className="btn-warning">
-                                🔒 Đổi Mật Khẩu
+                                Đổi Mật Khẩu
                             </Link>
                             <button onClick={handleLogout} className="btn-danger">
-                                🚪 Đăng xuất
+                                Đăng xuất
                             </button>
                         </div>
                     </div>
                 ) : (
                     <form onSubmit={handleUpdate}>
                         <div className="form-group">
-                            <label>Avatar</label>
-                            <div className="avatar-upload-section">
-                                {formData.avatarURL && (
-                                    <div className="avatar-preview">
-                                        <img src={formData.avatarURL} alt="Avatar preview" />
-                                    </div>
-                                )}
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleAvatarUpload}
-                                    disabled={uploadingAvatar}
-                                    id="avatar-upload"
-                                    style={{ display: 'none' }}
-                                />
-                                <label htmlFor="avatar-upload" className="btn-upload">
-                                    {uploadingAvatar ? '📤 Đang upload...' : '📷 Chọn ảnh'}
-                                </label>
-                                <small style={{ color: '#b3b3b3', marginTop: '5px', display: 'block' }}>
-                                    Hoặc nhập URL ảnh bên dưới
-                                </small>
-                            </div>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleAvatarUpload}
+                                disabled={uploadingAvatar}
+                                id="avatar-upload"
+                                style={{ display: 'none' }}
+                            />
+                            <label htmlFor="avatar-upload" className="btn-upload" style={{ marginBottom: '20px', display: 'inline-block' }}>
+                                {uploadingAvatar ? 'Đang upload...' : 'Chọn ảnh Avatar'}
+                            </label>
                         </div>
                         <div className="form-group">
                             <label>Họ và tên</label>
@@ -185,28 +206,18 @@ function ProfilePage() {
                                 placeholder="Nhập họ tên"
                             />
                         </div>
-                        <div className="form-group">
-                            <label>Avatar URL (tùy chọn)</label>
-                            <input
-                                type="url"
-                                name="avatarURL"
-                                value={formData.avatarURL}
-                                onChange={handleChange}
-                                placeholder="https://example.com/avatar.jpg"
-                            />
-                        </div>
                         <div className="button-group">
                             <button type="submit" className="btn-primary">
-                                💾 Lưu
+                                Lưu
                             </button>
                             <button type="button" onClick={() => setEditing(false)} className="btn-secondary">
-                                ❌ Hủy
+                                Hủy
                             </button>
                         </div>
                     </form>
                 )}
+                </div>
             </div>
-        </div>
         </Layout>
     );
 }

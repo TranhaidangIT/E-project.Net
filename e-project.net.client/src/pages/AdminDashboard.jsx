@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
 import { adminAPI } from '../services/api';
 import Layout from '../components/Layout';
+import './AdminDashboard.css';
 
 function AdminDashboard() {
     const { user, logout } = useAuth();

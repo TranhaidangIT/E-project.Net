@@ -48,7 +48,6 @@ function RegisterPage() {
     return (
         <Layout>
         <div className="auth-container">
-            <button onClick={() => navigate(-1)} className="btn-back-auth">← Quay Lại</button>
             <div className="auth-card">
                 <h2>🎵 Music Web - Đăng Ký</h2>
                 

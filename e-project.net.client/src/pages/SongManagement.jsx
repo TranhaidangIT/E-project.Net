@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { songAPI } from '../services/api';
 import Layout from '../components/Layout';
+import './SongManagement.css';
 
 function SongManagement() {
     const [songs, setSongs] = useState([]);
@@ -129,13 +130,13 @@ function SongManagement() {
 
     return (
         <Layout>
-        <div className="admin-container">
-            <div className="admin-header">
-                <div className="header-left">
-                    <h1>🎵 Quản Lý Bài Hát</h1>
-                    <p>Quản lý: {user?.username} (Admin)</p>
-                </div>
-                <div className="header-right">
+        <div className="song-management-container">
+            {/* Header */}
+            <div className="song-management-header">
+                <h1>🎵 Quản Lý Bài Hát</h1>
+                <p>Quản lý: {user?.username} (Admin)</p>
+                
+                <div className="header-actions">
                     <button onClick={() => navigate('/admin')} className="btn-secondary">
                         👥 Quản lý Users
                     </button>
@@ -143,21 +144,21 @@ function SongManagement() {
                         👤 Profile
                     </button>
                     <button onClick={logout} className="btn-danger">
-                        Đăng xuất
+                        🚪 Đăng xuất
                     </button>
                 </div>
             </div>
 
-            {/* Search and Add */}
-            <div className="admin-card" style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            {/* Search Section */}
+            <div className="search-section">
+                <div className="search-controls">
                     <input
                         type="text"
+                        className="search-input"
                         placeholder="Tìm kiếm bài hát hoặc nghệ sĩ..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                        style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '2px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff' }}
                     />
                     <button onClick={handleSearch} className="btn-secondary">
                         🔍 Tìm
@@ -172,11 +173,11 @@ function SongManagement() {
             </div>
 
             {/* Songs Table */}
-            <div className="admin-card">
+            <div className="song-table-section">
                 <h2>Danh Sách Bài Hát ({songs.length})</h2>
                 {error && <div className="error-message">{error}</div>}
                 
-                <table className="user-table">
+                <table className="song-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -219,7 +220,7 @@ function SongManagement() {
                 </table>
 
                 {songs.length === 0 && (
-                    <p style={{ textAlign: 'center', padding: '20px', color: '#a0a0a0' }}>
+                    <p style={{ textAlign: 'center', padding: '20px', color: '#b3b3b3' }}>
                         Chưa có bài hát nào
                     </p>
                 )}
@@ -270,7 +271,7 @@ function SongManagement() {
                                 />
                             </div>
 
-                            <div className="button-group">
+                            <div className="modal-buttons">
                                 <button type="submit" className="btn-primary">
                                     {editMode ? '💾 Cập Nhật' : '➕ Thêm'}
                                 </button>

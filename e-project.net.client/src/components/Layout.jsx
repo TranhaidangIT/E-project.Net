@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import './Layout.css';
@@ -6,6 +7,7 @@ const Layout = ({ children }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleLogout = () => {
         logout();
@@ -14,6 +16,35 @@ const Layout = ({ children }) => {
 
     const isActive = (path) => {
         return location.pathname === path ? 'active' : '';
+    };
+
+    // Dynamic search placeholder based on current page
+    const getSearchPlaceholder = () => {
+        switch (location.pathname) {
+            case '/playlists':
+                return 'Tìm playlist của bạn...';
+            case '/admin':
+            case '/admin/songs':
+                return 'Tìm kiếm người dùng...';
+            case '/profile':
+                return 'Tìm kiếm bài hát, nghệ sĩ...';
+            default:
+                return 'Tìm kiếm bài hát, nghệ sĩ...';
+        }
+    };
+
+    // Dynamic search navigation based on current page
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (!searchQuery.trim()) return;
+        
+        if (location.pathname === '/playlists') {
+            // Stay on playlist page with search query
+            navigate('/playlists?q=' + encodeURIComponent(searchQuery));
+        } else {
+            // Default: navigate to music page
+            navigate('/music?q=' + encodeURIComponent(searchQuery));
+        }
     };
 
     return (
@@ -30,17 +61,34 @@ const Layout = ({ children }) => {
                         {/* Navigation */}
                         <nav className="main-nav">
                             <Link to="/" className={`nav-link ${isActive('/')}`}>
-                                🏠 Trang Chủ
+                                Trang Chủ
                             </Link>
                             <Link to="/music" className={`nav-link ${isActive('/music')}`}>
-                                🎧 Âm Nhạc
+                                Âm Nhạc
                             </Link>
                             {user && (
                                 <Link to="/playlists" className={`nav-link ${isActive('/playlists')}`}>
-                                    📋 Playlist
+                                    Playlist
                                 </Link>
                             )}
                         </nav>
+                    </div>
+
+                    {/* Search Bar - Center */}
+                    <div className="header-center">
+                        <form className="header-search" onSubmit={handleSearch}>
+                            <input
+                                type="text"
+                                placeholder={getSearchPlaceholder()}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                            <button type="submit" className="search-btn">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                                </svg>
+                            </button>
+                        </form>
                     </div>
 
                     <div className="header-right">

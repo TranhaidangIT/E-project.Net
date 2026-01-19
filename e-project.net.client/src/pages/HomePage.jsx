@@ -10,40 +10,42 @@ function HomePage() {
         <Layout>
             {/* Hero Banner */}
             <section className="hero-banner">
-                <div className="hero-content">
-                    <h1 className="hero-title">
-                        Khám Phá <span className="highlight">Âm Nhạc</span> Của Bạn
-                    </h1>
-                    <p className="hero-subtitle">
-                        Nghe hàng triệu bài hát và tạo playlist hoàn hảo của bạn
-                    </p>
-                    <div className="hero-actions">
-                        {user ? (
-                            <>
-                                <Link to="/music" className="btn-hero btn-primary-hero">
-                                    🎵 Khám Phá Âm Nhạc
-                                </Link>
-                                <Link to="/playlists" className="btn-hero btn-secondary-hero">
-                                    📋 Playlist Của Tôi
-                                </Link>
-                            </>
-                        ) : (
-                            <>
-                                <Link to="/register" className="btn-hero btn-primary-hero">
-                                    Bắt Đầu Miễn Phí
-                                </Link>
-                                <Link to="/music" className="btn-hero btn-secondary-hero">
-                                    Duyệt Âm Nhạc
-                                </Link>
-                            </>
-                        )}
+                <div className="hero-wrapper">
+                    <div className="hero-content">
+                        <h1 className="hero-title">
+                            Khám Phá <span className="highlight">Âm Nhạc</span> Của Bạn
+                        </h1>
+                        <p className="hero-subtitle">
+                            Nghe hàng triệu bài hát và tạo playlist hoàn hảo của bạn
+                        </p>
+                        <div className="hero-actions">
+                            {user ? (
+                                <>
+                                    <Link to="/music" className="btn-hero btn-primary-hero">
+                                        🎵 Khám Phá Âm Nhạc
+                                    </Link>
+                                    <Link to="/playlists" className="btn-hero btn-secondary-hero">
+                                        📋 Playlist Của Tôi
+                                    </Link>
+                                </>
+                            ) : (
+                                <>
+                                    <Link to="/register" className="btn-hero btn-primary-hero">
+                                        Bắt Đầu Miễn Phí
+                                    </Link>
+                                    <Link to="/music" className="btn-hero btn-secondary-hero">
+                                        Duyệt Âm Nhạc
+                                    </Link>
+                                </>
+                            )}
+                        </div>
                     </div>
-                </div>
-                <div className="hero-illustration">
-                    <div className="music-circle circle-1">🎵</div>
-                    <div className="music-circle circle-2">🎧</div>
-                    <div className="music-circle circle-3">🎸</div>
-                    <div className="music-circle circle-4">🎹</div>
+                    <div className="hero-illustration">
+                        <div className="music-circle circle-1">🎵</div>
+                        <div className="music-circle circle-2">🎧</div>
+                        <div className="music-circle circle-3">🎸</div>
+                        <div className="music-circle circle-4">🎹</div>
+                    </div>
                 </div>
             </section>
 
