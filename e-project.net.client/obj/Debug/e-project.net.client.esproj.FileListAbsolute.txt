@@ -1,1 +1,2 @@
 D:\.NET\E-project.Net\e-project.net.client\obj\Debug\e-project.net.client.esproj.CoreCompileInputs.cache
+D:\E-project.Net\e-project.net.client\obj\Debug\e-project.net.client.esproj.CoreCompileInputs.cache

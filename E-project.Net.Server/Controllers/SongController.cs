@@ -72,7 +72,8 @@ namespace E_project.Net.Server.Controllers
         /// </summary>
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<SongDTO>> CreateSong([FromBody] CreateSongDTO createSongDTO)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<SongDTO>> CreateSong([FromForm] CreateSongDTO createSongDTO)
         {
             // Check if user is admin
             var isAdminClaim = User.FindFirst("IsAdmin")?.Value;
@@ -86,17 +87,37 @@ namespace E_project.Net.Server.Controllers
                 return BadRequest(ModelState);
             }
 
+            // Check file type
+            if (!createSongDTO.File.ContentType.StartsWith("audio/"))
+            {
+                return BadRequest(new { message = "Only audio files are allowed" });
+            }
+
             var song = new Song
             {
                 SongName = createSongDTO.SongName,
                 ArtistName = createSongDTO.ArtistName,
-                Duration = createSongDTO.Duration,
+                Duration = createSongDTO.Duration ?? 0,
                 PlayCount = 0,
                 CreatedAt = DateTime.Now
             };
 
             _context.Songs.Add(song);
             await _context.SaveChangesAsync();
+
+            // Save file
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "songs");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var filePath = Path.Combine(uploadsFolder, $"{song.SongID}.mp3");
+            
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await createSongDTO.File.CopyToAsync(stream);
+            }
 
             var songDTO = new SongDTO
             {
@@ -138,7 +159,10 @@ namespace E_project.Net.Server.Controllers
 
             song.SongName = updateSongDTO.SongName;
             song.ArtistName = updateSongDTO.ArtistName;
-            song.Duration = updateSongDTO.Duration;
+            if (updateSongDTO.Duration.HasValue)
+            {
+                song.Duration = updateSongDTO.Duration;
+            }
 
             await _context.SaveChangesAsync();
 
@@ -173,6 +197,13 @@ namespace E_project.Net.Server.Controllers
             if (song == null)
             {
                 return NotFound(new { message = "Song not found" });
+            }
+
+            // Delete file
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "songs", $"{id}.mp3");
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
             }
 
             _context.Songs.Remove(song);
