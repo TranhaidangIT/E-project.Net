@@ -52,24 +52,20 @@ export const adminAPI = {
     getUserById: (id) => api.get(`/admin/users/${id}`),
     toggleAdmin: (id, isAdmin) => api.put(`/admin/users/${id}/role`, { isAdmin }),
     deleteUser: (id) => api.delete(`/admin/users/${id}`),
-    createAdmin: (data) => api.post('/admin/create-admin', data),
+    adminStats: () => api.get('/admin/stats'),
+};
+
+export const historyAPI = {
+    recordHistory: (songId) => api.post(`/history/record/${songId}`),
+    getHistory: () => api.get('/history')
 };
 
 // Song API
 export const songAPI = {
     getAllSongs: () => api.get('/song'),
     getSongById: (id) => api.get(`/song/${id}`),
-    createSong: (data) => api.post('/song', data),
-    createSongWithFile: (formData, onProgress) => api.post('/song', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
-        onUploadProgress: (progressEvent) => {
-            if (onProgress && progressEvent.total) {
-                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                onProgress(percentCompleted);
-            }
-        },
+    createSong: (data) => api.post('/song', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
     }),
     updateSong: (id, data) => api.put(`/song/${id}`, data),
     deleteSong: (id) => api.delete(`/song/${id}`),

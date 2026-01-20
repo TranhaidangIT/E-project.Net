@@ -3,7 +3,7 @@
 "ServerUrl": "https://localhost:50494",
 "RedirectUrl": "",
 "LaunchCommand": "npm run dev",
-"WorkingDirectory": "D:\\.NET\\E-project.Net\\E-project.Net.Server\\..\\e-project.net.client",
+"WorkingDirectory": "D:\\E-project.Net\\E-project.Net.Server\\..\\e-project.net.client",
 "MaxTimeoutInSeconds": "120",
 "KeepRunning": "false"
 }

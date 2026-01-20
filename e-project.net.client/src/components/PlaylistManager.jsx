@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { playlistAPI, songAPI } from '../services/api';
 import Layout from './Layout';
+import MusicPlayer from './MusicPlayer';
 import './PlaylistManager.css';
 
 const PlaylistManager = () => {
@@ -13,6 +14,10 @@ const PlaylistManager = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
+    // Playback state
+    const [currentSong, setCurrentSong] = useState(null);
+    const [currentIndex, setCurrentIndex] = useState(-1);
 
     // Form state
     const [newPlaylist, setNewPlaylist] = useState({
@@ -89,6 +94,7 @@ const PlaylistManager = () => {
             if (selectedPlaylist === playlistId) {
                 setSelectedPlaylist(null);
                 setPlaylistDetail(null);
+                setCurrentSong(null); // Stop music if deleted playlist was playing
             }
             loadPlaylists();
         } catch (err) {
@@ -117,7 +123,8 @@ const PlaylistManager = () => {
         }
     };
 
-    const handleRemoveSong = async (songId) => {
+    const handleRemoveSong = async (songId, e) => {
+        e.stopPropagation(); // Prevent playing when clicking delete
         if (!selectedPlaylist) return;
 
         if (!window.confirm('Xóa bài hát này khỏi playlist?')) return;
@@ -127,6 +134,7 @@ const PlaylistManager = () => {
             await playlistAPI.removeSongFromPlaylist(selectedPlaylist, songId);
             setSuccess('Đã xóa bài hát khỏi playlist!');
             loadPlaylistDetail(selectedPlaylist);
+            // If removed song is playing, stop or next? For now, keep simple.
         } catch (err) {
             setError('Không thể xóa bài hát');
             console.error(err);
@@ -154,6 +162,28 @@ const PlaylistManager = () => {
         }
     };
 
+    // Playback Logic
+    const playSong = (song, index) => {
+        setCurrentSong(song);
+        setCurrentIndex(index);
+    };
+
+    const playNext = () => {
+        if (playlistDetail && currentIndex < playlistDetail.songs.length - 1) {
+            const nextIndex = currentIndex + 1;
+            setCurrentSong(playlistDetail.songs[nextIndex]);
+            setCurrentIndex(nextIndex);
+        }
+    };
+
+    const playPrevious = () => {
+        if (playlistDetail && currentIndex > 0) {
+            const prevIndex = currentIndex - 1;
+            setCurrentSong(playlistDetail.songs[prevIndex]);
+            setCurrentIndex(prevIndex);
+        }
+    };
+
     // Get songs not in current playlist
     const getAvailableSongs = () => {
         if (!playlistDetail) return allSongs;
@@ -163,17 +193,11 @@ const PlaylistManager = () => {
 
     return (
         <Layout>
-        <div className="playlist-manager">
-            {/* Page Header */}
-            <div className="playlist-header-centered">
-                <h1>Playlist Của Tôi</h1>
-                <p>Quản lý bộ sưu tập âm nhạc của bạn</p>
-                <div className="header-actions">
-                    <button 
-                        className="btn-create-playlist" 
-                        onClick={() => setShowCreateModal(true)}
-                    >
-                        + Tạo Playlist Mới
+        <div className="playlist-manager" style={{ paddingBottom: currentSong ? '100px' : '20px' }}>
+            <div className="playlist-header">
+                <div className="header-with-back">
+                    <button onClick={() => navigate(-1)} className="btn-back">
+                        ← Quay Lại
                     </button>
                 </div>
             </div>
@@ -308,28 +332,68 @@ const PlaylistManager = () => {
                                     + Thêm bài hát đầu tiên
                                 </button>
                             </div>
-                        ) : (
-                            playlistDetail.songs.map((song, index) => (
-                                <div key={song.playlistSongID} className="song-row">
-                                    <span className="col-index">{index + 1}</span>
-                                    <span className="col-title">{song.songName}</span>
-                                    <span className="col-artist">{song.artistName}</span>
-                                    <span className="col-duration">
-                                        {song.duration ? `${Math.floor(song.duration / 60)}:${(song.duration % 60).toString().padStart(2, '0')}` : '--:--'}
-                                    </span>
-                                    <span className="col-action">
-                                        <button 
-                                            className="btn-remove-song"
-                                            onClick={() => handleRemoveSong(song.songID)}
-                                            title="Xóa khỏi playlist"
-                                        >
-                                            ✕
-                                        </button>
-                                    </span>
-                                </div>
-                            ))
-                        )}
-                    </div>
+
+                            <div className="songs-list">
+                                {playlistDetail.songs.length === 0 ? (
+                                    <p className="no-data">Chưa có bài hát trong playlist này</p>
+                                ) : (
+                                    playlistDetail.songs.map((song, index) => {
+                                        const isPlayingThis = currentSong?.songID === song.songID;
+                                        return (
+                                            <div 
+                                                key={song.playlistSongID} 
+                                                className={`song-item ${isPlayingThis ? 'playing' : ''}`}
+                                                onClick={() => playSong(song, index)}
+                                                style={{ cursor: 'pointer', borderLeft: isPlayingThis ? '4px solid #e94560' : 'none' }}
+                                            >
+                                                <span className="song-number">
+                                                    {isPlayingThis ? '▶️' : index + 1}
+                                                </span>
+                                                <div className="song-info">
+                                                    <h4 style={{ color: isPlayingThis ? '#e94560' : 'inherit' }}>
+                                                        {song.songName}
+                                                    </h4>
+                                                    <p>{song.artistName}</p>
+                                                </div>
+                                                {song.duration && (
+                                                    <span className="duration">
+                                                        {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
+                                                    </span>
+                                                )}
+                                                <button 
+                                                    className="btn-remove"
+                                                    onClick={(e) => handleRemoveSong(song.songID, e)}
+                                                >
+                                                    Xóa
+                                                </button>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </>
+                    )}
+                </div>
+            )}
+
+            {/* Music Player Fixed at Bottom */}
+            {currentSong && (
+                <div className="fixed-player" style={{
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1000,
+                    background: '#1a1a2e',
+                    borderTop: '1px solid rgba(255,255,255,0.1)',
+                    padding: '0 20px'
+                }}>
+                     <MusicPlayer 
+                        key={currentSong?.songID}
+                        song={currentSong}
+                        onNext={playlistDetail && currentIndex < playlistDetail.songs.length - 1 ? playNext : null}
+                        onPrevious={playlistDetail && currentIndex > 0 ? playPrevious : null}
+                    />
                 </div>
             )}
 

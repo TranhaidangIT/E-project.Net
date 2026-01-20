@@ -1,150 +1,89 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { likedSongAPI, playlistAPI } from '../services/api';
-import './MusicPlayer.css';
+import { historyAPI } from '../services/api';
 
 function MusicPlayer({ song, onNext, onPrevious }) {
-    const [isPlaying, setIsPlaying] = useState(false);
+    // ===== STATE =====
+    // Component sẽ được remount khi songID đổi (key ở parent)
+    const [isPlaying, setIsPlaying] = useState(true);
     const [currentTime, setCurrentTime] = useState(0);
-    const [volume, setVolume] = useState(70);
-    const [isLiked, setIsLiked] = useState(false);
-    const [showPlaylistDropdown, setShowPlaylistDropdown] = useState(false);
-    const [playlists, setPlaylists] = useState([]);
-    const [playlistMessage, setPlaylistMessage] = useState('');
-    const intervalRef = useRef(null);
-    const dropdownRef = useRef(null);
+    const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(100);
+    const [hasRecorded, setHasRecorded] = useState(false);
 
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const duration = song?.duration || 180;
+    const audioRef = useRef(null);
 
-    // Reset when song changes - this is intentional state reset on dependency change
-    const currentSongId = song?.songID;
+    // ===== PLAY / PAUSE EFFECT =====
     useEffect(() => {
-        // Reset player state when song changes (intentional synchronous update)
-        setCurrentTime(0);
-        setIsPlaying(false);
-        setIsLiked(false);
-        
-        // Check if song is liked (async operation)
-        if (user && currentSongId) {
-            const checkLiked = async () => {
-                try {
-                    const response = await likedSongAPI.checkLiked(currentSongId);
-                    setIsLiked(response.data);
-                } catch (err) {
-                    console.error('Failed to check liked status:', err);
-                    setIsLiked(false);
-                }
-            };
-            checkLiked();
-        }
-    }, [currentSongId, user]);
+        if (!audioRef.current) return;
 
-    // Fetch playlists when user is logged in
-    useEffect(() => {
-        if (user) {
-            const loadPlaylists = async () => {
-                try {
-                    const response = await playlistAPI.getMyPlaylists();
-                    setPlaylists(response.data);
-                } catch (err) {
-                    console.error('Failed to fetch playlists:', err);
-                }
-            };
-            loadPlaylists();
-        }
-    }, [user]);
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-                setShowPlaylistDropdown(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const handleLikeToggle = async () => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-        try {
-            if (isLiked) {
-                await likedSongAPI.unlikeSong(song.songID);
-                setIsLiked(false);
-            } else {
-                await likedSongAPI.likeSong(song.songID);
-                setIsLiked(true);
-            }
-        } catch (err) {
-            console.error('Failed to toggle like:', err);
-        }
-    };
-
-    const handleAddToPlaylist = async (playlistId) => {
-        try {
-            await playlistAPI.addSongToPlaylist(playlistId, song.songID);
-            setPlaylistMessage('Đã thêm!');
-            setTimeout(() => {
-                setPlaylistMessage('');
-                setShowPlaylistDropdown(false);
-            }, 1000);
-        } catch (err) {
-            setPlaylistMessage(err.response?.data?.message || 'Lỗi');
-            setTimeout(() => setPlaylistMessage(''), 2000);
-        }
-    };
-
-    useEffect(() => {
-        // Simulate playback
         if (isPlaying) {
-            intervalRef.current = setInterval(() => {
-                setCurrentTime(prev => {
-                    if (prev >= duration) {
-                        setIsPlaying(false);
-                        onNext?.();
-                        return 0;
-                    }
-                    return prev + 1;
-                });
-            }, 1000);
+            audioRef.current.play().catch(err => {
+                console.warn('Autoplay prevented:', err);
+                setIsPlaying(false);
+            });
         } else {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
+            audioRef.current.pause();
         }
+    }, [isPlaying]);
 
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
-        };
-    }, [isPlaying, duration, onNext]);
+    // ===== VOLUME EFFECT =====
+    useEffect(() => {
+        if (!audioRef.current) return;
+        audioRef.current.volume = volume / 100;
+    }, [volume]);
 
+    // ===== AUDIO EVENTS =====
+    const handleTimeUpdate = () => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        const current = audio.currentTime;
+        setCurrentTime(current);
+
+        // 🔑 30-Second Listen Rule
+        if (current >= 30 && !hasRecorded && song?.songID) {
+            setHasRecorded(true);
+            historyAPI.recordHistory(song.songID).catch(err =>
+                console.error('Failed to record listening history', err)
+            );
+        }
+    };
+
+    const handleLoadedMetadata = () => {
+        if (!audioRef.current) return;
+        setDuration(audioRef.current.duration || 0);
+    };
+
+    const handleEnded = () => {
+        setIsPlaying(false);
+        if (onNext) onNext();
+    };
+
+    // ===== CONTROLS =====
     const togglePlay = () => {
-        setIsPlaying(!isPlaying);
+        setIsPlaying(prev => !prev);
     };
 
     const handleSeek = (e) => {
-        const newTime = parseInt(e.target.value);
+        const newTime = Number(e.target.value);
         setCurrentTime(newTime);
+        if (audioRef.current) {
+            audioRef.current.currentTime = newTime;
+        }
     };
 
     const handleVolumeChange = (e) => {
-        setVolume(parseInt(e.target.value));
+        setVolume(Number(e.target.value));
     };
 
     const formatTime = (seconds) => {
+        if (!seconds || isNaN(seconds)) return '0:00';
         const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
+        const secs = Math.floor(seconds % 60);
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
+    // ===== EMPTY STATE =====
     if (!song) {
         return (
             <div className="music-player">
@@ -157,14 +96,28 @@ function MusicPlayer({ song, onNext, onPrevious }) {
         );
     }
 
+    // File URL (ASP.NET wwwroot/uploads)
+    const songUrl = `/uploads/songs/${song.songID}.mp3`;
+
+    // ===== RENDER =====
     return (
         <div className="music-player">
+            <audio
+                ref={audioRef}
+                src={songUrl}
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+                onEnded={handleEnded}
+                onError={(e) => {
+                    console.error('Audio error', e);
+                    setIsPlaying(false);
+                }}
+            />
+
             <div className="player-content">
-                {/* Left: Song Info */}
-                <div className="player-left">
-                    <div className="player-album-art">
-                        <img src="/logo.svg" alt="" className="player-logo-icon" />
-                    </div>
+                {/* SONG INFO */}
+                <div className="player-song-info">
+                    <div className="player-album-art">🎵</div>
                     <div className="player-details">
                         <h3>{song.songName}</h3>
                         <p>{song.artistName}</p>
@@ -220,67 +173,65 @@ function MusicPlayer({ song, onNext, onPrevious }) {
                     </div>
                 </div>
 
-                {/* Center: Controls & Progress */}
-                <div className="player-center">
-                    <div className="player-controls">
-                        <button 
-                            className="control-btn" 
-                            onClick={onPrevious}
-                            disabled={!onPrevious}
-                            title="Previous"
-                        >
-                            ⏮
-                        </button>
-                        
-                        <button 
-                            className="control-btn play-btn" 
-                            onClick={togglePlay}
-                            title={isPlaying ? 'Pause' : 'Play'}
-                        >
-                            {isPlaying ? '⏸' : '▶'}
-                        </button>
-                        
-                        <button 
-                            className="control-btn" 
-                            onClick={onNext}
-                            disabled={!onNext}
-                            title="Next"
-                        >
-                            ⏭
-                        </button>
-                    </div>
+                {/* CONTROLS */}
+                <div className="player-controls">
+                    <button
+                        className="control-btn"
+                        onClick={onPrevious}
+                        disabled={!onPrevious}
+                        title="Bài trước"
+                    >
+                        ⏮️
+                    </button>
 
-                    <div className="player-progress">
-                        <span className="time">{formatTime(currentTime)}</span>
-                        <input
-                            type="range"
-                            min="0"
-                            max={duration}
-                            value={currentTime}
-                            onChange={handleSeek}
-                            className="progress-bar"
-                        />
-                        <span className="time">{formatTime(duration)}</span>
-                    </div>
+                    <button
+                        className="control-btn play-btn"
+                        onClick={togglePlay}
+                        title={isPlaying ? 'Tạm dừng' : 'Phát'}
+                    >
+                        {isPlaying ? '⏸️' : '▶️'}
+                    </button>
+
+                    <button
+                        className="control-btn"
+                        onClick={onNext}
+                        disabled={!onNext}
+                        title="Bài tiếp theo"
+                    >
+                        ⏭️
+                    </button>
                 </div>
 
-                {/* Right: Volume & Demo Badge */}
-                <div className="player-right">
-                    <div className="player-volume">
-                        <span className="volume-icon"></span>
-                        <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={volume}
-                            onChange={handleVolumeChange}
-                            className="volume-bar"
-                        />
-                        <span className="volume-percent">{volume}%</span>
-                    </div>
-                    <div className="demo-badge">
-                        Demo Mode - Không có file nhạc thực tế
-                    </div>
+                {/* PROGRESS */}
+                <div className="player-progress">
+                    <span className="time">{formatTime(currentTime)}</span>
+                    <input
+                        type="range"
+                        min="0"
+                        max={duration}
+                        value={currentTime}
+                        onChange={handleSeek}
+                        className="progress-bar"
+                    />
+                    <span className="time">{formatTime(duration)}</span>
+                </div>
+
+                {/* VOLUME */}
+                <div className="player-volume">
+                    <span
+                        onClick={() => setVolume(volume === 0 ? 100 : 0)}
+                        style={{ cursor: 'pointer' }}
+                    >
+                        {volume === 0 ? '🔇' : '🔊'}
+                    </span>
+                    <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={volume}
+                        onChange={handleVolumeChange}
+                        className="volume-bar"
+                    />
                 </div>
             </div>
         </div>

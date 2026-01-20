@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { songAPI } from '../services/api';
@@ -14,9 +14,14 @@ function SongManagement() {
     const [currentSong, setCurrentSong] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     
+    // Drag & Drop state
+    const [dragActive, setDragActive] = useState(false);
+    const fileInputRef = useRef(null);
+    
     const [formData, setFormData] = useState({
         songName: '',
-        artistName: ''
+        artistName: '',
+        file: null
     });
     const [audioFile, setAudioFile] = useState(null);
     const [imageFile, setImageFile] = useState(null);
@@ -63,28 +68,28 @@ function SongManagement() {
             setCurrentSong(song);
             setFormData({
                 songName: song.songName,
-                artistName: song.artistName
+                artistName: song.artistName,
+                file: null
             });
         } else {
             setEditMode(false);
             setCurrentSong(null);
-            setFormData({ songName: '', artistName: '' });
+            setFormData({ songName: '', artistName: '', file: null });
         }
         setAudioFile(null);
         setImageFile(null);
         setImagePreview(null);
         setUploadProgress(0);
         setShowModal(true);
+        setError('');
+        setDragActive(false);
     };
 
     const handleCloseModal = () => {
         setShowModal(false);
-        setFormData({ songName: '', artistName: '' });
-        setAudioFile(null);
-        setImageFile(null);
-        setImagePreview(null);
-        setUploadProgress(0);
+        setFormData({ songName: '', artistName: '', file: null });
         setError('');
+        setDragActive(false);
     };
 
     const handleFileChange = (e) => {
@@ -132,7 +137,40 @@ function SongManagement() {
     };
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        if (e.target.name === 'file') {
+            setFormData({ ...formData, file: e.target.files[0] });
+        } else {
+            setFormData({ ...formData, [e.target.name]: e.target.value });
+        }
+    };
+
+    // Drag & Drop Handlers
+    const handleDrag = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === "dragenter" || e.type === "dragover") {
+            setDragActive(true);
+        } else if (e.type === "dragleave") {
+            setDragActive(false);
+        }
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const droppedFile = e.dataTransfer.files[0];
+            if (droppedFile.type.startsWith('audio/')) {
+                 setFormData({ ...formData, file: droppedFile });
+            } else {
+                setError('Chỉ chấp nhận file âm thanh (MP3, WAV...)');
+            }
+        }
+    };
+
+    const handleZoneClick = () => {
+        fileInputRef.current.click();
     };
 
     const handleSubmit = async (e) => {
@@ -141,7 +179,7 @@ function SongManagement() {
 
         try {
             if (editMode && currentSong) {
-                // Update mode - use JSON
+                // Update mode (Metadata only for now)
                 const songData = {
                     songName: formData.songName,
                     artistName: formData.artistName
@@ -149,24 +187,19 @@ function SongManagement() {
                 await songAPI.updateSong(currentSong.songID, songData);
                 alert('Cập nhật bài hát thành công!');
             } else {
-                // Create mode - use FormData with file
-                if (!audioFile) {
-                    setError('Vui lòng chọn file nhạc MP3');
+                // Create mode (Multipart)
+                if (!formData.file) {
+                    setError('Vui lòng chọn file nhạc (.mp3)');
                     return;
                 }
-
-                const formDataToSend = new FormData();
-                formDataToSend.append('SongName', formData.songName);
-                formDataToSend.append('ArtistName', formData.artistName);
-                formDataToSend.append('File', audioFile);
-                if (imageFile) {
-                    formDataToSend.append('ImageFile', imageFile);
-                }
-
-                await songAPI.createSongWithFile(formDataToSend, (progress) => {
-                    setUploadProgress(progress);
-                });
-                alert('Thêm bài hát thành công!');
+                
+                const data = new FormData();
+                data.append('songName', formData.songName);
+                data.append('artistName', formData.artistName);
+                data.append('file', formData.file);
+                
+                await songAPI.createSong(data);
+                alert('✅ Thêm bài hát thành công!');
             }
 
             handleCloseModal();
@@ -352,50 +385,48 @@ function SongManagement() {
                             </div>
 
                             {!editMode && (
-                                <>
                                 <div className="form-group">
-                                    <label>File Nhạc (MP3) *</label>
-                                    <input
-                                        type="file"
-                                        accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg"
-                                        onChange={handleFileChange}
-                                        required={!editMode}
+                                    <label>File Nhạc (.mp3) *</label>
+                                    <div 
+                                        className={`drag-drop-zone ${dragActive ? 'active' : ''}`}
+                                        onDragEnter={handleDrag}
+                                        onDragLeave={handleDrag}
+                                        onDragOver={handleDrag}
+                                        onDrop={handleDrop}
+                                        onClick={handleZoneClick}
                                         style={{
-                                            padding: '10px',
-                                            backgroundColor: '#282828',
-                                            border: '1px solid #404040',
-                                            borderRadius: '4px',
-                                            color: '#fff',
-                                            width: '100%'
+                                            border: dragActive ? '2px dashed #4facfe' : '2px dashed #666',
+                                            borderRadius: '10px',
+                                            padding: '20px',
+                                            textAlign: 'center',
+                                            cursor: 'pointer',
+                                            backgroundColor: dragActive ? 'rgba(79, 172, 254, 0.1)' : 'transparent',
+                                            transition: 'all 0.3s ease'
                                         }}
-                                    />
-                                    {audioFile && (
-                                        <p style={{ marginTop: '5px', color: '#1db954', fontSize: '14px' }}>
-                                            ✓ Đã chọn: {audioFile.name} ({(audioFile.size / 1024 / 1024).toFixed(2)} MB)
-                                        </p>
-                                    )}
-                                    {uploadProgress > 0 && uploadProgress < 100 && (
-                                        <div style={{ marginTop: '10px' }}>
-                                            <div style={{
-                                                width: '100%',
-                                                height: '8px',
-                                                backgroundColor: '#404040',
-                                                borderRadius: '4px',
-                                                overflow: 'hidden'
-                                            }}>
-                                                <div style={{
-                                                    width: `${uploadProgress}%`,
-                                                    height: '100%',
-                                                    backgroundColor: '#1db954',
-                                                    transition: 'width 0.3s'
-                                                }}></div>
+                                    >
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            name="file"
+                                            accept="audio/*"
+                                            onChange={handleChange}
+                                            style={{ display: 'none' }}
+                                        />
+                                        {formData.file ? (
+                                            <div style={{ color: '#4facfe' }}>
+                                                <p>📄 {formData.file.name}</p>
+                                                <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>Click hoặc kéo thả để thay đổi</p>
                                             </div>
-                                            <p style={{ textAlign: 'center', marginTop: '5px', color: '#b3b3b3' }}>
-                                                Đang upload: {uploadProgress}%
-                                            </p>
-                                        </div>
-                                    )}
+                                        ) : (
+                                            <div>
+                                                <p style={{ fontSize: '2rem', marginBottom: '10px' }}>☁️</p>
+                                                <p>Kéo thả file nhạc vào đây</p>
+                                                <p style={{ fontSize: '0.9rem', color: '#999' }}>hoặc click để chọn file</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
+                            )}
 
                                 <div className="form-group">
                                     <label>Hình Ảnh Bài Hát (Không bắt buộc)</label>
