@@ -1,135 +1,146 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Layout from "../components/Layout";
 import api from "../services/api";
 
 function YouTubePage() {
   const [inputUrl, setInputUrl] = useState("");
-  const [videoInfo, setVideoInfo] = useState(null);
-  const [loadingInfo, setLoadingInfo] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
+  const [videoInfo, setVideoInfo] = useState(null); // Contains { embedUrl, videoId, title, ... }
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [audioSrc, setAudioSrc] = useState(""); // Re-introduced
+  
+  // Player State
+  const [playerReady, setPlayerReady] = useState(false);
+  const [apiReady, setApiReady] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(100);
+  
+  const playerRef = useRef(null); // Holds the YT.Player instance
+  const iframeRef = useRef(null); // Holds the iframe DOM element
 
-  const audioRef = useRef(null);
+  // Load YouTube IFrame API
+  useEffect(() => {
+    // If API is already loaded
+    if (window.YT && window.YT.Player) {
+      setApiReady(true);
+    } else {
+      // Define global callback
+      window.onYouTubeIframeAPIReady = () => {
+        setApiReady(true);
+      };
+
+      // Inject script if not already present
+      if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+        const tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName("script")[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      }
+    }
+  }, []);
+
+  // Initialize Player when videoInfo AND apiReady are set
+  useEffect(() => {
+    if (videoInfo && apiReady && window.YT && window.YT.Player && iframeRef.current) {
+        // Destroy existing player if any
+        if (playerRef.current) {
+            playerRef.current.destroy();
+        }
+
+        // The iframe is already in the DOM with the SRC from backend. 
+        // We initialize the player on it.
+        playerRef.current = new window.YT.Player(iframeRef.current, {
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+  }, [videoInfo, apiReady]);
+
+  const onPlayerReady = (event) => {
+    setPlayerReady(true);
+    event.target.setVolume(volume);
+    // Auto-play not always guaranteed by browsers, but we can try
+    // event.target.playVideo(); 
+  };
+
+  const onPlayerStateChange = (event) => {
+    // YT.PlayerState.PLAYING = 1, PAUSED = 2, ENDED = 0
+    if (event.data === 1) {
+        setIsPlaying(true);
+    } else {
+        setIsPlaying(false);
+    }
+  };
 
   const handleLoadUrl = async () => {
     if (!inputUrl) return;
-
+    setLoading(true);
     setError("");
-    setLoadingInfo(true);
     setVideoInfo(null);
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
-    setAudioSrc("");
-
+    setPlayerReady(false);
+    
     try {
-      // 1. Get Info 
-      const infoRes = await api.get(`/youtube/info?url=${encodeURIComponent(inputUrl)}`);
-      setVideoInfo(infoRes.data);
-
-      // 2. Set Stream URL
-      // The backend will handle caching/conversion transparently.
-      // It might take a few seconds to start if not cached.
-      setAudioSrc(`/api/youtube/stream?url=${encodeURIComponent(inputUrl)}`);
-
+      const res = await api.get(`/youtube/info?url=${encodeURIComponent(inputUrl)}`);
+      setVideoInfo(res.data);
     } catch (err) {
-      console.error("Error loading video", err);
-      setError("Không thể tải thông tin video hoặc URL không hợp lệ");
+      console.error(err);
+      setError("Failed to load video info.");
     } finally {
-      setLoadingInfo(false);
+      setLoading(false);
     }
   };
 
   const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (audioRef.current.paused) {
-      audioRef.current.play().catch(console.error);
+    if (!playerRef.current || !playerReady) return;
+    if (isPlaying) {
+      playerRef.current.pauseVideo();
     } else {
-      audioRef.current.pause();
-    }
-  };
-
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
-    }
-  };
-
-  const handleSeek = (e) => {
-    const time = parseFloat(e.target.value);
-    setCurrentTime(time);
-    if (audioRef.current) {
-        audioRef.current.currentTime = time; 
+      playerRef.current.playVideo();
     }
   };
 
   const handleVolume = (e) => {
-    const vol = parseFloat(e.target.value);
-    setVolume(vol);
-    if (audioRef.current) {
-      audioRef.current.volume = vol;
+    const val = parseInt(e.target.value, 10);
+    setVolume(val);
+    if (playerRef.current && playerReady) {
+      playerRef.current.setVolume(val);
     }
-  };
-    
-  // Handlers for state sync
-  const onPlay = () => setIsPlaying(true);
-  const onPause = () => setIsPlaying(false);
-  const onEnded = () => setIsPlaying(false);
-
-  const formatTime = (seconds) => {
-    if (!seconds || isNaN(seconds)) return "0:00";
-    const date = new Date(seconds * 1000);
-    const mm = date.getUTCMinutes();
-    const ss = date.getUTCSeconds().toString().padStart(2, "0");
-    const hh = date.getUTCHours();
-    if (hh) return `${hh}:${mm}:${ss}`;
-    return `${mm}:${ss}`;
   };
 
   return (
     <Layout>
       <div style={{ padding: "40px", maxWidth: "1200px", margin: "0 auto", color: "white" }}>
-        <h2 style={{ marginBottom: "30px" }}>📺 YouTube MP3 Player</h2>
+        <h2 style={{ marginBottom: "30px" }}>📺 YouTube Embed Audio</h2>
 
-        <div style={{ display: "flex", gap: "40px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "40px", flexWrap: "wrap", alignItems: "flex-start" }}>
           
-          {/* LEFT: Info & Thumbnail */}
+          {/* LEFT: Metadata */}
           <div style={{ flex: "1", minWidth: "300px" }}>
-            <div className="auth-card" style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "300px" }}>
+            <div className="auth-card" style={{ display: "flex", flexDirection: "column", alignItems: "center", minHeight: "300px" }}>
                 {videoInfo ? (
                     <div style={{ textAlign: "center", width: "100%" }}>
                         <img 
                             src={videoInfo.thumbnailUrl} 
                             alt="Thumb" 
-                            style={{ width: "100%", borderRadius: "10px", boxShadow: "0 4px 10px rgba(0,0,0,0.5)", marginBottom: "20px" }}
+                            style={{ width: "100%", borderRadius: "10px", marginBottom: "20px" }}
                         />
                         <h3>{videoInfo.title}</h3>
                         <p style={{ color: "#aaa" }}>{videoInfo.authorName}</p>
                     </div>
                 ) : (
-                    <div style={{ textAlign: "center", color: "#666" }}>
-                        <div style={{ fontSize: "3rem" }}>🎵</div>
-                        <p>Nhập URL để phát nhạc (MP3)</p>
+                    <div style={{ textAlign: "center", color: "#666", marginTop: "50px" }}>
+                        <div style={{ fontSize: "3rem" }}>Waiting...</div>
                     </div>
                 )}
             </div>
           </div>
 
-          {/* RIGHT: Controls */}
+          {/* RIGHT: Input & Player Controls */}
           <div style={{ flex: "1", minWidth: "300px" }}>
             <div className="auth-card" style={{ width: "100%" }}>
                 
-                {/* Input */}
+                {/* Search Input */}
                 <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
                     <input 
                         type="text" 
@@ -140,80 +151,75 @@ function YouTubePage() {
                     />
                     <button 
                         onClick={handleLoadUrl} 
-                        disabled={loadingInfo}
+                        disabled={loading}
                         className="btn-primary"
                         style={{ padding: "0 20px" }}
                     >
-                        {loadingInfo ? "Processing..." : "Go"}
+                        {loading ? "..." : "Load"}
                     </button>
                 </div>
                 {error && <p className="error-message">{error}</p>}
 
-                {/* Audio Player */}
-                {(audioSrc || loadingInfo) && (
-                    <div style={{ background: "rgba(0,0,0,0.3)", padding: "20px", borderRadius: "10px" }}>
+                {/* Player UI */}
+                {videoInfo && (
+                    <div style={{ background: "rgba(0,0,0,0.3)", padding: "20px", borderRadius: "10px", marginTop: "20px" }}>
                         
-                        {/* Hidden Native Audio Element */}
-                        <audio 
-                            ref={audioRef} 
-                            src={audioSrc}
-                            onTimeUpdate={handleTimeUpdate}
-                            onLoadedMetadata={handleLoadedMetadata}
-                            onPlay={onPlay}
-                            onPause={onPause}
-                            onEnded={onEnded}
-                            controls={false} // Hidden controls
-                            autoPlay
-                        />
-
-                        {/* Progress */}
-                        <div style={{ marginBottom: "15px" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#ccc", marginBottom: "5px" }}>
-                                <span>{formatTime(currentTime)}</span>
-                                <span>{formatTime(duration)}</span>
-                            </div>
-                            <input 
-                                type="range" 
-                                min={0} 
-                                max={duration || 0} 
-                                value={currentTime}
-                                onChange={handleSeek}
-                                style={{ width: "100%", accentColor: "#e94560", cursor: "pointer" }}
-                            />
+                        {/* Hidden IFrame container - keep it strictly hidden or very small */}
+                        <div style={{ width: "1px", height: "1px", overflow: "hidden", opacity: 0, position: "absolute", left: "-9999px" }}>
+                            {/* We hook the API to this iframe */}
+                           <iframe 
+                                ref={iframeRef}
+                                id="yt-player-iframe"
+                                width="200" 
+                                height="200" 
+                                src={videoInfo.embedUrl} 
+                                title="YouTube video player" 
+                                frameBorder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowFullScreen
+                            ></iframe>
                         </div>
 
-                        {/* Controls */}
-                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", marginBottom: "15px" }}>
-                            <button className="control-btn" style={{ fontSize: "1.5rem", background: "none", border: "none" }}>⏮️</button>
-                            <button 
-                                onClick={togglePlay}
-                                style={{ width: "60px", height: "60px", borderRadius: "50%", background: "#e94560", border: "none", fontSize: "2rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-                            >
-                                {isPlaying ? "⏸️" : "▶️"}
-                            </button>
-                            <button className="control-btn" style={{ fontSize: "1.5rem", background: "none", border: "none" }}>⏭️</button>
+                        {/* Custom Audio Controls */}
+                        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+                           <h4 style={{marginBottom: "10px"}}>Audio Control</h4>
+                           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", marginBottom: "15px" }}>
+                                <button 
+                                    onClick={togglePlay}
+                                    style={{ 
+                                        width: "60px", height: "60px", borderRadius: "50%", 
+                                        background: playerReady ? "#e94560" : "#555", 
+                                        border: "none", fontSize: "2rem", cursor: playerReady ? "pointer" : "not-allowed",
+                                        display: "flex", alignItems: "center", justifyContent: "center",
+                                        color: "white"
+                                    }}
+                                    disabled={!playerReady}
+                                >
+                                    {isPlaying ? "⏸️" : "▶️"}
+                                </button>
+                           </div>
+
+                           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}>
+                                <span>Volume</span>
+                                <input 
+                                    type="range" 
+                                    min="0" 
+                                    max="100" 
+                                    value={volume} 
+                                    onChange={handleVolume}
+                                    style={{ accentColor: "#e94560" }}
+                                />
+                                <span>{volume}%</span>
+                           </div>
                         </div>
 
-                        {/* Volume */}
-                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}>
-                            <span>🔊</span>
-                            <input 
-                                type="range" 
-                                min={0} 
-                                max={1} 
-                                step="0.1" 
-                                value={volume}
-                                onChange={handleVolume}
-                                style={{ width: "100px", accentColor: "#e94560" }}
-                            />
+                         <div style={{ fontSize: "0.8rem", color: "#aaa", textAlign: "center" }}>
+                            * Powered by YouTube IFrame API
                         </div>
-
                     </div>
                 )}
-
             </div>
           </div>
-
         </div>
       </div>
     </Layout>
