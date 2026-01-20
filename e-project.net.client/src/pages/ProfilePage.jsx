@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
-import { userAPI, playlistAPI } from '../services/api';
+import { userAPI, playlistAPI, historyAPI } from '../services/api';
 import Layout from '../components/Layout';
 
 function ProfilePage() {
@@ -94,15 +94,12 @@ function ProfilePage() {
         }
     };
 
-    const loadHistory = () => {
+    const loadHistory = async () => {
         try {
-            const history = JSON.parse(localStorage.getItem('listeningHistory') || '[]');
-            // Only update if different to avoid re-renders impacting audio? 
-            // Actually React state update checks equality, but deep object diff is hard.
-            // Just setting it is fine, but maybe check length or first item ID.
-            setListeningHistory(history);
+            const response = await historyAPI.getHistory();
+            setListeningHistory(response.data);
         } catch (err) {
-            console.error(err);
+            console.error("Failed to load history", err);
         }
     };
 
@@ -314,7 +311,11 @@ function ProfilePage() {
                                 <p style={{ color: '#b3b3b3' }}>Chưa có lịch sử nghe nhạc.</p>
                             ) : (
                                 <div>
-                                    {listeningHistory.slice(0, 3).map(song => renderSongItem(song))}
+                                    {listeningHistory.map(item => (
+                                        <div key={item.historyID}>
+                                            {renderSongItem(item.song)}
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>

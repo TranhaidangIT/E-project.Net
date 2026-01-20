@@ -12,6 +12,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import PlaylistManager from './components/PlaylistManager';
+import YouTubePage from './pages/YouTubePage';
 import './App.css';
 
 // Protected Route Component
@@ -56,6 +57,7 @@ function AppRoutes() {
         <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/music" element={<MusicPage />} />
+            <Route path="/youtube" element={<YouTubePage />} />
             <Route path="/login" element={
                 <PublicRoute><LoginPage /></PublicRoute>
             } />

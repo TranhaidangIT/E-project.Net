@@ -14,7 +14,9 @@ namespace E_project.Net.Server.Data
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
         public DbSet<Song> Songs { get; set; }
         public DbSet<Playlist> Playlists { get; set; }
+        public DbSet<ListeningHistory> ListeningHistories { get; set; }
         public DbSet<PlaylistSong> PlaylistSongs { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -155,6 +157,29 @@ namespace E_project.Net.Server.Data
 
                 entity.HasIndex(e => e.PlaylistID).HasDatabaseName("IX_PlaylistSongs_PlaylistID");
                 entity.HasIndex(e => e.SongID).HasDatabaseName("IX_PlaylistSongs_SongID");
+            });
+
+            // Configure ListeningHistory entity
+            modelBuilder.Entity<ListeningHistory>(entity =>
+            {
+                entity.ToTable("ListeningHistory");
+                entity.HasKey(e => e.HistoryID);
+
+                entity.Property(e => e.ListenedAt)
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Song)
+                    .WithMany()
+                    .HasForeignKey(e => e.SongID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.UserID).HasDatabaseName("IX_ListeningHistory_UserID");
+                entity.HasIndex(e => e.SongID).HasDatabaseName("IX_ListeningHistory_SongID");
             });
         }
     }

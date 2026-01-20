@@ -72,7 +72,7 @@ namespace E_project.Net.Server.Controllers
         /// </summary>
         [HttpPost]
         [Authorize]
-        [Consumes("multipart/form-data")]
+
         public async Task<ActionResult<SongDTO>> CreateSong([FromForm] CreateSongDTO createSongDTO)
         {
             // Check if user is admin

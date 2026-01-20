@@ -35,6 +35,9 @@ const Layout = ({ children }) => {
                             <Link to="/music" className={`nav-link ${isActive('/music')}`}>
                                 🎧 Âm Nhạc
                             </Link>
+                            <Link to="/youtube" className={`nav-link ${isActive('/youtube')}`}>
+                                📺 YouTube
+                            </Link>
                             {user && (
                                 <Link to="/playlists" className={`nav-link ${isActive('/playlists')}`}>
                                     📋 Playlist
