@@ -127,7 +127,7 @@ const Layout = ({ children }) => {
                             <a href="#" aria-label="Facebook">📘</a>
                             <a href="#" aria-label="Twitter">🐦</a>
                             <a href="#" aria-label="Instagram">📷</a>
-                            <a href="#" aria-label="YouTube">📺</a>
+                            <a href="#" aria-label="YouTube">YouTube</a>
                         </div>
                     </div>
                 </div>

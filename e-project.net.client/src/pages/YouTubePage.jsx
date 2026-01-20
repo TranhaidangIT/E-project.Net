@@ -110,118 +110,107 @@ function YouTubePage() {
 
   return (
     <Layout>
-      <div style={{ padding: "40px", maxWidth: "1200px", margin: "0 auto", color: "white" }}>
-        <h2 style={{ marginBottom: "30px" }}>📺 YouTube Embed Audio</h2>
-
+        <div style={{ padding: "40px", maxWidth: "1200px", margin: "0 auto", color: "white" }}>
+        <h2 style={{ marginBottom: "30px", fontWeight: 600, fontSize: "2rem", letterSpacing: "-0.5px" }}>YouTube</h2>
         <div style={{ display: "flex", gap: "40px", flexWrap: "wrap", alignItems: "flex-start" }}>
-          
           {/* LEFT: Metadata */}
-          <div style={{ flex: "1", minWidth: "300px" }}>
-            <div className="auth-card" style={{ display: "flex", flexDirection: "column", alignItems: "center", minHeight: "300px" }}>
-                {videoInfo ? (
-                    <div style={{ textAlign: "center", width: "100%" }}>
-                        <img 
-                            src={videoInfo.thumbnailUrl} 
-                            alt="Thumb" 
-                            style={{ width: "100%", borderRadius: "10px", marginBottom: "20px" }}
-                        />
-                        <h3>{videoInfo.title}</h3>
-                        <p style={{ color: "#aaa" }}>{videoInfo.authorName}</p>
-                    </div>
-                ) : (
-                    <div style={{ textAlign: "center", color: "#666", marginTop: "50px" }}>
-                        <div style={{ fontSize: "3rem" }}>Waiting...</div>
-                    </div>
-                )}
+            <div style={{ flex: "1", minWidth: "300px" }}>
+            <div className="auth-card" style={{ display: "flex", flexDirection: "column", alignItems: "center", minHeight: "220px", background: "#181818", borderRadius: "10px" }}>
+              {videoInfo ? (
+                <div style={{ textAlign: "center", width: "100%" }}>
+                  <img 
+                    src={videoInfo.thumbnailUrl} 
+                    alt="Thumb" 
+                    style={{ width: "100%", borderRadius: "8px", marginBottom: "16px" }}
+                  />
+                  <div style={{ fontWeight: 500, fontSize: "1.08rem", marginBottom: "6px" }}>{videoInfo.title}</div>
+                  <div style={{ color: "#b3b3b3", fontSize: "0.95rem" }}>{videoInfo.authorName}</div>
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", color: "#888", marginTop: "60px", fontSize: "1rem" }}>
+                  Chưa có video nào
+                </div>
+              )}
             </div>
-          </div>
-
+            </div>
           {/* RIGHT: Input & Player Controls */}
           <div style={{ flex: "1", minWidth: "300px" }}>
-            <div className="auth-card" style={{ width: "100%" }}>
-                
-                {/* Search Input */}
-                <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-                    <input 
-                        type="text" 
-                        value={inputUrl}
-                        onChange={(e) => setInputUrl(e.target.value)}
-                        placeholder="YouTube URL..."
-                        style={{ flex: 1, padding: "10px", borderRadius: "5px", border: "none", background: "rgba(255,255,255,0.1)", color: "white" }}
-                    />
-                    <button 
-                        onClick={handleLoadUrl} 
-                        disabled={loading}
-                        className="btn-primary"
-                        style={{ padding: "0 20px" }}
-                    >
-                        {loading ? "..." : "Load"}
-                    </button>
-                </div>
-                {error && <p className="error-message">{error}</p>}
-
-                {/* Player UI */}
-                {videoInfo && (
-                    <div style={{ background: "rgba(0,0,0,0.3)", padding: "20px", borderRadius: "10px", marginTop: "20px" }}>
-                        
-                        {/* Hidden IFrame container - keep it strictly hidden or very small */}
-                        <div style={{ width: "1px", height: "1px", overflow: "hidden", opacity: 0, position: "absolute", left: "-9999px" }}>
-                            {/* We hook the API to this iframe */}
-                           <iframe 
-                                ref={iframeRef}
-                                id="yt-player-iframe"
-                                width="200" 
-                                height="200" 
-                                src={videoInfo.embedUrl} 
-                                title="YouTube video player" 
-                                frameBorder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowFullScreen
-                            ></iframe>
-                        </div>
-
-                        {/* Custom Audio Controls */}
-                        <div style={{ textAlign: "center", marginBottom: "20px" }}>
-                           <h4 style={{marginBottom: "10px"}}>Audio Control</h4>
-                           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", marginBottom: "15px" }}>
-                                <button 
-                                    onClick={togglePlay}
-                                    style={{ 
-                                        width: "60px", height: "60px", borderRadius: "50%", 
-                                        background: playerReady ? "#e94560" : "#555", 
-                                        border: "none", fontSize: "2rem", cursor: playerReady ? "pointer" : "not-allowed",
-                                        display: "flex", alignItems: "center", justifyContent: "center",
-                                        color: "white"
-                                    }}
-                                    disabled={!playerReady}
-                                >
-                                    {isPlaying ? "⏸️" : "▶️"}
-                                </button>
-                           </div>
-
-                           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}>
-                                <span>Volume</span>
-                                <input 
-                                    type="range" 
-                                    min="0" 
-                                    max="100" 
-                                    value={volume} 
-                                    onChange={handleVolume}
-                                    style={{ accentColor: "#e94560" }}
-                                />
-                                <span>{volume}%</span>
-                           </div>
-                        </div>
-
-                         <div style={{ fontSize: "0.8rem", color: "#aaa", textAlign: "center" }}>
-                            * Powered by YouTube IFrame API
-                        </div>
-                    </div>
-                )}
+            <div className="auth-card" style={{ width: "100%", background: "#181818", borderRadius: "10px" }}>
+            {/* Search Input */}
+            <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+              <input 
+                type="text" 
+                value={inputUrl}
+                onChange={(e) => setInputUrl(e.target.value)}
+                placeholder="Nhập đường dẫn YouTube..."
+                style={{ flex: 1, padding: "10px", borderRadius: "6px", border: "none", background: "#222", color: "white", fontSize: "1rem" }}
+              />
+              <button 
+                onClick={handleLoadUrl} 
+                disabled={loading}
+                className="btn-primary"
+                style={{ padding: "0 20px", borderRadius: "6px", fontWeight: 500, fontSize: "1rem" }}
+              >
+                {loading ? "Đang tải..." : "Load"}
+              </button>
             </div>
+            {error && <p className="error-message">{error}</p>}
+            {/* Player UI */}
+            {videoInfo && (
+              <div style={{ background: "rgba(0,0,0,0.3)", padding: "20px", borderRadius: "10px", marginTop: "20px" }}>
+                {/* Hidden IFrame container - keep it strictly hidden or very small */}
+                <div style={{ width: "1px", height: "1px", overflow: "hidden", opacity: 0, position: "absolute", left: "-9999px" }}>
+                   <iframe 
+                    ref={iframeRef}
+                    id="yt-player-iframe"
+                    width="200" 
+                    height="200" 
+                    src={videoInfo.embedUrl} 
+                    title="YouTube video player" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                  ></iframe>
+                </div>
+                {/* Custom Audio Controls */}
+                <div style={{ textAlign: "center", marginBottom: "20px" }}>
+                   <div style={{marginBottom: "10px", fontWeight: 500, fontSize: "1.05rem"}}>Điều khiển âm thanh</div>
+                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", marginBottom: "15px" }}>
+                    <button 
+                      onClick={togglePlay}
+                      style={{ 
+                        minWidth: "80px", height: "36px", borderRadius: "6px", 
+                        background: playerReady ? "#e94560" : "#555", 
+                        border: "none", fontSize: "1rem", cursor: playerReady ? "pointer" : "not-allowed",
+                        color: "white", fontWeight: 500
+                      }}
+                      disabled={!playerReady}
+                    >
+                      {isPlaying ? "Tạm dừng" : "Phát"}
+                    </button>
+                   </div>
+                   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "6px" }}>
+                    <span style={{fontSize: "0.98rem"}}>Âm lượng</span>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="100" 
+                      value={volume} 
+                      onChange={handleVolume}
+                      style={{ accentColor: "#e94560" }}
+                    />
+                    <span style={{fontSize: "0.98rem"}}>{volume}%</span>
+                   </div>
+                </div>
+                 <div style={{ fontSize: "0.8rem", color: "#aaa", textAlign: "center" }}>
+                  * Powered by YouTube IFrame API
+                </div>
+              </div>
+            )}
+          </div>
           </div>
         </div>
-      </div>
+        </div>
     </Layout>
   );
 }

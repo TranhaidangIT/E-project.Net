@@ -462,8 +462,6 @@ function SongManagement() {
                                         </div>
                                     )}
                                 </div>
-                                </>
-                            )}
 
                             <div className="modal-buttons">
                                 <button type="submit" className="btn-primary">

@@ -122,55 +122,6 @@ function MusicPlayer({ song, onNext, onPrevious }) {
                         <h3>{song.songName}</h3>
                         <p>{song.artistName}</p>
                     </div>
-                    <div className="player-actions">
-                        <button 
-                            className={`player-action-btn like-btn ${isLiked ? 'liked' : ''}`}
-                            onClick={handleLikeToggle}
-                            title={isLiked ? 'Bỏ thích' : 'Thích'}
-                        >
-                            <svg viewBox="0 0 24 24" width="20" height="20" fill={isLiked ? '#e74c3c' : 'currentColor'}>
-                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                            </svg>
-                        </button>
-                        <div className="playlist-dropdown-container" ref={dropdownRef}>
-                            <button 
-                                className="player-action-btn add-btn"
-                                onClick={() => {
-                                    if (!user) {
-                                        navigate('/login');
-                                        return;
-                                    }
-                                    setShowPlaylistDropdown(!showPlaylistDropdown);
-                                }}
-                                title="Thêm vào Playlist"
-                            >
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                                </svg>
-                            </button>
-                            {showPlaylistDropdown && (
-                                <div className="player-playlist-dropdown">
-                                    <div className="dropdown-header">Thêm vào Playlist</div>
-                                    {playlistMessage && (
-                                        <div className="dropdown-message">{playlistMessage}</div>
-                                    )}
-                                    {playlists.length === 0 ? (
-                                        <div className="dropdown-empty">Chưa có playlist</div>
-                                    ) : (
-                                        playlists.map(playlist => (
-                                            <div 
-                                                key={playlist.playlistID}
-                                                className="dropdown-item"
-                                                onClick={() => handleAddToPlaylist(playlist.playlistID)}
-                                            >
-                                                {playlist.playlistName}
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
                 </div>
 
                 {/* CONTROLS */}

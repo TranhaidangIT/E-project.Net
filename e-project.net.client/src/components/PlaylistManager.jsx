@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { playlistAPI, songAPI } from '../services/api';
 import Layout from './Layout';
 import MusicPlayer from './MusicPlayer';
 import './PlaylistManager.css';
 
 const PlaylistManager = () => {
+    const navigate = useNavigate();
     const [playlists, setPlaylists] = useState([]);
     const [selectedPlaylist, setSelectedPlaylist] = useState(null);
     const [playlistDetail, setPlaylistDetail] = useState(null);
@@ -332,47 +334,43 @@ const PlaylistManager = () => {
                                     + Thêm bài hát đầu tiên
                                 </button>
                             </div>
-
+                        ) : (
                             <div className="songs-list">
-                                {playlistDetail.songs.length === 0 ? (
-                                    <p className="no-data">Chưa có bài hát trong playlist này</p>
-                                ) : (
-                                    playlistDetail.songs.map((song, index) => {
-                                        const isPlayingThis = currentSong?.songID === song.songID;
-                                        return (
-                                            <div 
-                                                key={song.playlistSongID} 
-                                                className={`song-item ${isPlayingThis ? 'playing' : ''}`}
-                                                onClick={() => playSong(song, index)}
-                                                style={{ cursor: 'pointer', borderLeft: isPlayingThis ? '4px solid #e94560' : 'none' }}
-                                            >
-                                                <span className="song-number">
-                                                    {isPlayingThis ? '▶️' : index + 1}
-                                                </span>
-                                                <div className="song-info">
-                                                    <h4 style={{ color: isPlayingThis ? '#e94560' : 'inherit' }}>
-                                                        {song.songName}
-                                                    </h4>
-                                                    <p>{song.artistName}</p>
-                                                </div>
-                                                {song.duration && (
-                                                    <span className="duration">
-                                                        {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
-                                                    </span>
-                                                )}
-                                                <button 
-                                                    className="btn-remove"
-                                                    onClick={(e) => handleRemoveSong(song.songID, e)}
-                                                >
-                                                    Xóa
-                                                </button>
+                                {playlistDetail.songs.map((song, index) => {
+                                    const isPlayingThis = currentSong?.songID === song.songID;
+                                    return (
+                                        <div 
+                                            key={song.playlistSongID} 
+                                            className={`song-item ${isPlayingThis ? 'playing' : ''}`}
+                                            onClick={() => playSong(song, index)}
+                                            style={{ cursor: 'pointer', borderLeft: isPlayingThis ? '4px solid #e94560' : 'none' }}
+                                        >
+                                            <span className="song-number">
+                                                {isPlayingThis ? '▶️' : index + 1}
+                                            </span>
+                                            <div className="song-info">
+                                                <h4 style={{ color: isPlayingThis ? '#e94560' : 'inherit' }}>
+                                                    {song.songName}
+                                                </h4>
+                                                <p>{song.artistName}</p>
                                             </div>
-                                        );
-                                    })
-                                )}
+                                            {song.duration && (
+                                                <span className="duration">
+                                                    {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
+                                                </span>
+                                            )}
+                                            <button 
+                                                className="btn-remove"
+                                                onClick={(e) => handleRemoveSong(song.songID, e)}
+                                            >
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        </>
-                    )}
+                        )}
+                    </div>
                 </div>
             )}
 
