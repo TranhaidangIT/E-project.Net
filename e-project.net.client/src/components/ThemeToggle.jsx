@@ -6,11 +6,10 @@ const ThemeToggle = () => {
     return (
         <button
             onClick={toggleTheme}
-            className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors text-xl"
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            aria-label="Toggle Theme"
+            className="p-2 rounded-lg bg-surface hover:bg-surface-hover transition-colors border border-border-color"
+            title={theme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}
         >
-            {theme === 'dark' ? '☀️' : '🌙'}
+            <span className="text-sm font-medium text-text-primary">{theme === 'dark' ? 'Light' : 'Dark'}</span>
         </button>
     );
 };

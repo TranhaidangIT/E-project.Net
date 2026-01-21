@@ -18,37 +18,37 @@ import YouTubePage from './pages/YouTubePage';
 // Protected Route Component
 function ProtectedRoute({ children }) {
     const { user, loading } = useAuth();
-    
+
     if (loading) {
         return <div className="loading">Đang tải...</div>;
     }
-    
+
     return user ? children : <Navigate to="/login" />;
 }
 
 // Admin Route Component
 function AdminRoute({ children }) {
     const { user, loading } = useAuth();
-    
+
     if (loading) {
         return <div className="loading">Đang tải...</div>;
     }
-    
+
     if (!user) {
         return <Navigate to="/login" />;
     }
-    
+
     return user.isAdmin ? children : <Navigate to="/" />;
 }
 
 // Public Route (redirect if logged in)
 function PublicRoute({ children }) {
     const { user, loading } = useAuth();
-    
+
     if (loading) {
         return <div className="loading">Đang tải...</div>;
     }
-    
+
     return user ? <Navigate to="/profile" /> : children;
 }
 

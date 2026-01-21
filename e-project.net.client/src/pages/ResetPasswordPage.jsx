@@ -68,7 +68,7 @@ function ResetPasswordPage() {
                 newPassword: formData.newPassword,
                 confirmPassword: formData.confirmPassword,
             });
-            
+
             if (response.data.success) {
                 alert('✅ Đặt lại mật khẩu thành công! Vui lòng đăng nhập.');
                 navigate('/login');
@@ -97,7 +97,11 @@ function ResetPasswordPage() {
             <Layout>
                 <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-4">
                     <div className="w-full max-w-md bg-surface/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8 text-center animate-fade-in">
-                        <div className="text-5xl mb-4">❌</div>
+                        <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </div>
                         <h2 className="text-2xl font-bold text-white mb-4">Mã Không Hợp Lệ</h2>
                         <div className="bg-red-500/10 text-red-200 p-4 rounded-xl mb-6">{error}</div>
                         <div className="space-y-3">
@@ -119,18 +123,25 @@ function ResetPasswordPage() {
             <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-4">
                 <div className="w-full max-w-md bg-surface/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8 animate-fade-in">
                     <div className="text-center mb-8">
-                        <h2 className="text-2xl font-bold text-white mb-2">🔑 Đặt Lại Mật Khẩu</h2>
+                        <div className="flex justify-center mb-4">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <h2 className="text-2xl font-bold text-white mb-2">Đặt Lại Mật Khẩu</h2>
                         <p className="text-text-secondary">
                             Nhập mật khẩu mới của bạn
                         </p>
                     </div>
-                
+
                     {error && (
                         <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-200 text-sm text-center">
                             {error}
                         </div>
                     )}
-                    
+
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-text-secondary">Mã khôi phục</label>
@@ -156,7 +167,7 @@ function ResetPasswordPage() {
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all"
                             />
                         </div>
-                        
+
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-text-secondary">Xác nhận mật khẩu</label>
                             <input
@@ -170,16 +181,16 @@ function ResetPasswordPage() {
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all"
                             />
                         </div>
-                        
-                        <button 
-                            type="submit" 
-                            disabled={loading} 
+
+                        <button
+                            type="submit"
+                            disabled={loading}
                             className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary-hover hover:to-secondary-hover text-white font-bold py-3 rounded-xl shadow-lg transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Đang xử lý...' : 'Đặt Lại Mật Khẩu'}
                         </button>
                     </form>
-                    
+
                     <div className="mt-8 text-center">
                         <Link to="/login" className="text-text-secondary hover:text-white transition-colors text-sm">
                             ← Quay lại đăng nhập

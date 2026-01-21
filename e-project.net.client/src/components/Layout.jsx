@@ -27,28 +27,28 @@ const Layout = ({ children }) => {
 
     return (
         <div className="min-h-screen flex flex-col bg-background-start to-background-end">
-            {/* Header / Navbar */}
-            <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-background-start/80 backdrop-blur-md shadow-lg border-b border-white/5' : 'bg-transparent'}`}>
-                <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-8">
-                        <Link to="/" className="flex items-center gap-2 group">
-                            <span className="text-2xl group-hover:scale-110 transition-transform duration-200">🎵</span>
-                            <span className="text-xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Music Web</span>
+            {/* Header / Navbar - Improved */}
+            <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-background-start/90 backdrop-blur-lg shadow-lg border-b border-white/5' : 'bg-transparent'}`}>
+                <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-12">
+                        <Link to="/" className="flex items-center gap-3 group">
+                            <img src="/wave-sound.png" alt="Music Web" className="w-10 h-10 group-hover:scale-105 transition-transform duration-200" />
+                            <span className="text-2xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Music Web</span>
                         </Link>
-                        
+
                         {/* Navigation Desktop */}
-                        <nav className="hidden md:flex items-center gap-6">
-                            <Link to="/" className={`text-sm font-medium transition-colors ${isActive('/')}`}>
+                        <nav className="hidden md:flex items-center gap-8">
+                            <Link to="/" className={`text-base font-medium transition-colors ${isActive('/')}`}>
                                 Trang Chủ
                             </Link>
-                            <Link to="/music" className={`text-sm font-medium transition-colors ${isActive('/music')}`}>
+                            <Link to="/music" className={`text-base font-medium transition-colors ${isActive('/music')}`}>
                                 Âm Nhạc
                             </Link>
-                            <Link to="/youtube" className={`text-sm font-medium transition-colors ${isActive('/youtube')}`}>
+                            <Link to="/youtube" className={`text-base font-medium transition-colors ${isActive('/youtube')}`}>
                                 YouTube
                             </Link>
                             {user && (
-                                <Link to="/playlists" className={`text-sm font-medium transition-colors ${isActive('/playlists')}`}>
+                                <Link to="/playlists" className={`text-base font-medium transition-colors ${isActive('/playlists')}`}>
                                     Playlist
                                 </Link>
                             )}
@@ -72,20 +72,20 @@ const Layout = ({ children }) => {
                                         )}
                                     </div>
                                 </div>
-                                
+
                                 {/* Dropdown Menu */}
                                 <div className="absolute top-full right-0 mt-2 w-48 bg-surface backdrop-blur-xl border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50">
                                     <div className="py-1">
                                         <Link to="/profile" className="block px-4 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 mx-1 rounded-lg">
-                                            👤 Hồ Sơ
+                                            Hồ Sơ
                                         </Link>
                                         {user.isAdmin && (
                                             <Link to="/admin" className="block px-4 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 mx-1 rounded-lg">
-                                                ⚙️ Quản Trị
+                                                Quản Trị
                                             </Link>
                                         )}
                                         <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-white/5 mx-1 rounded-lg">
-                                            🚪 Đăng Xuất
+                                            Đăng Xuất
                                         </button>
                                     </div>
                                 </div>
@@ -100,7 +100,7 @@ const Layout = ({ children }) => {
                                 </Link>
                             </div>
                         )}
-                        
+
                         {/* Mobile Menu Button */}
                         <button className="md:hidden text-white p-2" onClick={() => setMenuOpen(!menuOpen)}>
                             ☰
@@ -120,7 +120,7 @@ const Layout = ({ children }) => {
             </header>
 
             {/* Main Content */}
-            <main className="flex-grow pt-20 px-4 pb-12 w-full max-w-7xl mx-auto">
+            <main className="flex-grow pt-24 px-4 pb-12 w-full max-w-7xl mx-auto">
                 {children}
             </main>
 
@@ -130,13 +130,13 @@ const Layout = ({ children }) => {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <div className="col-span-1 md:col-span-1">
                             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                <span>🎵</span> Music Web
+                                <img src="/wave-sound.png" alt="Music Web" className="w-6 h-6" /> Music Web
                             </h3>
                             <p className="text-text-muted text-sm">
                                 Nền tảng nghe nhạc trực tuyến với trải nghiệm đỉnh cao.
                             </p>
                         </div>
-                        
+
                         <div>
                             <h4 className="font-bold text-white mb-4">Liên Kết</h4>
                             <ul className="space-y-2 text-sm text-text-secondary">
@@ -145,7 +145,7 @@ const Layout = ({ children }) => {
                                 {user && <li><Link to="/playlists" className="hover:text-primary transition-colors">Playlist</Link></li>}
                             </ul>
                         </div>
-                        
+
                         <div>
                             <h4 className="font-bold text-white mb-4">Hỗ Trợ</h4>
                             <ul className="space-y-2 text-sm text-text-secondary">
@@ -154,13 +154,13 @@ const Layout = ({ children }) => {
                                 <li><a href="#" className="hover:text-primary transition-colors">Chính Sách</a></li>
                             </ul>
                         </div>
-                        
+
                         <div>
                             <h4 className="font-bold text-white mb-4">Kết Nối</h4>
                             <div className="flex gap-4">
-                                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary hover:scale-110 transition-all">FB</a>
-                                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary hover:scale-110 transition-all">IG</a>
-                                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary hover:scale-110 transition-all">YT</a>
+                                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary transition-all">FB</a>
+                                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary transition-all">IG</a>
+                                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary transition-all">YT</a>
                             </div>
                         </div>
                     </div>

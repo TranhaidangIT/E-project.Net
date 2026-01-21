@@ -12,17 +12,17 @@ function SongManagement() {
     const [editMode, setEditMode] = useState(false);
     const [currentSong, setCurrentSong] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-    
+
     // Drag & Drop state
     const [dragActive, setDragActive] = useState(false);
     const fileInputRef = useRef(null);
-    
+
     const [formData, setFormData] = useState({
         songName: '',
         artistName: '',
         file: null
     });
-    
+
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
@@ -109,7 +109,7 @@ function SongManagement() {
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             const droppedFile = e.dataTransfer.files[0];
             if (droppedFile.type.startsWith('audio/')) {
-                 setFormData({ ...formData, file: droppedFile });
+                setFormData({ ...formData, file: droppedFile });
             } else {
                 setError('Chỉ chấp nhận file âm thanh (MP3, WAV...)');
             }
@@ -139,12 +139,12 @@ function SongManagement() {
                     setError('Vui lòng chọn file nhạc (.mp3)');
                     return;
                 }
-                
+
                 const data = new FormData();
                 data.append('songName', formData.songName);
                 data.append('artistName', formData.artistName);
                 data.append('file', formData.file);
-                
+
                 await songAPI.createSong(data);
                 // alert('✅ Thêm bài hát thành công!');
             }
@@ -191,18 +191,18 @@ function SongManagement() {
                     </div>
                     <div className="flex items-center gap-3">
                         <button onClick={() => navigate('/admin')} className="px-4 py-2 rounded-lg bg-surface border border-white/10 text-white hover:bg-surface-hover transition-colors flex items-center gap-2">
-                            <span>👥</span> Quản lý Users
+                            Quản lý Users
                         </button>
                         <button onClick={() => navigate('/profile')} className="px-4 py-2 rounded-lg bg-surface border border-white/10 text-white hover:bg-surface-hover transition-colors flex items-center gap-2">
-                            <span>👤</span> Hồ sơ
+                            Hồ sơ
                         </button>
-                         <button onClick={logout} className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-colors">
+                        <button onClick={logout} className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-colors">
                             Đăng xuất
                         </button>
                     </div>
                 </div>
 
-                 {/* Actions Bar */}
+                {/* Actions Bar */}
                 <div className="glass-panel p-4 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
                     <div className="relative flex-1 w-full md:max-w-md">
                         <input
@@ -215,7 +215,7 @@ function SongManagement() {
                         />
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">🔍</span>
                     </div>
-                    
+
                     <div className="flex items-center gap-3 w-full md:w-auto">
                         <button onClick={handleSearch} className="px-4 py-2.5 rounded-lg bg-surface hover:bg-surface-hover text-white transition-colors border border-white/10 flex-1 md:flex-none">
                             Tìm Kiếm
@@ -232,9 +232,9 @@ function SongManagement() {
                 {/* Songs Table */}
                 <div className="glass-panel p-6 overflow-hidden">
                     <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                        <span>🎵</span> Danh Sách Bài Hát <span className="text-sm font-normal text-text-secondary bg-white/5 px-2 py-0.5 rounded-full ml-2">{songs.length}</span>
+                        Danh Sách Bài Hát <span className="text-sm font-normal text-text-secondary bg-white/5 px-2 py-0.5 rounded-full ml-2">{songs.length}</span>
                     </h2>
-                    
+
                     {error && <div className="mb-4 text-red-400 text-sm text-center bg-red-500/10 p-2 rounded-lg border border-red-500/20">{error}</div>}
 
                     <div className="overflow-x-auto">
@@ -266,14 +266,14 @@ function SongManagement() {
                                                     className="p-2 rounded-lg hover:bg-amber-500/20 text-amber-500 transition-colors"
                                                     title="Sửa"
                                                 >
-                                                    ✏️
+                                                    Sửa
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(song.songID)}
                                                     className="p-2 rounded-lg hover:bg-red-500/20 text-red-500 transition-colors"
                                                     title="Xóa"
                                                 >
-                                                    🗑️
+                                                    Xóa
                                                 </button>
                                             </div>
                                         </td>
@@ -285,7 +285,9 @@ function SongManagement() {
 
                     {songs.length === 0 && !loading && (
                         <div className="text-center py-12 text-text-muted">
-                            <p className="text-4xl mb-4 opacity-50">🎵</p>
+                            <div className="mb-4">
+                                <img src="/wave-sound.png" alt="No songs" className="w-16 h-16 mx-auto opacity-50" />
+                            </div>
                             <p>Không có bài hát nào được tìm thấy</p>
                         </div>
                     )}
@@ -297,13 +299,13 @@ function SongManagement() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={handleCloseModal}>
                     <div className="bg-[#1e1e1e] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
-                            <h2 className="text-xl font-bold text-white">{editMode ? '✏️ Cập Nhật Bài Hát' : '➕ Thêm Bài Hát Mới'}</h2>
+                            <h2 className="text-xl font-bold text-white">{editMode ? 'Cập Nhật Bài Hát' : 'Thêm Bài Hát Mới'}</h2>
                             <button onClick={handleCloseModal} className="text-text-muted hover:text-white transition-colors text-2xl leading-none">&times;</button>
                         </div>
-                        
+
                         <div className="p-6">
                             {error && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-sm text-center">{error}</div>}
-                            
+
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-text-muted mb-1">Tên Bài Hát <span className="text-red-500">*</span></label>
@@ -334,14 +336,13 @@ function SongManagement() {
                                 {!editMode && (
                                     <div>
                                         <label className="block text-sm font-medium text-text-muted mb-1">File Nhạc (.mp3) <span className="text-red-500">*</span></label>
-                                        <div 
-                                            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                                                dragActive 
-                                                ? 'border-primary bg-primary/10' 
-                                                : formData.file 
-                                                    ? 'border-green-500/50 bg-green-500/5' 
+                                        <div
+                                            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${dragActive
+                                                ? 'border-primary bg-primary/10'
+                                                : formData.file
+                                                    ? 'border-green-500/50 bg-green-500/5'
                                                     : 'border-white/10 hover:border-white/30 hover:bg-white/5'
-                                            }`}
+                                                }`}
                                             onDragEnter={handleDrag}
                                             onDragLeave={handleDrag}
                                             onDragOver={handleDrag}
@@ -358,13 +359,17 @@ function SongManagement() {
                                             />
                                             {formData.file ? (
                                                 <div className="text-green-400">
-                                                    <div className="text-3xl mb-2">🎵</div>
+                                                    <div className="mb-2">
+                                                        <img src="/wave-sound.png" alt="Upload" className="w-12 h-12 mx-auto opacity-50" />
+                                                    </div>
                                                     <p className="font-medium truncate max-w-[200px] mx-auto">{formData.file.name}</p>
                                                     <p className="text-xs opacity-70 mt-1">Click để thay đổi</p>
                                                 </div>
                                             ) : (
                                                 <div className="text-text-muted">
-                                                    <div className="text-3xl mb-2 opacity-50">☁️</div>
+                                                    <div className="mb-2">
+                                                        <span className="text-2xl opacity-50">☁</span>
+                                                    </div>
                                                     <p className="font-medium text-white mb-1">Kéo thả file vào đây</p>
                                                     <p className="text-xs">hoặc click để chọn file</p>
                                                 </div>

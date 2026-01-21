@@ -41,7 +41,7 @@ function AdminDashboard() {
             setError('Không thể thay đổi quyền của chính mình');
             return;
         }
-        
+
         try {
             await adminAPI.toggleAdmin(userId, !currentStatus);
             setMessage('Cập nhật quyền thành công!');
@@ -57,7 +57,7 @@ function AdminDashboard() {
             setError('Không thể xóa chính mình');
             return;
         }
-        
+
         if (!window.confirm(`Bạn có chắc muốn xóa user "${username}"?`)) {
             return;
         }
@@ -91,15 +91,15 @@ function AdminDashboard() {
                             Dashboard Quản Trị
                         </h1>
                         <p className="text-text-secondary">
-                            Xin chào, <strong className="text-primary">{user?.fullName || user?.username}</strong> 👑
+                            Xin chào, <strong className="text-primary">{user?.fullName || user?.username}</strong>
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
                         <Link to="/admin/songs" className="px-4 py-2 rounded-lg bg-surface border border-border-color text-text-primary hover:bg-surface-hover transition-colors flex items-center gap-2">
-                            <span>🎵</span> Quản lý Bài hát
+                            Quản lý Bài hát
                         </Link>
                         <Link to="/profile" className="px-4 py-2 rounded-lg bg-surface border border-border-color text-text-primary hover:bg-surface-hover transition-colors flex items-center gap-2">
-                            <span>👤</span> Hồ sơ
+                            Hồ sơ
                         </Link>
                         <button onClick={handleLogout} className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-colors">
                             Đăng xuất
@@ -113,8 +113,10 @@ function AdminDashboard() {
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="glass-panel p-6 flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-3xl shadow-lg shadow-blue-500/20">
-                            👥
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
                         </div>
                         <div>
                             <h3 className="text-3xl font-bold text-text-primary">{stats.totalUsers}</h3>
@@ -122,8 +124,10 @@ function AdminDashboard() {
                         </div>
                     </div>
                     <div className="glass-panel p-6 flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center text-3xl shadow-lg shadow-amber-500/20">
-                            👑
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
                         </div>
                         <div>
                             <h3 className="text-3xl font-bold text-text-primary">{stats.totalAdmins}</h3>
@@ -132,7 +136,7 @@ function AdminDashboard() {
                     </div>
                     <div className="glass-panel p-6 flex items-center gap-4">
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-3xl shadow-lg shadow-purple-500/20">
-                            👤
+                            User
                         </div>
                         <div>
                             <h3 className="text-3xl font-bold text-text-primary">{stats.totalUsers - stats.totalAdmins}</h3>
@@ -144,9 +148,9 @@ function AdminDashboard() {
                 {/* Users Table */}
                 <div className="glass-panel p-6 overflow-hidden">
                     <h2 className="text-xl font-bold text-text-primary mb-6 flex items-center gap-2">
-                        <span>📋</span> Danh Sách Người Dùng
+                        Danh Sách Người Dùng
                     </h2>
-                    
+
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
@@ -176,36 +180,34 @@ function AdminDashboard() {
                                         <td className="py-4 text-text-secondary text-sm">{u.email}</td>
                                         <td className="py-4 text-text-primary text-sm">{u.fullName || '-'}</td>
                                         <td className="py-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                                                u.isAdmin 
-                                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' 
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${u.isAdmin
+                                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                                                 : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                                            }`}>
-                                                {u.isAdmin ? '👑 Admin' : '👤 User'}
+                                                }`}>
+                                                {u.isAdmin ? 'Admin' : 'User'}
                                             </span>
                                         </td>
                                         <td className="py-4 text-text-secondary text-sm">{new Date(u.createdAt).toLocaleDateString('vi-VN')}</td>
                                         <td className="py-4 text-center">
                                             <div className="flex items-center justify-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                <button 
+                                                <button
                                                     onClick={() => handleToggleAdmin(u.userID, u.isAdmin)}
                                                     disabled={u.userID === user.userID}
-                                                    className={`p-2 rounded-lg transition-colors ${
-                                                        u.isAdmin 
-                                                        ? 'hover:bg-amber-500/20 text-amber-500' 
+                                                    className={`p-2 rounded-lg transition-colors ${u.isAdmin
+                                                        ? 'hover:bg-amber-500/20 text-amber-500'
                                                         : 'hover:bg-blue-500/20 text-blue-500'
-                                                    } disabled:opacity-30 disabled:cursor-not-allowed`}
+                                                        } disabled:opacity-30 disabled:cursor-not-allowed`}
                                                     title={u.isAdmin ? 'Hủy quyền Admin' : 'Cấp quyền Admin'}
                                                 >
-                                                    {u.isAdmin ? '⬇️' : '⬆️'}
+                                                    {u.isAdmin ? '↓' : '↑'}
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => handleDeleteUser(u.userID, u.username)}
                                                     disabled={u.userID === user.userID}
                                                     className="p-2 rounded-lg hover:bg-red-500/20 text-red-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                                     title="Xóa user"
                                                 >
-                                                    🗑️
+                                                    Xóa
                                                 </button>
                                             </div>
                                         </td>

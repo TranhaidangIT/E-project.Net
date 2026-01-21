@@ -4,7 +4,6 @@ import { useAuth } from '../hooks/useAuth';
 import { songAPI, playlistAPI } from '../services/api';
 import MusicPlayer from '../components/MusicPlayer';
 import Layout from '../components/Layout';
-// import './MusicPage.css'; // Removed
 
 function MusicPage() {
     // ===== STATE =====
@@ -20,7 +19,7 @@ function MusicPage() {
     const [playlistMessage, setPlaylistMessage] = useState('');
     const [favoritesPlaylist, setFavoritesPlaylist] = useState(null);
     const [likedSongIds, setLikedSongIds] = useState(new Set());
-    
+
     const { user } = useAuth();
     const navigate = useNavigate();
 
@@ -34,7 +33,7 @@ function MusicPage() {
 
     useEffect(() => {
         const fetchIds = async () => {
-             if (!favoritesPlaylist) return;
+            if (!favoritesPlaylist) return;
             try {
                 const res = await playlistAPI.getPlaylistById(favoritesPlaylist.playlistID);
                 const ids = new Set(res.data.songs.map(s => s.songID));
@@ -117,18 +116,17 @@ function MusicPage() {
 
             const playlistId = targetPlaylist.playlistID;
             const songId = song.songID;
-            
-            // Optimistic Update (Complex without local state toggle, so we fetch)
+
             const detailRes = await playlistAPI.getPlaylistById(playlistId);
             const isLiked = detailRes.data.songs.some(s => s.songID === songId);
-            
+
             if (isLiked) {
                 await playlistAPI.removeSongFromPlaylist(playlistId, songId);
             } else {
                 await playlistAPI.addSongToPlaylist(playlistId, songId);
             }
-            await fetchFavoriteSongsIds(); 
-            
+            await fetchFavoriteSongsIds();
+
         } catch (err) {
             alert('Lỗi cập nhật yêu thích');
             console.error(err);
@@ -184,10 +182,10 @@ function MusicPage() {
         <Layout>
             {/* 3-Column Layout Container */}
             <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] -mx-4 -mb-12">
-                
+
                 {/* COL 1: PLAYER (Left) */}
                 <div className="w-full lg:w-1/4 bg-surface border-r border-border-color p-4 overflow-y-auto hidden lg:block">
-                    <MusicPlayer 
+                    <MusicPlayer
                         song={currentSong}
                         onNext={currentIndex < songs.length - 1 ? playNext : null}
                         onPrevious={currentIndex > 0 ? playPrevious : null}
@@ -197,68 +195,73 @@ function MusicPage() {
                 {/* COL 2: SONG LIST (Center) - Expanded */}
                 <div className="w-full lg:w-3/4 flex flex-col bg-transparent relative">
                     {/* Header / Search */}
-                    <div className="p-6 sticky top-0 z-20 bg-surface/95 backdrop-blur border-b border-border-color shadow-md">
-                        <div className="relative">
+                    <div className="p-8 sticky top-0 z-20 bg-surface/95 backdrop-blur border-b border-border-color shadow-sm">
+                        <h1 className="text-3xl font-bold text-text-primary mb-4">Khám Phá Âm Nhạc</h1>
+                        <div className="relative max-w-2xl">
                             <input
                                 type="text"
                                 placeholder="Tìm kiếm bài hát, nghệ sĩ..."
-                                className="w-full bg-surface border border-border-color rounded-full py-3 px-12 text-text-primary focus:outline-none focus:border-primary focus:bg-surface-hover transition-all"
+                                className="w-full bg-surface border border-border-color rounded-xl py-4 px-14 text-text-primary placeholder-text-muted focus:outline-none focus:border-primary focus:bg-surface-hover transition-all text-lg"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                             />
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">🔍</span>
+                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted text-xl">⌕</span>
                         </div>
                     </div>
 
                     {/* Song Table */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
                         {loading ? (
-                            <div className="flex items-center justify-center h-full text-primary">Đang tải...</div>
+                            <div className="flex items-center justify-center h-full text-primary text-lg">Đang tải...</div>
                         ) : error ? (
                             <div className="flex items-center justify-center h-full text-red-400">{error}</div>
                         ) : (
                             <table className="w-full text-left border-collapse">
-                                <thead className="sticky top-0 bg-surface/95 z-10 text-xs text-text-muted uppercase tracking-wider">
-                                    <tr>
-                                        <th className="p-3 text-center w-12">#</th>
-                                        <th className="p-3 w-1/2">Tiêu đề</th>
-                                        <th className="p-3 text-right">Thao tác</th>
+                                <thead className="sticky top-0 bg-surface/95 z-10 text-sm text-text-muted uppercase tracking-wider">
+                                    <tr className="border-b border-border-color">
+                                        <th className="p-4 text-center w-16">#</th>
+                                        <th className="p-4">Tiêu đề</th>
+                                        <th className="p-4 text-right w-32">Thao tác</th>
                                     </tr>
                                 </thead>
-                                <tbody className="text-sm">
+                                <tbody className="text-base">
                                     {songs.map((song, index) => {
                                         const isCurrent = currentSong?.songID === song.songID;
                                         return (
-                                            <tr 
+                                            <tr
                                                 key={song.songID}
                                                 onClick={() => playSong(song, index)}
                                                 className={`group border-b border-border-color hover:bg-surface-hover transition-colors cursor-pointer ${isCurrent ? 'bg-primary/10 border-l-4 border-l-primary' : ''}`}
                                             >
-                                                <td className="p-3 text-center text-text-muted font-medium w-12">
-                                                    {isCurrent ? <span className="text-primary animate-pulse">▶</span> : index + 1}
+                                                <td className="p-4 text-center text-text-muted font-medium w-16">
+                                                    {isCurrent ? (
+                                                        <svg className="w-4 h-4 text-primary inline" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M8 5v14l11-7z" />
+                                                        </svg>
+                                                    ) : index + 1}
                                                 </td>
-                                                <td className="p-3">
-                                                    <div className="flex flex-col">
-                                                        <span className={`font-medium text-base ${isCurrent ? 'text-primary' : 'text-text-primary'}`}>{song.songName}</span>
-                                                        <span className="text-xs text-text-secondary group-hover:text-text-primary transition-colors">{song.artistName}</span>
+                                                <td className="p-4">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className={`font-semibold text-lg ${isCurrent ? 'text-primary' : 'text-text-primary'}`}>{song.songName}</span>
+                                                        <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">{song.artistName}</span>
                                                     </div>
                                                 </td>
-                                                <td className="p-3 text-right">
-                                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <td className="p-4 text-right">
+                                                    <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button
                                                             onClick={(e) => toggleFavorite(song, e)}
-                                                            className={`p-2 rounded-full hover:bg-surface-hover transition-colors ${likedSongIds.has(song.songID) ? 'text-primary' : 'text-text-muted'}`}
+                                                            className={`p-2 rounded-lg hover:bg-surface transition-colors ${likedSongIds.has(song.songID) ? 'text-primary' : 'text-text-muted'}`}
                                                             title="Yêu thích"
                                                         >
-                                                            {likedSongIds.has(song.songID) ? '❤️' : '♡'}
+                                                            {likedSongIds.has(song.songID) ? '♥' : '♡'}
                                                         </button>
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => openPlaylistModal(song, e)}
-                                                            className="p-2 rounded-full hover:bg-surface-hover text-text-muted hover:text-text-primary transition-colors"
+                                                            className="p-2 rounded-lg hover:bg-surface text-text-muted hover:text-text-primary transition-colors"
                                                             title="Thêm vào playlist"
                                                         >
-                                                            ➕
+                                                            +
                                                         </button>
                                                     </div>
                                                 </td>
@@ -270,10 +273,6 @@ function MusicPage() {
                         )}
                     </div>
                 </div>
-
-
-                {/* Mobile Player (Sticky Bottom if needed or use the main one but formatted differently) */}
-                {/* For now, hidden on mobile layout as requested focus is desktop but valid to consider */}
             </div>
 
             {/* MODAL */}
@@ -288,7 +287,7 @@ function MusicPage() {
                             <p className="text-text-secondary mb-4">
                                 Thêm bài hát <strong className="text-text-primary">{selectedSongForPlaylist?.songName}</strong> vào:
                             </p>
-                            
+
                             {playlistMessage && (
                                 <div className={`p-3 rounded-lg text-center mb-4 text-sm font-medium ${playlistMessage.includes('✅') ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                                     {playlistMessage}
@@ -298,7 +297,7 @@ function MusicPage() {
                             {playlists.length === 0 ? (
                                 <div className="text-center py-6">
                                     <p className="text-text-muted mb-4">Bạn chưa có playlist nào</p>
-                                    <button 
+                                    <button
                                         className="btn-primary"
                                         onClick={() => navigate('/playlists')}
                                     >
@@ -308,13 +307,17 @@ function MusicPage() {
                             ) : (
                                 <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
                                     {playlists.map(playlist => (
-                                        <div 
+                                        <div
                                             key={playlist.playlistID}
                                             className="flex items-center justify-between p-3 rounded-xl bg-surface hover:bg-surface-hover cursor-pointer transition-colors group border border-transparent hover:border-border-color"
                                             onClick={() => addToPlaylist(playlist.playlistID)}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <span className="text-xl">📋</span>
+                                                <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
+                                                    <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+                                                    </svg>
+                                                </div>
                                                 <div>
                                                     <h4 className="text-sm font-bold text-text-primary group-hover:text-primary transition-colors">{playlist.playlistName}</h4>
                                                     <p className="text-xs text-text-muted">{playlist.songCount} bài hát</p>
@@ -334,4 +337,3 @@ function MusicPage() {
 }
 
 export default MusicPage;
-    
