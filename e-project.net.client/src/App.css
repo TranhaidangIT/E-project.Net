@@ -10,9 +10,9 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background: linear-gradient(135deg, var(--bg-main-start) 0%, var(--bg-main-end) 50%, var(--bg-main-end) 100%);
     min-height: 100vh;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 /* Container */
@@ -26,21 +26,21 @@ body {
 
 /* Card */
 .auth-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+    background: var(--bg-surface);
+    backdrop-filter: blur(var(--backdrop-blur));
     border-radius: 20px;
     padding: 40px;
     width: 100%;
     max-width: 450px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
 }
 
 .auth-card h2 {
     text-align: center;
     margin-bottom: 30px;
     font-size: 1.8rem;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 /* Form */
@@ -52,28 +52,28 @@ body {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
-    color: #e0e0e0;
+    color: var(--text-secondary);
 }
 
 .form-group input {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid var(--border-color);
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: var(--bg-glass);
+    color: var(--text-primary);
     font-size: 1rem;
     transition: all 0.3s ease;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #e94560;
-    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary);
+    background: var(--bg-surface-hover);
 }
 
 .form-group input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-muted);
 }
 
 /* Buttons */
@@ -93,14 +93,14 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
-    color: #fff;
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    color: white;
     width: 100%;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+    box-shadow: 0 5px 20px rgba(236, 72, 153, 0.4);
 }
 
 .btn-primary:disabled {
@@ -110,23 +110,24 @@ body {
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--bg-surface-hover);
+    border-color: var(--text-secondary);
 }
 
 .btn-danger {
-    background: linear-gradient(135deg, #ff4757, #ff6b81);
-    color: #fff;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
 }
 
 .btn-danger:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(255, 71, 87, 0.4);
+    box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4);
 }
 
 /* Button Group */
@@ -145,9 +146,9 @@ body {
 
 /* Messages */
 .error-message {
-    background: rgba(255, 71, 87, 0.2);
-    border: 1px solid #ff4757;
-    color: #ff6b81;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid #ef4444;
+    color: #ef4444;
     padding: 12px;
     border-radius: 10px;
     margin-bottom: 20px;
@@ -155,9 +156,9 @@ body {
 }
 
 .success-message {
-    background: rgba(46, 213, 115, 0.2);
-    border: 1px solid #2ed573;
-    color: #7bed9f;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid #22c55e;
+    color: #22c55e;
     padding: 12px;
     border-radius: 10px;
     margin-bottom: 20px;
@@ -168,11 +169,11 @@ body {
 .auth-link {
     text-align: center;
     margin-top: 20px;
-    color: #e0e0e0;
+    color: var(--text-secondary);
 }
 
 .auth-link a {
-    color: #e94560;
+    color: var(--primary);
     text-decoration: none;
     font-weight: 600;
 }
@@ -191,43 +192,44 @@ body {
 }
 
 .forgot-password-link {
-    color: #ffa502;
+    color: var(--secondary);
     text-decoration: none;
     font-size: 0.9rem;
     transition: all 0.3s ease;
 }
 
 .forgot-password-link:hover {
-    color: #ff6348;
     text-decoration: underline;
+    opacity: 0.8;
 }
 
 /* Auth Description */
 .auth-description {
     text-align: center;
-    color: #a0a0a0;
+    color: var(--text-muted);
     margin-bottom: 20px;
     font-size: 0.95rem;
 }
 
 /* Token Display */
 .token-display {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface);
     padding: 15px;
     border-radius: 10px;
     margin: 15px 0;
     font-size: 1rem;
+    border: 1px solid var(--border-color);
 }
 
 .token-display strong {
-    color: #ffd700;
+    color: #fbbf24;
     font-size: 1.3rem;
     letter-spacing: 2px;
 }
 
 .token-note {
     font-size: 0.85rem;
-    color: #7bed9f;
+    color: #22c55e;
     margin-top: 10px;
 }
 
@@ -235,7 +237,7 @@ body {
 .disabled-input {
     opacity: 0.6;
     cursor: not-allowed;
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: var(--bg-glass) !important;
 }
 
 /* Profile */
@@ -253,20 +255,20 @@ body {
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #e94560;
+    border: 3px solid var(--primary);
 }
 
 .avatar-placeholder {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
     display: inline-flex;
     justify-content: center;
     align-items: center;
     font-size: 2.5rem;
     font-weight: bold;
-    color: #fff;
+    color: white;
 }
 
 .profile-info {
@@ -277,15 +279,15 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 12px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .info-item label {
-    color: #a0a0a0;
+    color: var(--text-secondary);
 }
 
 .info-item span {
-    color: #fff;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
@@ -297,13 +299,13 @@ body {
 }
 
 .badge.admin {
-    background: linear-gradient(135deg, #ffd700, #ffaa00);
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
     color: #000;
 }
 
 .badge.user {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: var(--bg-surface-hover);
+    color: var(--text-primary);
 }
 
 /* Home */
@@ -315,10 +317,11 @@ body {
 .home-card h1 {
     font-size: 2.5rem;
     margin-bottom: 10px;
+    color: var(--text-primary);
 }
 
 .subtitle {
-    color: #a0a0a0;
+    color: var(--text-secondary);
     margin-bottom: 30px;
 }
 
@@ -328,15 +331,16 @@ body {
 
 .features {
     text-align: left;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-surface);
     padding: 20px;
     border-radius: 15px;
     margin-top: 30px;
+    border: 1px solid var(--border-color);
 }
 
 .features h3 {
     margin-bottom: 15px;
-    color: #e94560;
+    color: var(--primary);
 }
 
 .features ul {
@@ -345,7 +349,7 @@ body {
 
 .features li {
     padding: 8px 0;
-    color: #e0e0e0;
+    color: var(--text-secondary);
 }
 
 /* Loading */
@@ -375,17 +379,19 @@ body {
     align-items: center;
     margin-bottom: 30px;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface);
     backdrop-filter: blur(10px);
     border-radius: 15px;
+    border: 1px solid var(--border-color);
 }
 
 .header-left h1 {
     margin-bottom: 5px;
+    color: var(--text-primary);
 }
 
 .header-left p {
-    color: #a0a0a0;
+    color: var(--text-secondary);
 }
 
 .header-right {
@@ -402,14 +408,14 @@ body {
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface);
     backdrop-filter: blur(10px);
     border-radius: 15px;
     padding: 25px;
     display: flex;
     align-items: center;
     gap: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
 }
 
 .stat-icon {
@@ -418,24 +424,25 @@ body {
 
 .stat-info h3 {
     font-size: 2rem;
-    color: #e94560;
+    color: var(--primary);
 }
 
 .stat-info p {
-    color: #a0a0a0;
+    color: var(--text-secondary);
 }
 
 /* Admin Card */
 .admin-card {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface);
     backdrop-filter: blur(10px);
     border-radius: 15px;
     padding: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
 }
 
 .admin-card h2 {
     margin-bottom: 20px;
+    color: var(--text-primary);
 }
 
 /* User Table */
@@ -448,21 +455,22 @@ body {
 .user-table td {
     padding: 15px;
     text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
 }
 
 .user-table th {
-    background: rgba(255, 255, 255, 0.05);
-    color: #e94560;
+    background: var(--bg-surface-hover);
+    color: var(--primary);
     font-weight: 600;
 }
 
 .user-table tr:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-surface-hover);
 }
 
 .user-table tr.current-user {
-    background: rgba(233, 69, 96, 0.1);
+    background: rgba(236, 72, 153, 0.1);
 }
 
 .user-cell {
@@ -475,12 +483,13 @@ body {
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
     display: flex;
     justify-content: center;
     align-items: center;
     font-weight: bold;
     font-size: 0.9rem;
+    color: white;
 }
 
 .you-badge {
@@ -561,17 +570,18 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 20px 40px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-surface);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .music-header .header-left h1 {
     margin-bottom: 5px;
+    color: var(--text-primary);
 }
 
 .music-header .header-left p {
-    color: #a0a0a0;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
@@ -582,7 +592,7 @@ body {
 }
 
 .welcome-text {
-    color: #e94560;
+    color: var(--primary);
     font-weight: 600;
     margin-right: 10px;
 }
@@ -603,15 +613,16 @@ body {
     flex: 1;
     padding: 15px 20px;
     border-radius: 25px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    border: 2px solid var(--border-color);
+    background: var(--bg-glass);
+    color: var(--text-primary);
     font-size: 1rem;
 }
 
+
 .search-bar input:focus {
     outline: none;
-    border-color: #e94560;
+    border-color: var(--primary);
 }
 
 /* Songs Container */
@@ -621,7 +632,7 @@ body {
 
 .songs-container h2 {
     margin-bottom: 20px;
-    color: #e94560;
+    color: var(--primary);
 }
 
 .songs-grid {
@@ -632,7 +643,7 @@ body {
 
 /* Song Card */
 .song-card {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface);
     backdrop-filter: blur(10px);
     border-radius: 15px;
     padding: 20px;
@@ -645,19 +656,19 @@ body {
 
 .song-card:hover {
     transform: translateY(-5px);
-    border-color: #e94560;
-    box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
+    border-color: var(--primary);
+    box-shadow: 0 10px 30px rgba(236, 72, 153, 0.3);
 }
 
 .song-card.active {
-    border-color: #e94560;
-    background: rgba(233, 69, 96, 0.2);
+    border-color: var(--primary);
+    background: rgba(236, 72, 153, 0.2);
 }
 
 .song-card-art {
     width: 100%;
     aspect-ratio: 1;
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
     border-radius: 10px;
     display: flex;
     justify-content: center;
@@ -675,14 +686,14 @@ body {
 .song-card-info h3 {
     font-size: 1.1rem;
     margin-bottom: 5px;
-    color: #fff;
+    color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .song-card-info .artist {
-    color: #a0a0a0;
+    color: var(--text-secondary);
     font-size: 0.9rem;
     margin-bottom: 10px;
 }
@@ -691,7 +702,7 @@ body {
     display: flex;
     justify-content: space-between;
     font-size: 0.85rem;
-    color: #7bed9f;
+    color: #22c55e;
 }
 
 .song-card-actions {
@@ -702,7 +713,7 @@ body {
 }
 
 .btn-icon-action {
-    background: rgba(233, 69, 96, 0.8);
+    background: rgba(236, 72, 153, 0.8);
     border: none;
     border-radius: 50%;
     width: 40px;
@@ -717,7 +728,7 @@ body {
 }
 
 .btn-icon-action:hover {
-    background: #e94560;
+    background: var(--primary);
     transform: scale(1.1);
 }
 
@@ -734,7 +745,7 @@ body {
 
 .wave {
     width: 3px;
-    background: #e94560;
+    background: var(--primary);
     animation: wave 0.8s ease-in-out infinite;
 }
 
@@ -763,7 +774,7 @@ body {
 .empty-state {
     text-align: center;
     padding: 60px 20px;
-    color: #a0a0a0;
+    color: var(--text-secondary);
     font-size: 1.2rem;
 }
 
@@ -773,12 +784,19 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(20, 20, 30, 0.95);
+    background: rgba(20, 20, 30, 0.95); /* Keep dark for player usually, or adapt */
     backdrop-filter: blur(10px);
-    border-top: 2px solid rgba(233, 69, 96, 0.5);
+    border-top: 2px solid rgba(236, 72, 153, 0.5);
     padding: 20px 40px;
     z-index: 100;
     box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Adapt player for light mode via variables if needed, assuming user wants player dark always or matching theme */
+[data-theme='light'] .music-player {
+    background: rgba(255, 255, 255, 0.95);
+    border-top: 2px solid var(--primary);
+    box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.1);
 }
 
 .player-content {
@@ -797,7 +815,7 @@ body {
 .player-album-art {
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
     border-radius: 10px;
     display: flex;
     justify-content: center;
@@ -1006,6 +1024,10 @@ body {
    MODAL STYLES
    ======================================== */
 
+/* ========================================
+   MODAL STYLES
+   ======================================== */
+
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -1021,19 +1043,24 @@ body {
 }
 
 .modal-content {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+    background: var(--bg-surface);
+    backdrop-filter: blur(20px);
     border-radius: 20px;
     padding: 30px;
     width: 90%;
     max-width: 500px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border-color);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 .modal-content h2 {
     margin-bottom: 20px;
-    color: #e94560;
+    color: var(--primary);
+}
+
+[data-theme='light'] .modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 /* Playlist Select Modal */
@@ -1048,12 +1075,12 @@ body {
 }
 
 .song-to-add {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface-hover);
     padding: 15px;
     border-radius: 10px;
     margin-bottom: 20px;
     text-align: center;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .empty-playlists {
@@ -1062,7 +1089,7 @@ body {
 }
 
 .empty-playlists p {
-    color: #a0a0a0;
+    color: var(--text-secondary);
     margin-bottom: 20px;
 }
 
@@ -1077,7 +1104,7 @@ body {
     align-items: center;
     gap: 15px;
     padding: 15px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-glass);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1085,8 +1112,8 @@ body {
 }
 
 .playlist-item-select:hover {
-    background: rgba(233, 69, 96, 0.2);
-    border-color: #e94560;
+    background: var(--bg-surface-hover);
+    border-color: var(--primary);
     transform: translateX(5px);
 }
 
@@ -1100,18 +1127,18 @@ body {
 
 .playlist-item-select .playlist-info h4 {
     margin: 0 0 5px 0;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .playlist-item-select .playlist-info p {
     margin: 0;
-    color: #a0a0a0;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
 .playlist-arrow {
     font-size: 1.5rem;
-    color: #e94560;
+    color: var(--primary);
 }
 
 .alert {
@@ -1122,15 +1149,15 @@ body {
 }
 
 .alert-success {
-    background: rgba(126, 237, 159, 0.2);
-    color: #7bed9f;
-    border: 1px solid #7bed9f;
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border: 1px solid #22c55e;
 }
 
 .alert-error {
-    background: rgba(233, 69, 96, 0.2);
-    color: #ff6b6b;
-    border: 1px solid #ff6b6b;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid #ef4444;
 }
 
 /* Avatar Upload Section */
@@ -1140,7 +1167,7 @@ body {
     align-items: center;
     gap: 15px;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-surface);
     border-radius: 10px;
 }
 
@@ -1149,7 +1176,7 @@ body {
     height: 150px;
     border-radius: 50%;
     overflow: hidden;
-    border: 3px solid #e94560;
+    border: 3px solid var(--primary);
 }
 
 .avatar-preview img {
@@ -1161,7 +1188,7 @@ body {
 .btn-upload {
     display: inline-block;
     padding: 10px 20px;
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
     color: white;
     border-radius: 20px;
     cursor: pointer;
@@ -1171,7 +1198,7 @@ body {
 
 .btn-upload:hover {
     transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+    box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4);
 }
 
 .btn-upload:active {
@@ -1182,12 +1209,16 @@ body {
    BACK BUTTONS & PAGE HEADERS
    ======================================== */
 
+/* ========================================
+   BACK BUTTONS & PAGE HEADERS
+   ======================================== */
+
 .btn-back,
 .btn-back-auth {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface);
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
     padding: 10px 20px;
     border-radius: 10px;
     cursor: pointer;
@@ -1200,8 +1231,8 @@ body {
 
 .btn-back:hover,
 .btn-back-auth:hover {
-    background: rgba(233, 69, 96, 0.2);
-    border-color: #e94560;
+    background: var(--bg-surface-hover);
+    border-color: var(--primary);
     transform: translateX(-5px);
 }
 
@@ -1211,8 +1242,8 @@ body {
 
 .page-header {
     padding: 40px 60px;
-    background: rgba(255, 255, 255, 0.02);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .page-title-section {
@@ -1221,12 +1252,12 @@ body {
 
 .page-title-section h1 {
     font-size: 2.5rem;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 10px;
 }
 
 .page-title-section p {
-    color: #b3b3b3;
+    color: var(--text-secondary);
     font-size: 1.1rem;
 }
 
@@ -1239,11 +1270,12 @@ body {
 .header-with-back h1 {
     margin: 0;
     font-size: 2rem;
+    color: var(--text-primary);
 }
 
 .header-with-back p {
     margin: 5px 0 0 0;
-    color: #b3b3b3;
+    color: var(--text-secondary);
 }
 
 /* Music Page Specific */
@@ -1256,7 +1288,7 @@ body {
 }
 
 .songs-container h2 {
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 30px;
     font-size: 1.8rem;
 }
@@ -1269,8 +1301,8 @@ body {
 
 .playlist-manager .playlist-header {
     padding: 40px 60px;
-    background: rgba(255, 255, 255, 0.02);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1304,6 +1336,10 @@ body {
    ADMIN DASHBOARD STYLES
    ======================================== */
 
+/* ========================================
+   ADMIN DASHBOARD STYLES (RESPONSIVE/ADDITIONAL)
+   ======================================== */
+
 .admin-container {
     min-height: 100vh;
     padding: 0;
@@ -1311,8 +1347,8 @@ body {
 
 .admin-header {
     padding: 40px 60px;
-    background: rgba(255, 255, 255, 0.02);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1323,14 +1359,15 @@ body {
 .admin-header .header-left h1 {
     margin: 0;
     font-size: 2rem;
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .admin-header .header-left p {
     margin-top: 5px;
-    color: #b3b3b3;
+    color: var(--text-secondary);
 }
 
 .admin-header .header-right {
@@ -1346,7 +1383,7 @@ body {
 
 .btn-warning {
     background: linear-gradient(135deg, #f39c12, #e67e22);
-    color: #fff;
+    color: white;
 }
 
 .btn-warning:hover {
@@ -1356,7 +1393,7 @@ body {
 
 .btn-success {
     background: linear-gradient(135deg, #27ae60, #2ecc71);
-    color: #fff;
+    color: white;
 }
 
 .btn-success:hover {
@@ -1373,21 +1410,21 @@ body {
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-surface);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 30px;
     display: flex;
     align-items: center;
     gap: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
     transition: all 0.3s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
-    border-color: rgba(233, 69, 96, 0.5);
+    box-shadow: 0 10px 30px rgba(236, 72, 153, 0.3);
+    border-color: var(--primary);
 }
 
 .stat-icon {
@@ -1397,35 +1434,36 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(255, 107, 107, 0.2));
+    background: var(--bg-surface-hover);
     border-radius: 20px;
+    color: var(--primary);
 }
 
 .stat-info h3 {
     font-size: 2.5rem;
     margin: 0;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .stat-info p {
     margin: 5px 0 0 0;
-    color: #b3b3b3;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
 /* Admin Card */
 .admin-card {
     margin: 30px 60px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-surface);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
 }
 
 .admin-card h2 {
     margin: 0 0 20px 0;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 /* User Table */
@@ -1436,18 +1474,18 @@ body {
 }
 
 .user-table thead {
-    background: rgba(233, 69, 96, 0.2);
+    background: var(--bg-surface-hover);
 }
 
 .user-table th,
 .user-table td {
     padding: 15px;
     text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .user-table th {
-    color: #fff;
+    color: var(--text-primary);
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.85rem;
@@ -1455,7 +1493,7 @@ body {
 }
 
 .user-table td {
-    color: #e0e0e0;
+    color: var(--text-secondary);
 }
 
 .user-table tbody tr {
@@ -1463,11 +1501,11 @@ body {
 }
 
 .user-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-surface-hover);
 }
 
 .user-table tbody tr.current-user {
-    background: rgba(233, 69, 96, 0.1);
+    background: rgba(236, 72, 153, 0.1);
 }
 
 .user-cell {
@@ -1480,20 +1518,22 @@ body {
     width: 35px;
     height: 35px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     font-size: 0.9rem;
+    color: white;
 }
 
 .you-badge {
-    background: #e94560;
+    background: var(--primary);
     padding: 2px 8px;
     border-radius: 10px;
     font-size: 0.75rem;
     margin-left: 5px;
+    color: white;
 }
 
 .badge {
@@ -1505,10 +1545,12 @@ body {
 
 .badge.admin {
     background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
 }
 
 .badge.user {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--bg-surface-hover);
+    color: var(--text-primary);
 }
 
 .action-buttons {
@@ -1516,36 +1558,9 @@ body {
     gap: 8px;
 }
 
-/* Modal for Song Management */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(5px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: rgba(26, 26, 46, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    padding: 40px;
-    max-width: 500px;
-    width: 90%;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
-}
-
-.modal-content h2 {
-    margin: 0 0 25px 0;
-    color: #fff;
-}
+/* Modal for Song Management (Duplicate style, handled above but ensuring consistency) */
+/* The previous modal-overlay and modal-content override might handle this, 
+   but specific styles here for 'Song Management' context if separate */
 
 /* Responsive Admin */
 @media (max-width: 768px) {

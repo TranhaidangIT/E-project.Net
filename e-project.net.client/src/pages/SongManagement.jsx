@@ -132,7 +132,7 @@ function SongManagement() {
                     artistName: formData.artistName
                 };
                 await songAPI.updateSong(currentSong.songID, songData);
-                alert('✅ Cập nhật bài hát thành công!');
+                // alert('✅ Cập nhật bài hát thành công!');
             } else {
                 // Create mode (Multipart)
                 if (!formData.file) {
@@ -146,7 +146,7 @@ function SongManagement() {
                 data.append('file', formData.file);
                 
                 await songAPI.createSong(data);
-                alert('✅ Thêm bài hát thành công!');
+                // alert('✅ Thêm bài hát thành công!');
             }
 
             handleCloseModal();
@@ -161,7 +161,6 @@ function SongManagement() {
 
         try {
             await songAPI.deleteSong(songId);
-            alert('✅ Xóa bài hát thành công!');
             fetchSongs();
         } catch (err) {
             alert('❌ Lỗi: ' + (err.response?.data?.message || 'Không thể xóa bài hát'));
@@ -175,196 +174,218 @@ function SongManagement() {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    if (loading) return <Layout><div className="loading">Đang tải...</div></Layout>;
+    if (loading && songs.length === 0) return <div className="flex h-screen items-center justify-center text-white">Đang tải...</div>;
 
     return (
         <Layout>
-        <div className="admin-container">
-            <div className="admin-header">
-                <div className="header-left">
-                    <h1>🎵 Quản Lý Bài Hát</h1>
-                    <p>Quản lý: {user?.username} (Admin)</p>
+            <div className="max-w-7xl mx-auto px-4 py-8">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-display font-bold text-white mb-2">
+                            Quản Lý Bài Hát
+                        </h1>
+                        <p className="text-text-secondary">
+                            Admin <strong className="text-primary">{user?.username}</strong>
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => navigate('/admin')} className="px-4 py-2 rounded-lg bg-surface border border-white/10 text-white hover:bg-surface-hover transition-colors flex items-center gap-2">
+                            <span>👥</span> Quản lý Users
+                        </button>
+                        <button onClick={() => navigate('/profile')} className="px-4 py-2 rounded-lg bg-surface border border-white/10 text-white hover:bg-surface-hover transition-colors flex items-center gap-2">
+                            <span>👤</span> Hồ sơ
+                        </button>
+                         <button onClick={logout} className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-colors">
+                            Đăng xuất
+                        </button>
+                    </div>
                 </div>
-                <div className="header-right">
-                    <button onClick={() => navigate('/admin')} className="btn-secondary">
-                        👥 Quản lý Users
-                    </button>
-                    <button onClick={() => navigate('/profile')} className="btn-secondary">
-                        👤 Profile
-                    </button>
-                    <button onClick={logout} className="btn-danger">
-                        Đăng xuất
-                    </button>
+
+                 {/* Actions Bar */}
+                <div className="glass-panel p-4 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <div className="relative flex-1 w-full md:max-w-md">
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm bài hát hoặc nghệ sĩ..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                            className="w-full bg-white/5 border border-white/10 rounded-full py-2.5 px-5 pl-11 text-white focus:outline-none focus:border-primary transition-all"
+                        />
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">🔍</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                        <button onClick={handleSearch} className="px-4 py-2.5 rounded-lg bg-surface hover:bg-surface-hover text-white transition-colors border border-white/10 flex-1 md:flex-none">
+                            Tìm Kiếm
+                        </button>
+                        <button onClick={() => { setSearchQuery(''); fetchSongs(); }} className="px-4 py-2.5 rounded-lg bg-surface hover:bg-surface-hover text-white transition-colors border border-white/10 flex-1 md:flex-none">
+                            Làm Mới
+                        </button>
+                        <button onClick={() => handleOpenModal()} className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-hover text-white font-bold shadow-lg shadow-primary/30 transition-all flex items-center gap-2 flex-1 md:flex-none justify-center">
+                            <span>➕</span> Thêm Mới
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            {/* Search and Add */}
-            <div className="admin-card" style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <input
-                        type="text"
-                        placeholder="Tìm kiếm bài hát hoặc nghệ sĩ..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                        style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '2px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff' }}
-                    />
-                    <button onClick={handleSearch} className="btn-secondary">
-                        🔍 Tìm
-                    </button>
-                    <button onClick={() => fetchSongs()} className="btn-secondary">
-                        🔄 Tất cả
-                    </button>
-                    <button onClick={() => handleOpenModal()} className="btn-primary">
-                        ➕ Thêm bài hát
-                    </button>
+                {/* Songs Table */}
+                <div className="glass-panel p-6 overflow-hidden">
+                    <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <span>🎵</span> Danh Sách Bài Hát <span className="text-sm font-normal text-text-secondary bg-white/5 px-2 py-0.5 rounded-full ml-2">{songs.length}</span>
+                    </h2>
+                    
+                    {error && <div className="mb-4 text-red-400 text-sm text-center bg-red-500/10 p-2 rounded-lg border border-red-500/20">{error}</div>}
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-white/10 text-left text-text-muted text-sm uppercase tracking-wider">
+                                    <th className="pb-4 pl-4">ID</th>
+                                    <th className="pb-4">Bài Hát</th>
+                                    <th className="pb-4">Nghệ Sĩ</th>
+                                    <th className="pb-4">Thời Lượng</th>
+                                    <th className="pb-4">Lượt Nghe</th>
+                                    <th className="pb-4">Ngày Thêm</th>
+                                    <th className="pb-4 text-center">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {songs.map((song) => (
+                                    <tr key={song.songID} className="group hover:bg-white/5 transition-colors">
+                                        <td className="py-4 pl-4 text-text-secondary">#{song.songID}</td>
+                                        <td className="py-4 font-medium text-white">{song.songName}</td>
+                                        <td className="py-4 text-text-secondary">{song.artistName}</td>
+                                        <td className="py-4 text-text-secondary font-mono text-xs">{formatDuration(song.duration)}</td>
+                                        <td className="py-4 text-text-secondary">{song.playCount}</td>
+                                        <td className="py-4 text-text-secondary text-sm">{new Date(song.createdAt).toLocaleDateString('vi-VN')}</td>
+                                        <td className="py-4 text-center">
+                                            <div className="flex items-center justify-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => handleOpenModal(song)}
+                                                    className="p-2 rounded-lg hover:bg-amber-500/20 text-amber-500 transition-colors"
+                                                    title="Sửa"
+                                                >
+                                                    ✏️
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(song.songID)}
+                                                    className="p-2 rounded-lg hover:bg-red-500/20 text-red-500 transition-colors"
+                                                    title="Xóa"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {songs.length === 0 && !loading && (
+                        <div className="text-center py-12 text-text-muted">
+                            <p className="text-4xl mb-4 opacity-50">🎵</p>
+                            <p>Không có bài hát nào được tìm thấy</p>
+                        </div>
+                    )}
                 </div>
-            </div>
-
-            {/* Songs Table */}
-            <div className="admin-card">
-                <h2>Danh Sách Bài Hát ({songs.length})</h2>
-                {error && <div className="error-message">{error}</div>}
-                
-                <table className="user-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Tên Bài Hát</th>
-                            <th>Nghệ Sĩ</th>
-                            <th>Thời Lượng</th>
-                            <th>Lượt Nghe</th>
-                            <th>Ngày Thêm</th>
-                            <th>Thao Tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {songs.map((song) => (
-                            <tr key={song.songID}>
-                                <td>{song.songID}</td>
-                                <td><strong>{song.songName}</strong></td>
-                                <td>{song.artistName}</td>
-                                <td>{formatDuration(song.duration)}</td>
-                                <td>{song.playCount}</td>
-                                <td>{new Date(song.createdAt).toLocaleDateString('vi-VN')}</td>
-                                <td>
-                                    <div className="action-buttons">
-                                        <button
-                                            onClick={() => handleOpenModal(song)}
-                                            className="btn-warning btn-sm"
-                                        >
-                                            ✏️ Sửa
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(song.songID)}
-                                            className="btn-danger btn-sm"
-                                        >
-                                            🗑️ Xóa
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-
-                {songs.length === 0 && (
-                    <p style={{ textAlign: 'center', padding: '20px', color: '#a0a0a0' }}>
-                        Chưa có bài hát nào
-                    </p>
-                )}
             </div>
 
             {/* Modal */}
             {showModal && (
-                <div className="modal-overlay" onClick={handleCloseModal}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h2>{editMode ? '✏️ Sửa Bài Hát' : '➕ Thêm Bài Hát Mới'}</h2>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={handleCloseModal}>
+                    <div className="bg-[#1e1e1e] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
+                        <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+                            <h2 className="text-xl font-bold text-white">{editMode ? '✏️ Cập Nhật Bài Hát' : '➕ Thêm Bài Hát Mới'}</h2>
+                            <button onClick={handleCloseModal} className="text-text-muted hover:text-white transition-colors text-2xl leading-none">&times;</button>
+                        </div>
                         
-                        {error && <div className="error-message">{error}</div>}
-                        
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <label>Tên Bài Hát *</label>
-                                <input
-                                    type="text"
-                                    name="songName"
-                                    value={formData.songName}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Nhập tên bài hát"
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label>Nghệ Sĩ *</label>
-                                <input
-                                    type="text"
-                                    name="artistName"
-                                    value={formData.artistName}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Nhập tên nghệ sĩ"
-                                />
-                            </div>
-
-                            {!editMode && (
-                                <div className="form-group">
-                                    <label>File Nhạc (.mp3) *</label>
-                                    <div 
-                                        className={`drag-drop-zone ${dragActive ? 'active' : ''}`}
-                                        onDragEnter={handleDrag}
-                                        onDragLeave={handleDrag}
-                                        onDragOver={handleDrag}
-                                        onDrop={handleDrop}
-                                        onClick={handleZoneClick}
-                                        style={{
-                                            border: dragActive ? '2px dashed #4facfe' : '2px dashed #666',
-                                            borderRadius: '10px',
-                                            padding: '20px',
-                                            textAlign: 'center',
-                                            cursor: 'pointer',
-                                            backgroundColor: dragActive ? 'rgba(79, 172, 254, 0.1)' : 'transparent',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                    >
-                                        <input
-                                            ref={fileInputRef}
-                                            type="file"
-                                            name="file"
-                                            accept="audio/*"
-                                            onChange={handleChange}
-                                            style={{ display: 'none' }}
-                                        />
-                                        {formData.file ? (
-                                            <div style={{ color: '#4facfe' }}>
-                                                <p>📄 {formData.file.name}</p>
-                                                <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>Click hoặc kéo thả để thay đổi</p>
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <p style={{ fontSize: '2rem', marginBottom: '10px' }}>☁️</p>
-                                                <p>Kéo thả file nhạc vào đây</p>
-                                                <p style={{ fontSize: '0.9rem', color: '#999' }}>hoặc click để chọn file</p>
-                                            </div>
-                                        )}
-                                    </div>
+                        <div className="p-6">
+                            {error && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-sm text-center">{error}</div>}
+                            
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-text-muted mb-1">Tên Bài Hát <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="text"
+                                        name="songName"
+                                        value={formData.songName}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="Nhập tên bài hát"
+                                        className="w-full bg-black/20 border border-white/10 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-primary transition-colors placeholder-text-muted/50"
+                                    />
                                 </div>
-                            )}
 
-                            <div className="button-group">
-                                <button type="submit" className="btn-primary">
-                                    {editMode ? '💾 Cập Nhật' : '➕ Thêm'}
-                                </button>
-                                <button type="button" onClick={handleCloseModal} className="btn-secondary">
-                                    ❌ Hủy
-                                </button>
-                            </div>
-                        </form>
+                                <div>
+                                    <label className="block text-sm font-medium text-text-muted mb-1">Nghệ Sĩ <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="text"
+                                        name="artistName"
+                                        value={formData.artistName}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="Nhập tên nghệ sĩ"
+                                        className="w-full bg-black/20 border border-white/10 rounded-lg py-2.5 px-4 text-white focus:outline-none focus:border-primary transition-colors placeholder-text-muted/50"
+                                    />
+                                </div>
+
+                                {!editMode && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-text-muted mb-1">File Nhạc (.mp3) <span className="text-red-500">*</span></label>
+                                        <div 
+                                            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                                                dragActive 
+                                                ? 'border-primary bg-primary/10' 
+                                                : formData.file 
+                                                    ? 'border-green-500/50 bg-green-500/5' 
+                                                    : 'border-white/10 hover:border-white/30 hover:bg-white/5'
+                                            }`}
+                                            onDragEnter={handleDrag}
+                                            onDragLeave={handleDrag}
+                                            onDragOver={handleDrag}
+                                            onDrop={handleDrop}
+                                            onClick={handleZoneClick}
+                                        >
+                                            <input
+                                                ref={fileInputRef}
+                                                type="file"
+                                                name="file"
+                                                accept="audio/*"
+                                                onChange={handleChange}
+                                                className="hidden"
+                                            />
+                                            {formData.file ? (
+                                                <div className="text-green-400">
+                                                    <div className="text-3xl mb-2">🎵</div>
+                                                    <p className="font-medium truncate max-w-[200px] mx-auto">{formData.file.name}</p>
+                                                    <p className="text-xs opacity-70 mt-1">Click để thay đổi</p>
+                                                </div>
+                                            ) : (
+                                                <div className="text-text-muted">
+                                                    <div className="text-3xl mb-2 opacity-50">☁️</div>
+                                                    <p className="font-medium text-white mb-1">Kéo thả file vào đây</p>
+                                                    <p className="text-xs">hoặc click để chọn file</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="flex gap-3 pt-4">
+                                    <button type="button" onClick={handleCloseModal} className="flex-1 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-colors font-medium">
+                                        Hủy
+                                    </button>
+                                    <button type="submit" className="flex-1 py-2.5 rounded-lg bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/30 transition-all font-medium">
+                                        {editMode ? 'Lưu Thay Đổi' : 'Tải Lên'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}
-        </div>
         </Layout>
     );
 }

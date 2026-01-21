@@ -4,8 +4,10 @@ import { useAuth } from '../hooks/useAuth';
 import { songAPI, playlistAPI } from '../services/api';
 import MusicPlayer from '../components/MusicPlayer';
 import Layout from '../components/Layout';
+// import './MusicPage.css'; // Removed
 
 function MusicPage() {
+    // ===== STATE =====
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -17,107 +19,18 @@ function MusicPage() {
     const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState(null);
     const [playlistMessage, setPlaylistMessage] = useState('');
     const [favoritesPlaylist, setFavoritesPlaylist] = useState(null);
+    const [likedSongIds, setLikedSongIds] = useState(new Set());
     
     const { user } = useAuth();
     const navigate = useNavigate();
 
+    // ===== EFFECTS =====
     useEffect(() => {
         fetchSongs();
         if (user) {
             fetchPlaylists();
         }
     }, [user]);
-
-    const fetchSongs = async () => {
-        try {
-            setLoading(true);
-            const response = await songAPI.getAllSongs();
-            setSongs(response.data);
-            // Optional: Auto-select first song if none selected
-            // if (response.data.length > 0 && !currentSong) {
-            //     setCurrentSong(response.data[0]);
-            //     setCurrentIndex(0);
-            // }
-        } catch {
-            setError('Không thể tải danh sách bài hát');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchPlaylists = async () => {
-        try {
-            const response = await playlistAPI.getMyPlaylists();
-            setPlaylists(response.data);
-            
-            // Find 'Favorites' playlist
-            const fav = response.data.find(p => p.playlistName === 'Favorites');
-            if (fav) {
-                setFavoritesPlaylist(fav);
-            } else {
-                // Optional: Create if not exists (lazy creation on first like is better, or here)
-                // For now, we will create it when user first likes a song if it doesn't exist
-            }
-        } catch (err) {
-            console.error('Failed to fetch playlists:', err);
-        }
-    };
-
-    const toggleFavorite = async (song, e) => {
-        e.stopPropagation();
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-
-        try {
-            let targetPlaylist = favoritesPlaylist;
-            
-            // Create Favorites playlist if it doesn't exist
-            if (!targetPlaylist) {
-                const createRes = await playlistAPI.createPlaylist({
-                    playlistName: 'Favorites',
-                    description: 'My favorite songs',
-                    isPublic: false
-                });
-                targetPlaylist = createRes.data;
-                setFavoritesPlaylist(targetPlaylist);
-                // Refresh playlists to show in modal list too
-                fetchPlaylists(); // async but we have the object
-            }
-
-            // Check if song is already in Favorites (We need detail or check fetch)
-            // Since we don't have the full list of songs in favoritesPlaylist object (only count),
-            // we might need to fetch the details OR just try to add/remove.
-            // Simplified approach: Try add. If error "already exists", try remove (if API supported remove by songID easily).
-            // Actually, `addSongToPlaylist` throws if exists.
-            // Let's rely on a helper to check status or just manage local state for "liked" icons if possible.
-            // BETTER: Load Favorites Details to know what's liked.
-            
-            // For this iteration, I'll fetch the favorite playlist details to know the songs.
-            await handleFavoriteAction(targetPlaylist.playlistID, song.songID);
-            
-        } catch (err) {
-            alert('Lỗi cập nhật yêu thích');
-            console.error(err);
-        }
-    };
-
-    const handleFavoriteAction = async (playlistId, songId) => {
-        // First get current details to see if it's there
-        const detailRes = await playlistAPI.getPlaylistById(playlistId);
-        const isLiked = detailRes.data.songs.some(s => s.songID === songId);
-        
-        if (isLiked) {
-            await playlistAPI.removeSongFromPlaylist(playlistId, songId);
-        } else {
-            await playlistAPI.addSongToPlaylist(playlistId, songId);
-        }
-        // Refresh to update UI (if we had "isLiked" state on songs)
-        await fetchFavoriteSongsIds(); 
-    };
-
-    const [likedSongIds, setLikedSongIds] = useState(new Set());
 
     useEffect(() => {
         const fetchIds = async () => {
@@ -133,15 +46,91 @@ function MusicPage() {
         fetchIds();
     }, [favoritesPlaylist]);
 
+    // ===== API HELPERS =====
+    const fetchSongs = async () => {
+        try {
+            setLoading(true);
+            const response = await songAPI.getAllSongs();
+            setSongs(response.data);
+        } catch {
+            setError('Không thể tải danh sách bài hát');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchPlaylists = async () => {
+        try {
+            const response = await playlistAPI.getMyPlaylists();
+            setPlaylists(response.data);
+            const fav = response.data.find(p => p.playlistName === 'Favorites');
+            if (fav) setFavoritesPlaylist(fav);
+        } catch (err) {
+            console.error('Failed to fetch playlists:', err);
+        }
+    };
+
     const fetchFavoriteSongsIds = async () => {
-        // Keeping this for manual refresh if needed, duplicating logic or extracting it.
-        // Actually toggleFavorite calls this, so we need it defined.
         if (!favoritesPlaylist) return;
         try {
             const res = await playlistAPI.getPlaylistById(favoritesPlaylist.playlistID);
             const ids = new Set(res.data.songs.map(s => s.songID));
             setLikedSongIds(ids);
         } catch (err) {
+            console.error(err);
+        }
+    };
+
+    // ===== HANDLERS =====
+    const handleSearch = async () => {
+        if (!searchQuery.trim()) {
+            fetchSongs();
+            return;
+        }
+        try {
+            const response = await songAPI.searchSongs(searchQuery);
+            setSongs(response.data);
+        } catch {
+            setError('Lỗi tìm kiếm');
+        }
+    };
+
+    const toggleFavorite = async (song, e) => {
+        e.stopPropagation();
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
+        try {
+            let targetPlaylist = favoritesPlaylist;
+            if (!targetPlaylist) {
+                const createRes = await playlistAPI.createPlaylist({
+                    playlistName: 'Favorites',
+                    description: 'My favorite songs',
+                    isPublic: false
+                });
+                targetPlaylist = createRes.data;
+                setFavoritesPlaylist(targetPlaylist);
+                fetchPlaylists();
+            }
+
+            const playlistId = targetPlaylist.playlistID;
+            const songId = song.songID;
+            
+            // Optimistic Update (Complex without local state toggle, so we fetch)
+            const detailRes = await playlistAPI.getPlaylistById(playlistId);
+            const isLiked = detailRes.data.songs.some(s => s.songID === songId);
+            
+            if (isLiked) {
+                await playlistAPI.removeSongFromPlaylist(playlistId, songId);
+            } else {
+                await playlistAPI.addSongToPlaylist(playlistId, songId);
+            }
+            await fetchFavoriteSongsIds(); 
+            
+        } catch (err) {
+            alert('Lỗi cập nhật yêu thích');
             console.error(err);
         }
     };
@@ -170,19 +159,6 @@ function MusicPage() {
         }
     };
 
-    const handleSearch = async () => {
-        if (!searchQuery.trim()) {
-            fetchSongs();
-            return;
-        }
-        try {
-            const response = await songAPI.searchSongs(searchQuery);
-            setSongs(response.data);
-        } catch {
-            setError('Lỗi tìm kiếm');
-        }
-    };
-
     const playSong = (song, index) => {
         setCurrentSong(song);
         setCurrentIndex(index);
@@ -204,173 +180,83 @@ function MusicPage() {
         }
     };
 
-    if (loading) return <Layout><div className="loading">Đang tải...</div></Layout>;
-
     return (
         <Layout>
-            <div className="music-page-container" style={{ 
-                display: 'flex', 
-                height: 'calc(100vh - 80px)', // Adjust based on header height 
-                overflow: 'hidden' 
-            }}>
+            {/* 3-Column Layout Container */}
+            <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] -mx-4 -mb-12">
                 
-                {/* LEFT PANEL: Player */}
-                <div className="player-sidebar" style={{
-                    width: '320px',
-                    minWidth: '320px',
-                    borderRight: '1px solid rgba(255,255,255,0.1)',
-                    background: 'rgba(0,0,0,0.2)',
-                    display: 'flex',
-                    flexDirection: 'column'
-                }}>
+                {/* COL 1: PLAYER (Left) */}
+                <div className="w-full lg:w-1/4 bg-surface border-r border-border-color p-4 overflow-y-auto hidden lg:block">
                     <MusicPlayer 
-                        key={currentSong?.songID}
                         song={currentSong}
-                        playlist={songs}
                         onNext={currentIndex < songs.length - 1 ? playNext : null}
                         onPrevious={currentIndex > 0 ? playPrevious : null}
                     />
                 </div>
 
-                {/* RIGHT PANEL: Song List */}
-                <div className="song-list-panel" style={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: '30px',
-                    background: 'rgba(0,0,0,0.1)'
-                }}>
-                    
-                    {/* Header & Search */}
-                    <div className="list-header" style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                            <h1 style={{ fontSize: '2rem', margin: '0 0 10px' }}>🎵 Duyệt Âm Nhạc</h1>
-                            <p style={{ margin: 0, color: '#b3b3b3' }}>Khám phá {songs.length} bài hát</p>
-                        </div>
-                        
-                        <div className="search-bar" style={{ display: 'flex', gap: '10px' }}>
+                {/* COL 2: SONG LIST (Center) - Expanded */}
+                <div className="w-full lg:w-3/4 flex flex-col bg-transparent relative">
+                    {/* Header / Search */}
+                    <div className="p-6 sticky top-0 z-20 bg-surface/95 backdrop-blur border-b border-border-color shadow-md">
+                        <div className="relative">
                             <input
                                 type="text"
-                                placeholder="🔍 Tìm kiếm..."
+                                placeholder="Tìm kiếm bài hát, nghệ sĩ..."
+                                className="w-full bg-surface border border-border-color rounded-full py-3 px-12 text-text-primary focus:outline-none focus:border-primary focus:bg-surface-hover transition-all"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                                style={{
-                                    padding: '10px 15px',
-                                    borderRadius: '20px',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    background: 'rgba(255,255,255,0.05)',
-                                    color: 'white',
-                                    width: '250px'
-                                }}
                             />
-                            <button onClick={handleSearch} className="btn-primary" style={{ padding: '10px 20px', borderRadius: '20px' }}>
-                                Tìm
-                            </button>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">🔍</span>
                         </div>
                     </div>
 
-                    {error && <div className="error-message">{error}</div>}
-
-                    {/* Table Song List */}
-                    <div className="songs-list-view">
-                        {songs.length === 0 ? (
-                             <div className="empty-state">
-                                <p>Không tìm thấy bài hát nào</p>
-                            </div>
+                    {/* Song Table */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+                        {loading ? (
+                            <div className="flex items-center justify-center h-full text-primary">Đang tải...</div>
+                        ) : error ? (
+                            <div className="flex items-center justify-center h-full text-red-400">{error}</div>
                         ) : (
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                <thead>
-                                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#b3b3b3' }}>
-                                        <th style={{ padding: '10px', textAlign: 'center', width: '50px' }}>#</th>
-                                        <th style={{ padding: '10px', textAlign: 'left' }}>Tiêu đề</th>
-                                        <th style={{ padding: '10px', textAlign: 'left' }}>Album</th>
-                                        <th style={{ padding: '10px', textAlign: 'left' }}>Ngày thêm</th>
-                                        <th style={{ padding: '10px', textAlign: 'right' }}>Thời gian</th>
+                            <table className="w-full text-left border-collapse">
+                                <thead className="sticky top-0 bg-surface/95 z-10 text-xs text-text-muted uppercase tracking-wider">
+                                    <tr>
+                                        <th className="p-3 text-center w-12">#</th>
+                                        <th className="p-3 w-1/2">Tiêu đề</th>
+                                        <th className="p-3 text-right">Thao tác</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="text-sm">
                                     {songs.map((song, index) => {
                                         const isCurrent = currentSong?.songID === song.songID;
                                         return (
                                             <tr 
                                                 key={song.songID}
                                                 onClick={() => playSong(song, index)}
-                                                className="song-row"
-                                                style={{ 
-                                                    cursor: 'pointer',
-                                                    background: isCurrent ? 'rgba(255,255,255,0.1)' : 'transparent',
-                                                    color: isCurrent ? '#e94560' : 'inherit',
-                                                    transition: 'background 0.2s',
-                                                    borderBottom: '1px solid rgba(255,255,255,0.05)'
-                                                }}
-                                                onMouseEnter={(e) => e.currentTarget.style.background = isCurrent ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)'}
-                                                onMouseLeave={(e) => e.currentTarget.style.background = isCurrent ? 'rgba(255,255,255,0.1)' : 'transparent'}
+                                                className={`group border-b border-border-color hover:bg-surface-hover transition-colors cursor-pointer ${isCurrent ? 'bg-primary/10 border-l-4 border-l-primary' : ''}`}
                                             >
-                                                <td style={{ padding: '10px', textAlign: 'center' }}>
-                                                    {isCurrent ? <span className="playing-anim">▶️</span> : index + 1}
+                                                <td className="p-3 text-center text-text-muted font-medium w-12">
+                                                    {isCurrent ? <span className="text-primary animate-pulse">▶</span> : index + 1}
                                                 </td>
-                                                <td style={{ padding: '10px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                        <div style={{ 
-                                                            width: '40px', 
-                                                            height: '40px', 
-                                                            background: '#333', 
-                                                            borderRadius: '4px', 
-                                                            display: 'flex', 
-                                                            alignItems: 'center', 
-                                                            justifyContent: 'center',
-                                                            color: '#fff'
-                                                        }}>
-                                                            🎵
-                                                        </div>
-                                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                            <span style={{ fontWeight: 500, fontSize: '1rem', color: isCurrent ? '#e94560' : '#fff' }}>
-                                                                {song.songName}
-                                                            </span>
-                                                            <span style={{ fontSize: '0.85rem', color: '#b3b3b3' }}>
-                                                                {song.artistName}
-                                                            </span>
-                                                        </div>
+                                                <td className="p-3">
+                                                    <div className="flex flex-col">
+                                                        <span className={`font-medium text-base ${isCurrent ? 'text-primary' : 'text-text-primary'}`}>{song.songName}</span>
+                                                        <span className="text-xs text-text-secondary group-hover:text-text-primary transition-colors">{song.artistName}</span>
                                                     </div>
                                                 </td>
-                                                <td style={{ padding: '10px', color: '#b3b3b3' }}>
-                                                    Single
-                                                </td>
-                                                <td style={{ padding: '10px', color: '#b3b3b3' }}>
-                                                    {song.createdAt ? new Date(song.createdAt).toLocaleDateString('vi-VN') : '---'}
-                                                </td>
-                                                <td style={{ padding: '10px', textAlign: 'right' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '15px' }}>
+                                                <td className="p-3 text-right">
+                                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button
                                                             onClick={(e) => toggleFavorite(song, e)}
-                                                            className="row-action-btn"
-                                                            style={{
-                                                                background: 'transparent',
-                                                                border: 'none',
-                                                                cursor: 'pointer',
-                                                                fontSize: '1.2rem',
-                                                                color: likedSongIds.has(song.songID) ? '#e94560' : 'rgba(255,255,255,0.3)',
-                                                                transition: 'all 0.2s',
-                                                                padding: 0
-                                                            }}
-                                                            title={likedSongIds.has(song.songID) ? "Bỏ yêu thích" : "Yêu thích"}
+                                                            className={`p-2 rounded-full hover:bg-surface-hover transition-colors ${likedSongIds.has(song.songID) ? 'text-primary' : 'text-text-muted'}`}
+                                                            title="Yêu thích"
                                                         >
                                                             {likedSongIds.has(song.songID) ? '❤️' : '♡'}
                                                         </button>
-                                                        <span style={{ minWidth: '40px', color: '#b3b3b3' }}>--:--</span>
                                                         <button 
-                                                             onClick={(e) => openPlaylistModal(song, e)}
-                                                             className="row-action-btn"
-                                                             style={{
-                                                                background: 'transparent',
-                                                                border: 'none',
-                                                                cursor: 'pointer',
-                                                                fontSize: '1.2rem',
-                                                                color: '#fff',
-                                                                opacity: 0.5,
-                                                                padding: 0
-                                                             }}
-                                                             title="Thêm vào playlist"
+                                                            onClick={(e) => openPlaylistModal(song, e)}
+                                                            className="p-2 rounded-full hover:bg-surface-hover text-text-muted hover:text-text-primary transition-colors"
+                                                            title="Thêm vào playlist"
                                                         >
                                                             ➕
                                                         </button>
@@ -385,56 +271,64 @@ function MusicPage() {
                     </div>
                 </div>
 
-                {/* Add to Playlist Modal */}
-                {showPlaylistModal && (
-                    <div className="modal-overlay" onClick={() => setShowPlaylistModal(false)} style={{ zIndex: 1000 }}>
-                        <div className="modal playlist-select-modal" onClick={(e) => e.stopPropagation()}>
-                            <div className="modal-header">
-                                <h3>Thêm vào Playlist</h3>
-                                <button className="btn-close" onClick={() => setShowPlaylistModal(false)}>×</button>
-                            </div>
-                            <div className="modal-body">
-                                <p className="song-to-add">
-                                    <strong>{selectedSongForPlaylist?.songName}</strong> - {selectedSongForPlaylist?.artistName}
-                                </p>
-                                {playlistMessage && (
-                                    <div className={`alert ${playlistMessage.includes('✅') ? 'alert-success' : 'alert-error'}`}>
-                                        {playlistMessage}
-                                    </div>
-                                )}
-                                {playlists.length === 0 ? (
-                                    <div className="empty-playlists">
-                                        <p>Bạn chưa có playlist nào</p>
-                                        <button 
-                                            className="btn-primary"
-                                            onClick={() => navigate('/playlists')}
+
+                {/* Mobile Player (Sticky Bottom if needed or use the main one but formatted differently) */}
+                {/* For now, hidden on mobile layout as requested focus is desktop but valid to consider */}
+            </div>
+
+            {/* MODAL */}
+            {showPlaylistModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowPlaylistModal(false)}>
+                    <div className="bg-surface border border-border-color rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-fade-in" onClick={(e) => e.stopPropagation()}>
+                        <div className="p-4 border-b border-border-color flex justify-between items-center bg-surface-hover">
+                            <h3 className="text-lg font-bold text-text-primary">Thêm vào Playlist</h3>
+                            <button className="text-text-muted hover:text-text-primary text-2xl" onClick={() => setShowPlaylistModal(false)}>×</button>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-text-secondary mb-4">
+                                Thêm bài hát <strong className="text-text-primary">{selectedSongForPlaylist?.songName}</strong> vào:
+                            </p>
+                            
+                            {playlistMessage && (
+                                <div className={`p-3 rounded-lg text-center mb-4 text-sm font-medium ${playlistMessage.includes('✅') ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                    {playlistMessage}
+                                </div>
+                            )}
+
+                            {playlists.length === 0 ? (
+                                <div className="text-center py-6">
+                                    <p className="text-text-muted mb-4">Bạn chưa có playlist nào</p>
+                                    <button 
+                                        className="btn-primary"
+                                        onClick={() => navigate('/playlists')}
+                                    >
+                                        Tạo Playlist Đầu Tiên
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                                    {playlists.map(playlist => (
+                                        <div 
+                                            key={playlist.playlistID}
+                                            className="flex items-center justify-between p-3 rounded-xl bg-surface hover:bg-surface-hover cursor-pointer transition-colors group border border-transparent hover:border-border-color"
+                                            onClick={() => addToPlaylist(playlist.playlistID)}
                                         >
-                                            Tạo Playlist Đầu Tiên
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="playlists-list">
-                                        {playlists.map(playlist => (
-                                            <div 
-                                                key={playlist.playlistID}
-                                                className="playlist-item-select"
-                                                onClick={() => addToPlaylist(playlist.playlistID)}
-                                            >
-                                                <div className="playlist-icon">📋</div>
-                                                <div className="playlist-info">
-                                                    <h4>{playlist.playlistName}</h4>
-                                                    <p>{playlist.songCount} bài hát</p>
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-xl">📋</span>
+                                                <div>
+                                                    <h4 className="text-sm font-bold text-text-primary group-hover:text-primary transition-colors">{playlist.playlistName}</h4>
+                                                    <p className="text-xs text-text-muted">{playlist.songCount} bài hát</p>
                                                 </div>
-                                                <div className="playlist-arrow">→</div>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                                            <span className="text-text-muted group-hover:translate-x-1 transition-transform">→</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
         </Layout>
     );
 }

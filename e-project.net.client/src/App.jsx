@@ -13,7 +13,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import PlaylistManager from './components/PlaylistManager';
 import YouTubePage from './pages/YouTubePage';
-import './App.css';
+// import './App.css';
 
 // Protected Route Component
 function ProtectedRoute({ children }) {

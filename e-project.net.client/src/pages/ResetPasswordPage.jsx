@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authAPI } from '../services/api';
+import Layout from '../components/Layout';
 
 function ResetPasswordPage() {
     const [searchParams] = useSearchParams();
@@ -83,87 +84,110 @@ function ResetPasswordPage() {
 
     if (validating) {
         return (
-            <div className="auth-container">
-                <div className="auth-card">
-                    <div className="loading">Đang xác thực mã khôi phục...</div>
+            <Layout>
+                <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-4">
+                    <div className="text-primary font-bold text-xl animate-pulse">Đang xác thực mã khôi phục...</div>
                 </div>
-            </div>
+            </Layout>
         );
     }
 
     if (!tokenValid) {
         return (
-            <div className="auth-container">
-                <div className="auth-card">
-                    <h2>❌ Mã Không Hợp Lệ</h2>
-                    <div className="error-message">{error}</div>
-                    <div className="auth-links">
-                        <Link to="/forgot-password" className="btn-primary">Gửi lại mã khôi phục</Link>
-                        <Link to="/login" className="auth-link">Quay lại đăng nhập</Link>
+            <Layout>
+                <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-4">
+                    <div className="w-full max-w-md bg-surface/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8 text-center animate-fade-in">
+                        <div className="text-5xl mb-4">❌</div>
+                        <h2 className="text-2xl font-bold text-white mb-4">Mã Không Hợp Lệ</h2>
+                        <div className="bg-red-500/10 text-red-200 p-4 rounded-xl mb-6">{error}</div>
+                        <div className="space-y-3">
+                            <Link to="/forgot-password" className="block w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl transition-all">
+                                Gửi lại mã khôi phục
+                            </Link>
+                            <Link to="/login" className="block text-text-secondary hover:text-white transition-colors text-sm">
+                                Quay lại đăng nhập
+                            </Link>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </Layout>
         );
     }
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2>🔑 Đặt Lại Mật Khẩu</h2>
-                <p className="auth-description">
-                    Nhập mật khẩu mới của bạn
-                </p>
-                
-                {error && <div className="error-message">{error}</div>}
-                
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>Mã khôi phục</label>
-                        <input
-                            type="text"
-                            name="token"
-                            value={formData.token}
-                            disabled
-                            className="disabled-input"
-                        />
+        <Layout>
+            <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-4">
+                <div className="w-full max-w-md bg-surface/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8 animate-fade-in">
+                    <div className="text-center mb-8">
+                        <h2 className="text-2xl font-bold text-white mb-2">🔑 Đặt Lại Mật Khẩu</h2>
+                        <p className="text-text-secondary">
+                            Nhập mật khẩu mới của bạn
+                        </p>
                     </div>
+                
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-200 text-sm text-center">
+                            {error}
+                        </div>
+                    )}
+                    
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-text-secondary">Mã khôi phục</label>
+                            <input
+                                type="text"
+                                name="token"
+                                value={formData.token}
+                                disabled
+                                className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-text-muted cursor-not-allowed font-mono text-sm"
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <label>Mật khẩu mới</label>
-                        <input
-                            type="password"
-                            name="newPassword"
-                            value={formData.newPassword}
-                            onChange={handleChange}
-                            required
-                            placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
-                            minLength={6}
-                        />
-                    </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-text-secondary">Mật khẩu mới</label>
+                            <input
+                                type="password"
+                                name="newPassword"
+                                value={formData.newPassword}
+                                onChange={handleChange}
+                                required
+                                placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
+                                minLength={6}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all"
+                            />
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-text-secondary">Xác nhận mật khẩu</label>
+                            <input
+                                type="password"
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                required
+                                placeholder="Nhập lại mật khẩu mới"
+                                minLength={6}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all"
+                            />
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            disabled={loading} 
+                            className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary-hover hover:to-secondary-hover text-white font-bold py-3 rounded-xl shadow-lg transform hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Đang xử lý...' : 'Đặt Lại Mật Khẩu'}
+                        </button>
+                    </form>
                     
-                    <div className="form-group">
-                        <label>Xác nhận mật khẩu</label>
-                        <input
-                            type="password"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            required
-                            placeholder="Nhập lại mật khẩu mới"
-                            minLength={6}
-                        />
+                    <div className="mt-8 text-center">
+                        <Link to="/login" className="text-text-secondary hover:text-white transition-colors text-sm">
+                            ← Quay lại đăng nhập
+                        </Link>
                     </div>
-                    
-                    <button type="submit" disabled={loading} className="btn-primary">
-                        {loading ? 'Đang xử lý...' : 'Đặt Lại Mật Khẩu'}
-                    </button>
-                </form>
-                
-                <div className="auth-links">
-                    <Link to="/login" className="auth-link">← Quay lại đăng nhập</Link>
                 </div>
             </div>
-        </div>
+        </Layout>
     );
 }
 

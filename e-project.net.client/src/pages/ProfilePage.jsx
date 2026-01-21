@@ -7,7 +7,12 @@ import Layout from '../components/Layout';
 function ProfilePage() {
     const { user, logout, loadUser } = useAuth();
     const navigate = useNavigate();
+    
+    // UI State
+    const [activeTab, setActiveTab] = useState('history'); // history | favorites | playlists
     const [editing, setEditing] = useState(false);
+    
+    // Form State
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [formData, setFormData] = useState({
         fullName: user?.fullName || '',
@@ -16,20 +21,20 @@ function ProfilePage() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     
-    // Additional Data
+    // Data State
     const [listeningHistory, setListeningHistory] = useState([]);
     const [favorites, setFavorites] = useState([]);
-    
     const [playlists, setPlaylists] = useState([]);
     
-    // Playing State
+    // Audio Preview State
     const [playingPreview, setPlayingPreview] = useState(null); // songID
     const audioRef = useRef(new Audio());
     
-    // Drag & Drop
+    // Drag & Drop Ref
     const [dragActive, setDragActive] = useState(false);
     const fileInputRef = useRef(null);
 
+    // Initial Load
     useEffect(() => {
         if (user) {
             setFormData({
@@ -40,28 +45,26 @@ function ProfilePage() {
             fetchFavorites();
             loadHistory();
             
-            // Auto update history every 5s
-            const interval = setInterval(loadHistory, 5000);
+            // Auto update history every 10s
+            const interval = setInterval(loadHistory, 10000);
             return () => clearInterval(interval);
         }
     }, [user]);
 
-    // Handle Audio Preview
+    // Cleanup Audio
     useEffect(() => {
         const audio = audioRef.current;
-        
         const handleEnded = () => setPlayingPreview(null);
         audio.addEventListener('ended', handleEnded);
-        
         return () => {
             audio.removeEventListener('ended', handleEnded);
             audio.pause();
         };
     }, []);
 
+    // Helpers
     const togglePreview = (song) => {
         const audio = audioRef.current;
-        
         if (playingPreview === song.songID) {
             audio.pause();
             setPlayingPreview(null);
@@ -103,21 +106,12 @@ function ProfilePage() {
         }
     };
 
-    // ... (rest of standard profile handlers: handleLogout, handleChange, handleAvatarUpload, handleUpdate, Drag/Drop) ...
-    // Note: I will need to replace the *entire* playing logic or carefully insert it.
-    // Since I'm using replace_file_content for the whole file structure in previous turns, I can do it again to ensure structure.
-    
-    // ... [Copying the Drag/Drop handlers and Update handlers from previous state] ...
-    
-    // ... [Render includes new History and Favorites UI] ...
-    
-    // REPLACING THE ENTIRE FILE content to be safe and clean with new logic
-    
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
+    // Edit Profile Handlers
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -144,7 +138,6 @@ function ProfilePage() {
         try {
             const formDataUpload = new FormData();
             formDataUpload.append('file', file);
-
             const response = await userAPI.uploadAvatar(formDataUpload);
             setFormData(prev => ({ ...prev, avatarURL: response.data.avatarUrl }));
             setMessage('✅ Upload ảnh thành công! Nhấn "Lưu" để cập nhật.');
@@ -159,206 +152,258 @@ function ProfilePage() {
         e.preventDefault();
         setError('');
         setMessage('');
-
         try {
             await userAPI.updateProfile(formData);
             await loadUser();
-            setMessage('✅ Cập nhật thành công!');
-            setEditing(false);
+            setMessage('✅ Cập nhật hồ sơ thành công!');
+            setTimeout(() => setEditing(false), 1500);
         } catch (err) {
             setError(err.response?.data?.message || 'Cập nhật thất bại');
         }
     };
     
-    const handleDrag = (e) => { e.preventDefault(); e.stopPropagation(); if (e.type === "dragenter" || e.type === "dragover") setDragActive(true); else setDragActive(false); };
-    const handleDrop = async (e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); if (e.dataTransfer.files?.[0]) await uploadFile(e.dataTransfer.files[0]); };
-    const handleFileSelect = async (e) => { if (e.target.files?.[0]) await uploadFile(e.target.files[0]); };
-    const uploadFile = async (file) => { /* reuse handleAvatarUpload logic or call it */ 
-        // calling handleAvatarUpload directly requires a synthetic event, better to extract logic.
-        // For brevity in this replacement, I'll allow the duplicate logic in handleAvatarUpload or separate it.
-        // Actually, let's just use handleAvatarUpload with a fake event object
-        handleAvatarUpload({ target: { files: [file] } });
-    };
+    const handleDrag = (e) => { e.preventDefault(); e.stopPropagation(); setDragActive(e.type === "dragenter" || e.type === "dragover"); };
+    const handleDrop = (e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); if (e.dataTransfer.files?.[0]) handleAvatarUpload({ target: { files: [e.dataTransfer.files[0]] } }); };
 
+// ... (imports remain same)
 
-    if (!user) return <div className="auth-container"><div className="auth-card"><h2>Đang tải...</h2></div></div>;
+    if (!user) return <div className="flex h-screen items-center justify-center text-text-primary">Đang tải...</div>;
 
-    const renderSongItem = (song) => (
-        <div key={song.songID} style={{ 
-            background: 'rgba(255,255,255,0.05)', 
-            padding: '10px', 
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            marginBottom: '10px'
-        }}>
-            <div style={{ fontSize: '1.2rem' }}>🎵</div>
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-                <h4 style={{ margin: '0 0 2px', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{song.songName}</h4>
-                <p style={{ margin: 0, fontSize: '0.8rem', color: '#b3b3b3' }}>{song.artistName}</p>
+    // Render Song Item
+    const SongItem = ({ song, showPlay = true }) => (
+        <div className="group flex items-center justify-between p-3 rounded-xl bg-surface hover:bg-surface-hover transition-colors border border-transparent hover:border-border-color">
+            <div className="flex items-center gap-4 overflow-hidden">
+                <div className="w-10 h-10 rounded bg-gradient-to-br from-background-start to-background-end flex items-center justify-center text-lg shadow-inner">
+                    🎵
+                </div>
+                <div className="flex-1 overflow-hidden">
+                    <h4 className="font-semibold text-text-primary truncate group-hover:text-primary transition-colors">{song.songName}</h4>
+                    <p className="text-xs text-text-muted truncate">{song.artistName}</p>
+                </div>
             </div>
-            <button 
-                onClick={() => togglePreview(song)}
-                style={{
-                    background: playingPreview === song.songID ? '#e94560' : 'rgba(255,255,255,0.1)',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '30px',
-                    height: '30px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    color: 'white'
-                }}
-            >
-                {playingPreview === song.songID ? '⏸' : '▶'}
-            </button>
+            {showPlay && (
+                <button 
+                    onClick={() => togglePreview(song)}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all ${playingPreview === song.songID ? 'bg-primary text-white shadow-lg shadow-primary/40' : 'bg-surface text-text-primary hover:bg-surface-hover'}`}
+                >
+                    {playingPreview === song.songID ? '⏸' : '▶'}
+                </button>
+            )}
         </div>
     );
 
     return (
         <Layout>
-            <div className="profile-page-container" style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto', color: 'white' }}>
-                <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
+            <div className="max-w-6xl mx-auto px-4 py-8">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                     
-                    {/* Left Column: Profile Card */}
-                    <div style={{ flex: '1', minWidth: '300px', maxWidth: '400px' }}>
-                        <div className="auth-card profile-card" style={{ width: '100%' }}>
-                           {/* ... [Profile Header/Edit/Avatar UI - Same as before] ... */}
-                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <h2 style={{ margin: 0 }}>👤 Hồ Sơ</h2>
-                                {!editing && <button onClick={() => setEditing(true)} className="btn-secondary" style={{ padding: '5px 10px', fontSize: '0.9rem' }}>✏️ Sửa</button>}
+                    {/* LEFT COLUMN: Profile Card (4 cols) */}
+                    <div className="md:col-span-4 lg:col-span-3">
+                        <div className="glass-panel p-6 sticky top-24">
+                            <div className="flex justify-between items-start mb-6">
+                                <h2 className="text-xl font-display font-bold text-text-primary">Hồ Sơ</h2>
+                                {!editing && (
+                                    <button onClick={() => setEditing(true)} className="p-2 text-text-secondary hover:text-text-primary transition-colors" title="Chỉnh sửa">
+                                        ✏️
+                                    </button>
+                                )}
                             </div>
-                            {message && <div className="success-message">{message}</div>}
-                            {error && <div className="error-message">{error}</div>}
+
+                            {message && <div className="mb-4 p-3 rounded-lg bg-green-500/20 text-green-400 text-sm font-medium border border-green-500/30">{message}</div>}
+                            {error && <div className="mb-4 p-3 rounded-lg bg-red-500/20 text-red-400 text-sm font-medium border border-red-500/30">{error}</div>}
 
                             {!editing ? (
-                                <div style={{ textAlign: 'center' }}>
-                                    <div className="profile-avatar" style={{ margin: '0 auto 20px' }}>
-                                        {user.avatarURL ? <img src={user.avatarURL} alt="Avatar" /> : <div className="avatar-placeholder">{user.username.charAt(0).toUpperCase()}</div>}
+                                <div className="text-center">
+                                    <div className="relative w-32 h-32 mx-auto mb-6">
+                                        {user.avatarURL ? (
+                                            <img src={user.avatarURL} alt="Avatar" className="w-full h-full rounded-full object-cover border-4 border-surface shadow-xl" />
+                                        ) : (
+                                            <div className="w-full h-full rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-4xl font-bold text-white shadow-xl border-4 border-surface">
+                                                {user.username.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                        {user.isAdmin && <div className="absolute bottom-0 right-0 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-sm shadow-lg border-2 border-background-start" title="Admin">👑</div>}
                                     </div>
-                                    <h3 style={{ fontSize: '1.8rem', margin: '0 0 5px' }}>{user.fullName || user.username}</h3>
-                                    <p style={{ color: '#b3b3b3', margin: '0 0 20px' }}>@{user.username}</p>
-                                    <div style={{ textAlign: 'left', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '10px' }}>
-                                        <div className="info-item"><label>Email:</label><span>{user.email}</span></div>
-                                        <div className="info-item"><label>Vai trò:</label><span className={user.isAdmin ? 'badge admin' : 'badge user'}>{user.isAdmin ? '👑 Admin' : '👤 User'}</span></div>
-                                        <div className="info-item"><label>Tham gia:</label><span>{new Date(user.createdAt).toLocaleDateString('vi-VN')}</span></div>
+                                    
+                                    <h3 className="text-2xl font-bold text-text-primary mb-1">{user.fullName || user.username}</h3>
+                                    <p className="text-text-secondary mb-6">@{user.username}</p>
+                                    
+                                    <div className="space-y-3 text-left bg-surface rounded-xl p-4 mb-6">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-text-muted">Email</span>
+                                            <span className="text-text-primary truncate max-w-[150px]">{user.email}</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-text-muted">Tham gia</span>
+                                            <span className="text-text-primary">{new Date(user.createdAt).toLocaleDateString('vi-VN')}</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-text-muted">Vai trò</span>
+                                            <span className={user.isAdmin ? 'text-yellow-400 font-bold' : 'text-text-primary'}>{user.isAdmin ? 'Admin' : 'Thành viên'}</span>
+                                        </div>
                                     </div>
-                                    <div className="button-group" style={{ marginTop: '20px' }}>
-                                        {user.isAdmin && <Link to="/admin" className="btn-primary" style={{ display: 'block', marginBottom: '10px' }}>👑 Trang Quản Trị</Link>}
-                                        <Link to="/change-password" className="btn-warning" style={{ display: 'block', marginBottom: '10px' }}>🔒 Đổi Mật Khẩu</Link>
-                                        <button onClick={handleLogout} className="btn-danger" style={{ width: '100%' }}>🚪 Đăng xuất</button>
+
+                                    <div className="space-y-3">
+                                        {user.isAdmin && (
+                                            <Link to="/admin" className="block w-full py-2.5 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 font-medium transition-colors border border-yellow-500/30">
+                                                 Trang Quản Trị
+                                            </Link>
+                                        )}
+                                        <Link to="/change-password" className="block w-full py-2.5 rounded-lg bg-surface text-text-primary hover:bg-surface-hover font-medium transition-colors border border-border-color">
+                                            Đổi Mật Khẩu
+                                        </Link>
+                                        <button onClick={handleLogout} className="block w-full py-2.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 font-medium transition-colors border border-red-500/30">
+                                            Đăng Xuất
+                                        </button>
                                     </div>
                                 </div>
                             ) : (
-                                <form onSubmit={handleUpdate}>
-                                     {/* ... [Edit Form logic same as before, condensed for brevity in plan but full in implementation] ... */}
-                                    <div className="form-group" style={{ textAlign: 'center' }}>
-                                    <div 
-                                        className={`avatar-upload-zone ${dragActive ? 'active' : ''}`} 
-                                        onClick={() => fileInputRef.current.click()}
-                                        onDragEnter={handleDrag}
-                                        onDragLeave={handleDrag}
-                                        onDragOver={handleDrag}
-                                        onDrop={handleDrop}
-                                        style={{ 
-                                            width: '150px', 
-                                            height: '150px', 
-                                            borderRadius: '50%', 
-                                            border: `2px dashed ${dragActive ? '#e94560' : '#666'}`, 
-                                            margin: '0 auto 20px', 
-                                            position: 'relative', 
-                                            overflow: 'hidden', 
-                                            cursor: 'pointer', 
-                                            background: formData.avatarURL ? `url(${formData.avatarURL}) center/cover` : 'rgba(0,0,0,0.3)' 
-                                        }}
-                                    >
-                                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
-                                        {uploadingAvatar && (
-                                            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                                                ⏳
+                                <form onSubmit={handleUpdate} className="space-y-4">
+                                    <div className="text-center mb-6">
+                                        <div 
+                                            className={`relative w-32 h-32 mx-auto rounded-full border-2 border-dashed transition-all cursor-pointer overflow-hidden ${dragActive ? 'border-primary bg-primary/10' : 'border-text-muted hover:border-text-primary'}`}
+                                            onClick={() => fileInputRef.current.click()}
+                                            onDragEnter={handleDrag}
+                                            onDragLeave={handleDrag}
+                                            onDragOver={handleDrag}
+                                            onDrop={handleDrop}
+                                        >
+                                            {(formData.avatarURL || user.avatarURL) && (
+                                                <img src={formData.avatarURL || user.avatarURL} className="w-full h-full object-cover opacity-50" />
+                                            )}
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-xs text-center p-2 text-text-primary">
+                                                {uploadingAvatar ? <span className="animate-pulse">Đang tải...</span> : <span>{dragActive ? 'Thả ảnh ngay' : 'Nhấn để đổi ảnh'}</span>}
                                             </div>
-                                        )}
-                                        {!formData.avatarURL && !uploadingAvatar && (
-                                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>
-                                                {dragActive ? 'Thả ảnh vào đây' : 'Chọn hoặc thả ảnh'}
-                                            </div>
-                                        )}
+                                        </div>
+                                        <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => handleAvatarUpload(e)} className="hidden" />
                                     </div>
+                                    
+                                    <div>
+                                        <label className="block text-xs font-medium text-text-muted mb-1">Họ tên hiển thị</label>
+                                        <input 
+                                            type="text" 
+                                            name="fullName" 
+                                            value={formData.fullName} 
+                                            onChange={handleChange}
+                                            className="w-full bg-surface border border-border-color rounded-lg py-2 px-3 text-text-primary focus:outline-none focus:border-primary transition-colors"
+                                        />
                                     </div>
-                                    <div className="form-group"><label>Họ tên</label><input type="text" name="fullName" value={formData.fullName} onChange={handleChange} /></div>
-                                    {/* ... buttons ... */}
-                                     <div className="button-group">
-                                        <button type="submit" className="btn-primary">💾 Lưu</button>
-                                        <button type="button" onClick={() => setEditing(false)} className="btn-secondary">❌ Hủy</button>
+
+                                    <div className="flex gap-3 pt-2">
+                                        <button type="button" onClick={() => setEditing(false)} className="flex-1 py-2 rounded-lg bg-surface hover:bg-surface-hover text-text-primary transition-colors">Hủy</button>
+                                        <button type="submit" className="flex-1 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/30 transition-all">Lưu</button>
                                     </div>
                                 </form>
                             )}
                         </div>
                     </div>
 
-                    {/* Right Column: History & Favorites */}
-                    <div style={{ flex: '2', minWidth: '300px' }}>
-                        
-                        {/* History Section */}
-                        <div style={{ marginBottom: '40px' }}>
-                            <h2 style={{ borderBottom: '2px solid rgba(255,255,255,0.1)', paddingBottom: '10px', marginBottom: '20px' }}>
-                                🕒 Lịch Sử Nghe (Cập nhật mỗi 5s)
-                            </h2>
-                            {listeningHistory.length === 0 ? (
-                                <p style={{ color: '#b3b3b3' }}>Chưa có lịch sử nghe nhạc.</p>
-                            ) : (
-                                <div>
-                                    {listeningHistory.map(item => (
-                                        <div key={item.historyID}>
-                                            {renderSongItem(item.song)}
+                    {/* RIGHT COLUMN: Tabs & Content (8 cols) */}
+                    <div className="md:col-span-8 lg:col-span-9">
+                        {/* Tabs */}
+                        <div className="flex items-center gap-2 mb-8 border-b border-border-color pb-1 overflow-x-auto">
+                            {[
+                                { id: 'history', icon: '🕒', label: 'Lịch Sử Nghe' },
+                                { id: 'favorites', icon: '❤️', label: 'Yêu Thích' },
+                                { id: 'playlists', icon: '📋', label: 'Playlist Của Tôi' },
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`px-4 py-3 rounded-t-lg text-sm font-bold flex items-center gap-2 transition-colors relative ${
+                                        activeTab === tab.id 
+                                        ? 'text-text-primary border-b-2 border-primary bg-surface' 
+                                        : 'text-text-muted hover:text-text-primary hover:bg-surface'
+                                    }`}
+                                >
+                                    <span>{tab.icon}</span> {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Content Area */}
+                        <div className="animate-fade-in min-h-[300px]">
+                            {activeTab === 'history' && (
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-lg font-bold text-text-primary">Vừa nghe gần đây</h3>
+                                        <span className="text-xs text-primary animate-pulse">● Cập nhật trực tiếp</span>
+                                    </div>
+                                    {listeningHistory.length === 0 ? (
+                                        <div className="text-center py-12 text-text-muted border border-dashed border-border-color rounded-xl">
+                                            Chưa có lịch sử nghe nhạc. <Link to="/music" className="text-primary hover:underline">Nghe ngay?</Link>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Favorites Section */}
-                         <div style={{ marginBottom: '40px' }}>
-                            <h2 style={{ borderBottom: '2px solid rgba(255,255,255,0.1)', paddingBottom: '10px', marginBottom: '20px' }}>
-                                ❤️ Bài Hát Yêu Thích
-                            </h2>
-                            {favorites.length === 0 ? (
-                                <p style={{ color: '#b3b3b3' }}>Chưa có bài hát yêu thích.</p>
-                            ) : (
-                                <div>
-                                    {favorites.slice(0, 3).map(song => renderSongItem(song))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Playlists Section (Keep it small or move down) */}
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid rgba(255,255,255,0.1)', paddingBottom: '10px', marginBottom: '20px' }}>
-                                <h2 style={{ margin: 0 }}>📋 Playlist Của Tôi</h2>
-                                <Link to="/playlists" className="btn-secondary" style={{ padding: '5px 15px', fontSize: '0.9rem', textDecoration: 'none' }}>Quản lý</Link>
-                            </div>
-                             {playlists.length === 0 ? (
-                                <p style={{ color: '#b3b3b3' }}>Bạn chưa tạo playlist nào.</p>
-                            ) : (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '15px' }}>
-                                   {playlists.map(playlist => (
-                                        <div key={playlist.playlistID} style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '10px' }}>
-                                            <div style={{ fontSize: '1.5rem', marginBottom: '5px' }}>📋</div>
-                                            <h4 style={{ margin: '0', fontSize: '1rem' }}>{playlist.playlistName}</h4>
-                                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#888' }}>{playlist.songCount} bài</p>
+                                    ) : (
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                            {listeningHistory.map(item => (
+                                                <SongItem key={item.historyID} song={item.song} />
+                                            ))}
                                         </div>
-                                    ))}
+                                    )}
+                                </div>
+                            )}
+
+                            {activeTab === 'favorites' && (
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-lg font-bold text-text-primary">Bài hát đã thích</h3>
+                                        <span className="text-sm text-text-muted">{favorites.length} bài hát</span>
+                                    </div>
+                                    {favorites.length === 0 ? (
+                                        <div className="text-center py-12 text-text-muted border border-dashed border-border-color rounded-xl">
+                                            Chưa có bài hát yêu thích.
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                            {favorites.map(song => (
+                                                <SongItem key={song.songID} song={song} />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {activeTab === 'playlists' && (
+                                <div>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h3 className="text-lg font-bold text-text-primary">Danh sách phát của tôi</h3>
+                                        <Link to="/playlists" className="btn-primary flex items-center gap-2 text-sm px-4 py-2">
+                                            <span>+</span> Tạo Mới
+                                        </Link>
+                                    </div>
+                                    {playlists.length === 0 ? (
+                                        <div className="text-center py-12 text-text-muted border border-dashed border-border-color rounded-xl">
+                                            Bạn chưa có playlist nào.
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                                            {playlists.map(playlist => (
+                                                <div key={playlist.playlistID} className="glass-panel p-4 hover:bg-surface-hover transition-colors group cursor-pointer text-center relative">
+                                                    <div className="w-full aspect-square bg-gradient-to-br from-background-start to-background-end rounded-xl mb-4 flex items-center justify-center text-4xl shadow-lg group-hover:scale-105 transition-transform">
+                                                        📋
+                                                    </div>
+                                                    <h4 className="font-bold text-text-primary truncate px-2">{playlist.playlistName}</h4>
+                                                    <p className="text-xs text-text-muted mt-1">{playlist.songCount} bài hát</p>
+                                                    
+                                                    {playlist.playlistName !== 'Favorites' && (
+                                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button className="w-8 h-8 rounded-full bg-black/50 hover:bg-red-500 text-white flex items-center justify-center">
+                                                                🗑️
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
-
                     </div>
                 </div>
             </div>
         </Layout>
     );
 }
+
 export default ProfilePage;

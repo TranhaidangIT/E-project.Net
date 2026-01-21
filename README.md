@@ -8,152 +8,126 @@
 - [Tính Năng](#-tính-năng)
 - [Yêu Cầu Hệ Thống](#-yêu-cầu-hệ-thống)
 - [Cài Đặt và Chạy Dự Án](#-cài-đặt-và-chạy-dự-án)
-- [Cấu Hình](#-cấu-hình)
-- [API Endpoints](#-api-endpoints)
+- [Cấu Hình & API](#-cấu-hình--api)
 - [Hướng Dẫn Sử Dụng](#-hướng-dẫn-sử-dụng)
 
 ---
 
 ## 🎯 Giới Thiệu
 
-**Music Web** là một ứng dụng web nghe nhạc trực tuyến hiện đại được xây dựng với kiến trúc **Full-Stack**, bao gồm:
+**Music Web** là một nền tảng nghe nhạc trực tuyến hiện đại, được xây dựng theo kiến trúc **Full-Stack** mạnh mẽ. Dự án kết hợp sức mạnh của .NET 9 cho backend và React 19 cho frontend, mang lại trải nghiệm mượt mà và hiệu năng cao.
 
-- **Backend**: ASP.NET Core Web API với Entity Framework Core (`E-project.Net.Server`)
-- **Frontend**: React + Vite (`e-project.net.client`)
-- **Database**: SQL Server
-- **Authentication**: JWT (JSON Web Token)
-
-Ứng dụng cung cấp đầy đủ tính năng quản lý bài hát, playlist cá nhân, profile người dùng và phân quyền admin.
+Hệ thống cho phép người dùng nghe nhạc MP3 tải lên, tạo playlist cá nhân, xem lịch sử nghe nhạc, và đặc biệt là **tính năng phát âm thanh từ YouTube** thông qua Embed API thông minh.
 
 ---
 
 ## 🛠️ Công Nghệ Sử Dụng
 
-### Backend
+### 🔙 Backend (Server)
 
-- **ASP.NET Core 8.0** - Web API Framework
-- **Entity Framework Core** - ORM
-- **SQL Server** - Database
-- **JWT Authentication** - Xác thực người dùng
-- **BCrypt** - Mã hóa mật khẩu
+- **.NET 9.0** - Framework mới nhất của Microsoft, hiệu năng vượt trội.
+- **ASP.NET Core Web API** - Xây dựng RESTful API chuẩn.
+- **Entity Framework Core 9.0** - ORM tương tác với database.
+- **SQL Server 2022** - Hệ quản trị cơ sở dữ liệu.
+- **JWT Authentication** - Bảo mật và xác thực người dùng (Stateless).
+- **BCrypt.Net** - Mã hóa mật khẩu an toàn.
 
-### Frontend
+### 🎨 Frontend (Client)
 
-- **React 19.0** - UI Library
-- **Vite** - Build Tool
-- **React Router** - Routing
-- **Axios** - HTTP Client
-- **CSS3** - Styling với Responsive Design
+- **React 19.0** - Thư viện UI mới nhất.
+- **Vite** - Build tool siêu tốc.
+- **React Router v7** - Quản lý điều hướng client-side.
+- **Axios** - Xử lý HTTP Request.
+- **YouTube IFrame Player API** - Tích hợp phát nhạc từ YouTube.
+- **CSS3 / Glassmorphism** - Giao diện hiện đại, hiệu ứng kính mờ.
 
 ---
 
 ## 📁 Cấu Trúc Thư Mục
 
 ```
-E-project.Net/
+d:/E-project.Net/
 │
-├── 📂 E-project.Net.Server/          # Backend ASP.NET Core
-│   ├── 📂 Controllers/               # API Controllers
-│   │   ├── AdminController.cs        # Quản lý users (Admin)
-│   │   ├── AuthController.cs         # Đăng ký, đăng nhập, reset password
-│   │   ├── PlaylistController.cs     # CRUD playlist & playlist songs
-│   │   ├── SongController.cs         # CRUD bài hát & upload
-│   │   └── UserController.cs         # Profile & Avatar
+├── 📂 E-project.Net.Server/          # Backend Project (.NET 9)
+│   ├── 📂 Controllers/               # API Endpoints
+│   │   ├── AdminController.cs        # Quản lý Users (Admin)
+│   │   ├── AuthController.cs         # Login/Register/Refresh
+│   │   ├── HistoryController.cs      # Lịch sử nghe nhạc
+│   │   ├── PlaylistController.cs     # Playlist CRUD
+│   │   ├── SongController.cs         # Quản lý bài hát (MP3)
+│   │   ├── UserController.cs         # Profile, Avatar
+│   │   └── YouTubeController.cs      # Xử lý YouTube Embed & Metadata
 │   │
-│   ├── 📂 Models/                    # Data Models & DTOs
-│   │   ├── Song.cs                   # Entity Bài hát
-│   │   ├── Playlist.cs               # Entity Playlist
-│   │   ├── User.cs                   # Entity User
-│   │   └── 📂 DTOs/                  # Data Transfer Objects
-│   │
-│   ├── 📂 Data/                      # Database Context
-│   │   └── ApplicationDbContext.cs   # EF Core DbContext
-│   │
-│   ├── 📂 wwroot/                    # Static files
-│   │   └── 📂 uploads/               # Chứa avatar và nhạc upload
-│   │
-│   ├── Program.cs                    # Entry point & Services Config
-│   └── appsettings.json              # ConnectionString & JWT settings
+│   ├── 📂 Data/                      # Database Context & Migrations
+│   ├── 📂 Models/                    # Entity Class & DTOs
+│   ├── 📂 Services/                  # Business Logic (Auth, etc.)
+│   ├── Program.cs                    # Config DI, Pipeline, Middleware
+│   └── appsettings.json              # Connection String & JWT Config
 │
-├── 📂 e-project.net.client/          # Frontend React + Vite
+├── 📂 e-project.net.client/          # Frontend Project (React + Vite)
 │   ├── 📂 src/
-│   │   ├── 📂 pages/                 # React Pages
+│   │   ├── 📂 components/            # Reusable UI (Layout, Player, etc.)
+│   │   ├── 📂 context/               # Global State (AuthContext)
+│   │   ├── 📂 pages/                 # Các trang màn hình chính
+│   │   │   ├── AdminDashboard.jsx    # Dashboard quản trị
 │   │   │   ├── HomePage.jsx          # Trang chủ
-│   │   │   ├── MusicPage.jsx         # Trang nghe nhạc chính
-│   │   │   ├── ProfilePage.jsx       # Trang cá nhân
-│   │   │   ├── SongManagement.jsx    # Quản lý bài hát (Admin)
-│   │   │   ├── AdminDashboard.jsx    # Dashboard Admin
-│   │   │   ├── LoginPage.jsx         # Đăng nhập
-│   │   │   └── RegisterPage.jsx      # Đăng ký
-│   │   │
-│   │   ├── 📂 components/            # React Components
-│   │   │   ├── Layout.jsx            # Header & Footer Layout
-│   │   │   ├── MusicPlayer.jsx       # Player điều khiển nhạc
-│   │   │   └── PlaylistManager.jsx   # Modal/Panel quản lý playlist
-│   │   │
-│   │   ├── 📂 context/               # Global State
-│   │   │   └── AuthContext.jsx       # Quản lý trạng thái đăng nhập
-│   │   │
-│   │   ├── 📂 services/              # API Client
-│   │   │   └── api.js                # Cấu hình Axios & Endpoints
-│   │   │
-│   │   └── App.jsx                   # Main App Router
+│   │   │   ├── MusicPage.jsx         # Player nhạc MP3 upload
+│   │   │   ├── YouTubePage.jsx       # Player nhạc YouTube
+│   │   │   ├── ProfilePage.jsx       # Trang cá nhân user
+│   │   │   └── SongManagement.jsx    # Admin quản lý bài hát
+│   │   ├── 📂 services/              # API Calls wrapper
+│   │   └── App.jsx                   # Main Router
 │   │
-│   ├── package.json                  # Dependencies (React, Axios, etc.)
-│   └── vite.config.js                # Vite Proxy config
+│   ├── package.json                  # Dependencies (React 19, Axios...)
+│   └── vite.config.js                # Proxy API config
 │
-├── 📂 Database/                      # SQL Scripts
-│   ├── music_web_database.sql        # Script tạo DB chính
-│   └── ...
-│
-└── 📄 E-project.Net.sln              # Visual Studio Solution
+└── 📂 Database/                      # SQL Scripts khởi tạo DB
 ```
 
 ---
 
 ## ✨ Tính Năng
 
-### 🎵 Người Dùng (User)
+### 👤 Người Dùng (User)
 
-- ✅ **Đăng ký / Đăng nhập** với JWT
-- ✅ **Nghe nhạc**: Music player liên tục, danh sách bài hát
-- ✅ **Playlist cá nhân**: Tạo, sửa, xóa, thêm bài hát
-- ✅ **Profile**: Upload avatar, chỉnh sửa thông tin
+1.  **Authentication**: Đăng ký, Đăng nhập, Quên mật khẩu, Đổi mật khẩu.
+2.  **Streaming Youtube**: Tính năng **MỚI**. Nhập URL YouTube -> Hệ thống tự động trích xuất Video ID và phát âm thanh qua player tích hợp, hỗ trợ Play/Pause/Volume mà không cần tải video.
+3.  **Thư Viện Nhạc**: Nghe các bài hát MP3 được Admin upload.
+4.  **Playlist Cá Nhân**: Tạo playlist, thêm/xóa bài hát yêu thích.
+5.  **Lịch Sử Nghe Nhạc**: Xem lại các bài hát đã nghe.
+6.  **Profile**: Cập nhật thông tin cá nhân, upload Avatar.
 
 ### 👑 Quản Trị Viên (Admin)
 
-- ✅ **Quản lý Users**: Xem danh sách, xóa user
-- ✅ **Quản lý Bài hát**: Thêm (Upload MP3), Sửa, Xóa
+1.  **Dashboard**: Xem thống kê tổng quan hệ thống.
+2.  **Quản Lý User**: Xem danh sách, tìm kiếm, phân quyền Admin, xóa User vi phạm.
+3.  **Quản Lý Bài Hát**:
+    - Upload file MP3 lên server.
+    - Chỉnh sửa thông tin bài hát (Tên, Nghệ sĩ).
+    - Xóa bài hát.
 
 ---
 
 ## 💻 Yêu Cầu Hệ Thống
 
-- **Backend**: .NET SDK 8.0, SQL Server
-- **Frontend**: Node.js 18+, npm 9+
-- **Database**: SQL Server (LocalDB hoặc Full)
+- **OS**: Windows 10/11 (Development).
+- **Runtime**: .NET 9.0 SDK.
+- **Node.js**: Phiên bản 18 trở lên.
+- **Database**: SQL Server (LocalDB hoặc SQL Server 2019+).
 
 ---
 
 ## 🚀 Cài Đặt và Chạy Dự Án
 
-### Bước 1: Clone Repository
+### Bước 1: Chuẩn bị Database
 
-```bash
-git clone <repository-url>
-cd E-project.Net
-```
+1.  Mở SQL Server Management Studio (SSMS).
+2.  Chạy script trong `Database/music_web_database.sql` để tạo Database `MusicWebDB`.
+3.  Đảm bảo chuỗi kết nối trong `E-project.Net.Server/appsettings.json` đúng với instance SQL Server của bạn.
 
-### Bước 2: Cài Đặt Database
+### Bước 2: Chạy Backend (.NET)
 
-1. Mở SQL Server Management Studio (SSMS).
-2. Chạy script `Database/music_web_database.sql` để tạo database `MusicWebDB`.
-3. (Tùy chọn) Chạy thêm các script bổ sung trong thư mục `Database/`.
-
-### Bước 3: Chạy Backend
-
-1. Mở `E-project.Net.Server/appsettings.json` và cập nhật ConnectionString nếu cần.
-2. Mở terminal tại thư mục backend:
+Mở terminal tại thư mục gốc dự án:
 
 ```bash
 cd E-project.Net.Server
@@ -161,11 +135,11 @@ dotnet restore
 dotnet run
 ```
 
-Backend sẽ chạy tại: `https://localhost:5228`
+Backend sẽ khởi động tại: `https://localhost:7153` (hoặc cổng cấu hình trong launchSettings).
 
-### Bước 4: Chạy Frontend
+### Bước 3: Chạy Frontend (React)
 
-Mở một terminal **mới** và đi vào thư mục client:
+Mở terminal **mới**:
 
 ```bash
 cd e-project.net.client
@@ -177,36 +151,36 @@ Frontend sẽ chạy tại: `http://localhost:5173`
 
 ---
 
-## ⚙️ Cấu Hình Frontend Proxy
+## ⚙️ Cấu Hình & API
 
-File `e-project.net.client/vite.config.js` đã được cấu hình để proxy các request `/api` sang backend:
+### JWT Settings (appsettings.json)
 
-```javascript
-server: {
-    proxy: {
-        '/api': {
-            target: 'https://localhost:5228',
-            changeOrigin: true,
-            secure: false
-        }
-    }
+```json
+"JwtSettings": {
+  "SecretKey": "Your_Super_Secret_Key_Here_Must_Be_Long_Enough",
+  "Issuer": "http://localhost:5000",
+  "Audience": "http://localhost:3000",
+  "ExpiryMinutes": 60
 }
 ```
+
+### YouTube Integration logic
+
+Backend không tải video về server để tránh vi phạm bản quyền và vấn đề băng thông. Thay vào đó:
+
+1.  API `/api/youtube/info` nhận URL.
+2.  Server lấy metadata (Title, Thumbnail) qua oEmbed.
+3.  Server trả về `embedUrl` chuẩn.
+4.  Client dùng `iframe` để phát trực tiếp từ YouTube Server nhưng ẩn hình ảnh, chỉ giữ âm thanh.
 
 ---
 
 ## 🐛 Troubleshooting
 
-- **Lỗi 415 Unsupported Media Type**: Đã được sửa. Đảm bảo bạn đang chạy phiên bản mới nhất.
-- **Backend không kết nối**: Kiểm tra xem Backend có đang chạy không và port có khớp với config proxy không.
-- **Database Error**: Đảm bảo ConnectionString trong `appsettings.json` trỏ đúng tới SQL Server của bạn.
+- **Lỗi CORS**: Đã cấu hình `Program.cs` cho phép `localhost:5173`. Nếu đổi port, hãy cập nhật lại `AllowedOrigins`.
+- **Lỗi Database**: Kiểm tra kỹ ConnectionString. Chạy `dotnet ef database update` nếu dùng Migrations.
+- **Không nghe được nhạc YouTube**: Do trình duyệt chặn AutoPlay. Hãy nhấn nút Play trên giao diện lần đầu tiên.
 
 ---
 
-## 👨‍💻 Tác Giả
-
-**E-project.Net Team**
-
----
-
-🎉 **Enjoy Your Music!**
+**© 2026 E-project.Net Team.**

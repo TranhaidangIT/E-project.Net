@@ -1,133 +1,159 @@
-/* ========================================
-   LAYOUT STYLES
-   ======================================== */
+/* Layout.css */
 
+/* Site Wrapper */
 .layout {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
 }
 
-/* ========================================
-   HEADER / NAVBAR
-   ======================================== */
-
+/* =================================================================
+   MAIN HEADER (NAVBAR)
+   ================================================================= */
 .main-header {
-    background: rgba(20, 20, 30, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 2px solid rgba(233, 69, 96, 0.3);
-    position: sticky;
+    height: var(--header-height);
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    background: rgba(2, 6, 23, 0.85); /* Slightly transparent dark */
+    backdrop-filter: blur(var(--backdrop-blur));
+    -webkit-backdrop-filter: blur(var(--backdrop-blur));
+    border-bottom: 1px solid var(--border-color);
+    transition: all var(--transition-normal);
 }
 
 .header-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 15px 30px;
+    height: 100%;
+    padding: 0 24px;
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
 }
 
-/* Logo */
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: #fff;
-    font-size: 1.5rem;
-    font-weight: 700;
-    transition: transform 0.3s ease;
-}
-
-.logo:hover {
-    transform: scale(1.05);
-}
-
-.logo-icon {
-    font-size: 2rem;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-
-.logo-text {
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Header Left */
+/* Left Section: Logo & Nav */
 .header-left {
     display: flex;
     align-items: center;
     gap: 40px;
 }
 
-/* Main Navigation */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+    background: linear-gradient(to right, #fff, #9ca3af);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.logo-icon {
+    font-size: 1.8rem;
+    filter: drop-shadow(0 0 10px rgba(236, 72, 153, 0.5));
+}
+
 .main-nav {
     display: flex;
-    gap: 20px;
+    gap: 8px;
 }
 
 .nav-link {
-    color: #b3b3b3;
-    text-decoration: none;
+    color: var(--text-secondary);
     padding: 8px 16px;
-    border-radius: 20px;
-    transition: all 0.3s ease;
+    border-radius: var(--radius-full);
+    font-size: 0.95rem;
     font-weight: 500;
+    transition: all var(--transition-fast);
 }
 
 .nav-link:hover {
     color: #fff;
-    background: rgba(233, 69, 96, 0.2);
+    background: rgba(255,255,255,0.05);
 }
 
 .nav-link.active {
     color: #fff;
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
+    background: rgba(255,255,255,0.1);
+    font-weight: 600;
 }
 
-/* Header Right */
+/* Right Section: Auth & User */
 .header-right {
     display: flex;
     align-items: center;
+    gap: 20px;
+}
+
+/* Auth Buttons */
+.auth-buttons {
+    display: flex;
     gap: 15px;
+}
+
+.btn-header {
+    padding: 8px 20px;
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.btn-login {
+    color: #fff;
+}
+.btn-login:hover {
+    color: var(--primary);
+}
+
+.btn-register {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 10px rgba(236, 72, 153, 0.3);
+}
+.btn-register:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
 }
 
 /* User Menu */
 .user-menu {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    padding: 5px 10px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
     position: relative;
+    /* User dropdown would typically be absolute positioned inside here */
+}
+
+.user-menu:hover {
+    background: rgba(255,255,255,0.05);
 }
 
 .user-avatar {
-    width: 45px;
-    height: 45px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
     overflow: hidden;
-    border: 2px solid #e94560;
-    transition: transform 0.3s ease;
-}
-
-.user-avatar:hover {
-    transform: scale(1.1);
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .user-avatar img {
@@ -136,237 +162,193 @@
     object-fit: cover;
 }
 
-.user-avatar span {
-    color: white;
-    font-weight: 700;
-    font-size: 1.2rem;
-}
-
 .user-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     position: relative;
 }
 
 .user-name {
-    color: #fff;
     font-weight: 600;
-    cursor: pointer;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* Dropdown Menu (Hover based or Click based) */
 .dropdown-menu {
     position: absolute;
-    top: 100%;
+    top: 45px;
     right: 0;
-    margin-top: 10px;
-    background: rgba(20, 20, 30, 0.98);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(233, 69, 96, 0.3);
-    border-radius: 10px;
-    min-width: 200px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    width: 200px;
+    background: #1e293b; /* Solid dark color for dropdown */
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 8px;
+    display: none;
+    flex-direction: column;
+    z-index: 1001;
+    animation: slideDown 0.2s ease;
 }
 
-.user-dropdown:hover .dropdown-menu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+.user-menu:hover .dropdown-menu {
+    display: flex;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdown-item {
-    display: block;
-    padding: 12px 20px;
-    color: #b3b3b3;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    border: none;
-    background: transparent;
-    width: 100%;
+    padding: 10px 15px;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
     text-align: left;
-    cursor: pointer;
-    font-size: 0.95rem;
+    transition: all 0.2s;
 }
 
 .dropdown-item:hover {
-    background: rgba(233, 69, 96, 0.2);
+    background: rgba(255,255,255,0.05);
     color: #fff;
 }
 
 .logout-btn {
-    border-top: 1px solid rgba(233, 69, 96, 0.3);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    color: var(--danger);
+    width: 100%;
+    background: none;
+    cursor: pointer;
+}
+.logout-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
 }
 
-/* Auth Buttons */
-.auth-buttons {
-    display: flex;
-    gap: 10px;
-}
 
-.btn-header {
-    padding: 8px 20px;
-    border-radius: 20px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
-
-.btn-login {
-    color: #b3b3b3;
-    border-color: #b3b3b3;
-}
-
-.btn-login:hover {
-    color: #fff;
-    border-color: #fff;
-}
-
-.btn-register {
-    background: linear-gradient(135deg, #e94560, #ff6b6b);
-    color: #fff;
-}
-
-.btn-register:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
-}
-
-/* ========================================
+/* =================================================================
    MAIN CONTENT
-   ======================================== */
-
+   ================================================================= */
 .main-content {
+    margin-top: var(--header-height);
     flex: 1;
-    padding-bottom: 120px; /* Space for music player */
+    position: relative;
+    /* overflow-x: hidden; can sometimes cause sticky issues */ 
 }
 
-/* ========================================
-   FOOTER
-   ======================================== */
 
+/* =================================================================
+   FOOTER
+   ================================================================= */
 .main-footer {
-    background: rgba(20, 20, 30, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 2px solid rgba(233, 69, 96, 0.3);
-    color: #b3b3b3;
+    background: #020617; /* Very dark */
+    padding: 60px 0 20px;
+    border-top: 1px solid var(--border-color);
     margin-top: auto;
 }
 
 .footer-container {
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 40px 30px;
+    padding: 0 24px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 30px;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
 }
 
 .footer-section h3 {
-    color: #fff;
     margin-bottom: 15px;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .footer-section h4 {
     color: #fff;
-    margin-bottom: 15px;
-    font-size: 1rem;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
 }
 
 .footer-section p {
-    color: #b3b3b3;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
     line-height: 1.6;
 }
 
-.footer-section a,
-.footer-section button {
+.footer-section a {
     display: block;
-    color: #b3b3b3;
-    text-decoration: none;
-    padding: 5px 0;
-    transition: color 0.3s ease;
-    background: transparent;
-    border: none;
-    text-align: left;
-    cursor: pointer;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
     font-size: 0.95rem;
 }
 
-.footer-section a:hover,
-.footer-section button:hover {
-    color: #e94560;
+.footer-section a:hover {
+    color: var(--primary);
+    transform: translateX(5px);
+    transition: all 0.2s;
 }
 
 .social-links {
     display: flex;
     gap: 15px;
-    margin-top: 10px;
 }
 
 .social-links a {
+    display: inline-block;
     font-size: 1.5rem;
-    padding: 0;
+    opacity: 0.7;
+    margin-bottom: 0;
+}
+
+.social-links a:hover {
+    opacity: 1;
+    color: #fff;
+    transform: scale(1.1);
 }
 
 .footer-bottom {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.05);
     text-align: center;
-    padding: 20px;
-    border-top: 1px solid rgba(233, 69, 96, 0.2);
+    color: var(--text-muted);
+    font-size: 0.85rem;
 }
 
-.footer-bottom p {
-    color: #7a7a7a;
-    font-size: 0.9rem;
-}
 
-/* ========================================
+/* =================================================================
    RESPONSIVE
-   ======================================== */
+   ================================================================= */
+@media (max-width: 1024px) {
+    .header-container {
+        padding: 0 16px;
+    }
+    .main-nav {
+        display: none; /* In a real app, replace with Hamburger menu */
+    }
+    /* Simple mobile nav specific */
+}
 
 @media (max-width: 768px) {
-    .header-container {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .header-left {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .main-nav {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
     .footer-container {
-        grid-template-columns: 1fr;
-        text-align: center;
+        grid-template-columns: 1fr 1fr;
     }
-
-    .social-links {
-        justify-content: center;
-    }
-
-    .footer-section a,
-    .footer-section button {
-        text-align: center;
-    }
-}
-
-@media (max-width: 480px) {
-    .logo {
+    
+    .logo-text {
         font-size: 1.2rem;
     }
-
-    .main-nav {
+    
+    .header-right {
         gap: 10px;
     }
-
-    .nav-link {
-        padding: 6px 12px;
-        font-size: 0.9rem;
+    
+    .btn-header {
+        padding: 6px 14px;
+        font-size: 0.85rem;
     }
 }
